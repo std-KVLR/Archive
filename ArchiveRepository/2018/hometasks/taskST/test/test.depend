@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1573736321 source:d:\programming\cfiles\c++\tasksstroustrup\test\main.cpp
+	<iostream>
+	<vector>
+	<memory>
+	<list>
+

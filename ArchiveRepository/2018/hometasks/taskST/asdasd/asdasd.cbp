@@ -1,0 +1,25 @@
+ERT_TRUE(s.Step());
+    // The new database has the same auto_vacuum as a fresh database.
+    EXPECT_EQ(pragma_auto_vacuum, s.ColumnInt(0));
+  }
+}
+
+// Helper for SQLConnectionTest.RazePageSize.  Creates a fresh db based on
+// db_prefix, with the given initial page size, and verifies it against the
+// expected size.  Then changes to the final page size and razes, verifying that
+// the fresh database ends up with the expected final page size.
+void TestPageSize(const base::FilePath& db_prefix,
+                  int initial_page_size,
+                  const std::string& expected_initial_page_size,
+                  int final_page_size,
+                  const std::string& expected_final_page_size) {
+  const char kCreateSql[] = "CREATE TABLE x (t TEXT)";
+  const char kInsertSql1[] = "INSERT INTO x VALUES ('This is a test')";
+  const char kInsertSql2[] = "INSERT INTO x VALUES ('That was a test')";
+
+  const base::FilePath db_path = db_prefix.InsertBeforeExtensionASCII(
+      base::IntToString(initial_page_size));
+  sql::Connection::Delete(db_path);
+  sql::Connection db;
+  db.set_page_size(initial_page_size);
+  ASSERT_TRUE

@@ -1,0 +1,43 @@
+true,
+    maxRetransmitNum: 0,
+    reliable: false
+  };
+
+  function PendingConnectionAbortError(message) {
+    this.name = "PendingConnectionAbortError";
+    this.message = (message || "");
+  };
+  PendingConnectionAbortError.prototype = Error.prototype;
+
+  function ConnectionFailedError(message) {
+    this.name = "ConnectionFailedError";
+    this.message = (message || "");
+  };
+  ConnectionFailedError.prototype = Error.prototype;
+
+  var E = {
+    PendingConnectionAbortError: PendingConnectionAbortError,
+    ConnectionFailedError: ConnectionFailedError
+  };
+
+  function WebSocketBroker(brokerUrl) {
+    this.brokerUrl = brokerUrl;
+    this.state = WebSocketBroker.OFFLINE;
+
+    this.onstatechange = null;
+    this.onreceive = null;
+    this.onerror = null;
+
+    this.socket = null;
+    this.route = null;
+  };
+
+  // States
+  WebSocketBroker.OFFLINE     = 0x00;
+  WebSocketBroker.CONNECTING  = 0x01;
+  WebSocketBroker.CONNECTED   = 0x02;
+  // Flags
+  WebSocketBroker.ROUTED      = 0x10;
+  WebSocketBroker.LISTENING   = 0x20;
+
+  WebSocketBroker.prototype.setState = function setStat

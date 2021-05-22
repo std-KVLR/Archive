@@ -1,0 +1,59 @@
+# depslib dependency file v1.0
+1547224140 source:d:\programming\cfiles\c++\tasksstroustrup\task15\include\graph.cpp
+	<FL/Fl_GIF_Image.H>
+	<FL/Fl_JPEG_Image.H>
+	"Graph.h"
+	"Simple_window.h"
+
+1547254527 d:\programming\cfiles\c++\tasksstroustrup\task15\include\graph.h
+	<FL/fl_draw.H>
+	<FL/Fl_Image.H>
+	"Point.h"
+	"std_lib_facilities.h"
+	<iostream>
+
+1233364459 d:\programming\cfiles\c++\tasksstroustrup\task15\include\point.h
+
+1233364459 d:\programming\cfiles\c++\tasksstroustrup\task15\include\std_lib_facilities.h
+	<cmath>
+	<cstring>
+	<fstream>
+	<stdexcept>
+	<string>
+	<sstream>
+	<vector>
+
+1545954639 d:\programming\cfiles\c++\tasksstroustrup\task15\include\simple_window.h
+	"GUI.h"
+	"Graph.h"
+
+1233364459 d:\programming\cfiles\c++\tasksstroustrup\task15\include\gui.h
+	"Window.h"
+	"Graph.h"
+
+1233364459 d:\programming\cfiles\c++\tasksstroustrup\task15\include\window.h
+	<string>
+	<vector>
+	<FL/Fl.H>
+	<FL/Fl_Window.H>
+	"Point.h"
+
+1233364459 source:d:\programming\cfiles\c++\tasksstroustrup\task15\include\gui.cpp
+	<FL/Fl.H>
+	<FL/Fl_Button.H>
+	<FL/Fl_Output.H>
+	"GUI.h"
+
+1546232788 source:d:\programming\cfiles\c++\tasksstroustrup\task15\include\simple_window.cpp
+	"Simple_window.h"
+
+1233364459 source:d:\programming\cfiles\c++\tasksstroustrup\task15\include\window.cpp
+	"Window.h"
+	"Graph.h"
+	"GUI.h"
+
+1547594882 source:d:\programming\cfiles\c++\tasksstroustrup\task15\main.cpp
+	<iostream>
+	"include/Simple_window.h"
+	"include/Graph.h"
+

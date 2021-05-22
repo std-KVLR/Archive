@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1536355363 source:d:\programming\cfiles\c++\test_list\my_list.cpp
+	"My_List.h"
+
+1536354107 source:d:\programming\cfiles\c++\test_list\main.cpp
+	<iostream>
+	"My_List.h"
+
+1536355363 d:\programming\cfiles\c++\test_list\my_list.h
+	<string>
+	<vector>
+	<stdexcept>
+	<iostream>
+

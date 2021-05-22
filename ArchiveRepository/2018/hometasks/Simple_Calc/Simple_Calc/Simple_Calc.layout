@@ -1,0 +1,26 @@
+MPASM 02.30 Released              ADC.ASM   5-21-2001  18:57:19         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                    00001            LIST    p=16F877
+                    00002            #include "P16F877.INC"
+                    00001         LIST
+                    00002 ; P16F877.INC  Standard Header File, Version 1.00    Microchip Technology, Inc.
+                    00370         LIST
+                    00003 
+                    00004 ; Macro to generate a MOVLW instruction that also causes a model break:
+                    00005 break      MACRO arg
+                    00006            DW    0x3100 | (arg & H'FF')
+                    00007            ENDM
+                    00008 
+                    00009            cblock 0x20
+  00000020          00010               count, lc1, lc2;
+                    00011            endc
+                    00012 
+                    00013            ; Vector for normal start up.
+0000                00014            org     0
+0000 2805           00015            goto    start
+                    00016 
+0

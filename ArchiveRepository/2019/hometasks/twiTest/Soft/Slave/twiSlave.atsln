@@ -1,0 +1,9 @@
+-xs-12"><a class="btn btn_secondary btn-block" href="matlab:openExample('stats/VisualizeFisherIrisDataWithOptionsExample')">Open Script</a></div></div></div></div></div><p>Use various distance measures to try to obtain a better separation between species in the Fisher iris data.</p><div class="code_responsive"><div class="programlisting"><div class="codeinput"><pre>load <span style="color:#A020F0">fisheriris</span>
+
+rng <span style="color:#A020F0">default</span> <span style="color:#228B22">% for reproducibility</span>
+Y = tsne(meas,<span style="color:#A020F0">'Algorithm'</span>,<span style="color:#A020F0">'exact'</span>,<span style="color:#A020F0">'Distance'</span>,<span style="color:#A020F0">'mahalanobis'</span>);
+subplot(2,2,1)
+gscatter(Y(:,1),Y(:,2),species)
+title(<span style="color:#A020F0">'Mahalanobis'</span>)
+
+rng <span style="color:#A020F0">default</span> <span

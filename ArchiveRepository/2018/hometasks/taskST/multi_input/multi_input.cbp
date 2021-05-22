@@ -1,0 +1,18 @@
+e.
+x = [1:10];
+t = dtree(3,2,x);
+t = nodejoin(t,2);
+</pre></div></div><div class="clearfix"></div><div class="ref_sect"><h2 id="f10-769378_seealso">See Also</h2><p><span itemscope="" itemtype="http://www.mathworks.com/help/schema/MathWorksDocPage/SeeAlso" itemprop="seealso"><a itemprop="url" href="ntree.html"><span itemprop="name"><code>ntree</code></span></a></span> | <span itemscope="" itemtype="http://www.mathworks.com/help/schema/MathWorksDocPage/SeeAlso" itemprop="seealso"><a itemprop="url" href="wtbo.html"><span itemprop="name"><code>wtbo </code></span></a></span></p></div><div class="release_introduced"><h4>Introduced before R2006a</h4></div>
+</div></div></section>
+
+<div class="clearfix"></div>
+<div class="feedbackblock">Was this topic helpful?
+<input type="button" value="Yes" onClick="openFeedbackWindow('http://www.mathworks.com/programs/bounce_hub_help.html?s_cid=Help_Topic_Survey&amp;surveyParams='+document.location.href+'-YES-R2017a');">
+<input type="button" value="No" onClick="openFeedbackWindow('http://www.mathworks.com/programs/bounce_hub_help.html?s_cid=Help_Topic_Survey&amp;surveyParams='+document.location.href+'-NO-R2017a');">
+</div>
+<!--Last updated: Tue Feb 14 18:45:23 EST 2017-->
+</div>
+</div>
+</div><!--close_0960-->
+</div><!--close_0970-->
+<d

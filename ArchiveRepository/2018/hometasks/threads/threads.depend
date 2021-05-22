@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1543135958 source:d:\programming\cfiles\c++\threads\main.cpp
+	<iostream>
+	<thread>
+	<chrono>
+

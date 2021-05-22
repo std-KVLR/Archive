@@ -1,0 +1,79 @@
+# depslib dependency file v1.0
+1547224140 source:d:\programming\cfiles\c++\tasksstroustrup\task16\fltkgraphics\graph.cpp
+	<FL/Fl_GIF_Image.H>
+	<FL/Fl_JPEG_Image.H>
+	"Graph.h"
+	"Simple_window.h"
+
+1548275311 d:\programming\cfiles\c++\tasksstroustrup\task16\fltkgraphics\graph.h
+	<FL/fl_draw.H>
+	<FL/Fl_Image.H>
+	"Point.h"
+	"std_lib_facilities.h"
+	<iostream>
+
+1233364459 d:\programming\cfiles\c++\tasksstroustrup\task16\fltkgraphics\point.h
+
+1233364459 d:\programming\cfiles\c++\tasksstroustrup\task16\fltkgraphics\std_lib_facilities.h
+	<cmath>
+	<cstring>
+	<fstream>
+	<stdexcept>
+	<string>
+	<sstream>
+	<vector>
+
+1545954639 d:\programming\cfiles\c++\tasksstroustrup\task16\fltkgraphics\simple_window.h
+	"GUI.h"
+	"Graph.h"
+
+1233364459 d:\programming\cfiles\c++\tasksstroustrup\task16\fltkgraphics\gui.h
+	"Window.h"
+	"Graph.h"
+
+1233364459 d:\programming\cfiles\c++\tasksstroustrup\task16\fltkgraphics\window.h
+	<string>
+	<vector>
+	<FL/Fl.H>
+	<FL/Fl_Window.H>
+	"Point.h"
+
+1233364459 source:d:\programming\cfiles\c++\tasksstroustrup\task16\fltkgraphics\gui.cpp
+	<FL/Fl.H>
+	<FL/Fl_Button.H>
+	<FL/Fl_Output.H>
+	"GUI.h"
+
+1546232788 source:d:\programming\cfiles\c++\tasksstroustrup\task16\fltkgraphics\simple_window.cpp
+	"Simple_window.h"
+
+1233364459 source:d:\programming\cfiles\c++\tasksstroustrup\task16\fltkgraphics\window.cpp
+	"Window.h"
+	"Graph.h"
+	"GUI.h"
+
+1555427209 source:d:\programming\cfiles\c++\tasksstroustrup\task16\main.cpp
+	<iostream>
+	"Lines_window.h"
+	"My_window.h"
+
+1555373150 source:d:\programming\cfiles\c++\tasksstroustrup\task16\lines_window.cpp
+	"Lines_window.h"
+
+1555373114 d:\programming\cfiles\c++\tasksstroustrup\task16\lines_window.h
+	"FLTKGRAPHICS/GUI.h"
+
+1555428243 source:d:\programming\cfiles\c++\tasksstroustrup\task16\my_window.cpp
+	"My_window.h"
+
+1555427149 d:\programming\cfiles\c++\tasksstroustrup\task16\my_window.h
+	<cstdlib>
+	<ctime>
+	"FLTKGRAPHICS/GUI.h"
+
+1555420650 source:d:\programming\cfiles\c++\tasksstroustrup\task16\chess_window.cpp
+	"Chess_window.h"
+
+1555421359 d:\programming\cfiles\c++\tasksstroustrup\task16\chess_window.h
+	"My_window.h"
+

@@ -1,0 +1,123 @@
+...
+    maxiter,reps,startInput);
+if NANREMOVAL && hadnans
+    % Insert NaN rows.
+    idxbest = zeros(n,1);
+    MATLAB_EXPANDS_DBEST = false; % g1207427
+    EXPAND_DBEST = nargout == 4 && MATLAB_EXPANDS_DBEST;
+    if EXPAND_DBEST
+        Dtmp = coder.nullcopy(zeros(n,k,'like',varargout{2}));
+    end
+    j = ZERO;
+    for i = 1:n
+        if wasnan(i)
+            idxbest(i) = coder.internal.nan;
+            if EXPAND_DBEST
+                Dtmp(i,:) = coder.internal.nan;
+            end
+        else
+            j = j + 1;
+            idxbest(i) = idx(j);
+            if EXPAND_DBEST
+                Dtmp(i,:) = varargout{2}(j,:);
+            end
+        end
+    end
+    if EXPAND_DBEST
+        varargout{2} = Dtmp;
+    end
+else
+    idxbest = double(idx);
+end
+
+%--------------------------------------------------------------------------
+
+function [idxbest,Cbest,varargout] = local_kmeans(X,k, ...
+    distanceType,emptyAction,onlinePhase,startType,useParallel, ...
+    maxiter,reps,startInput)
+% outputs: [idxbest,Cbest,sumDbest,Dbest]
+coder.internal.prefer_const(k,distanceType,emptyAction,onlinePhase, ...
+    startType,useParallel,maxiter,reps,startInput);
+ONE = coder.internal.indexInt(1);
+XZERO = floatZero(X);
+n = coder.internal.indexInt(size(X,1));
+p = coder.internal.indexInt(size(X,2));
+% The startType must be constant-foldable when it is NUMERIC since the
+% NUMERIC start type is inferred from the type of the start method input.
+if coder.internal.isConst(startType) && startType == NUMERIC
+    Cinput = cast(startInput,'like',XZERO);
+    if distanceType == CORRELATION
+        % Need to center explicit starting points for 'correlation'.
+        % (Re)normalization for 'cosine'/'correlation' is done at each
+        % iteration.
+        Cinput = center(Cinput);
+    end
+else
+    Cinput = XZERO;
+end
+if startType == UNIFORM
+    [Xmins,Xmaxs] = minmax(X);
+else
+    Xmins = XZERO;
+    Xmaxs = XZERO;
+end
+if distanceType == CITYBLOCK
+    if useParallel
+        % Force sorting of columns in parallel.
+        iSorted = coder.nullcopy(zeros(size(X), ...
+            coder.internal.indexIntClass));
+        parfor j = 1:p
+            iSorted(:,j) = coder.internal.sortIdx(X(:,j),'a');
+        end
+    else
+        iSorted = coder.internal.sortIdx(X,'a');
+    end
+else
+    iSorted = zeros(0,0,coder.internal.indexIntClass);
+end
+if useParallel && reps > 1
+    totsumD = zeros(reps,1,'like',XZERO);
+    idx = zeros(n,reps,coder.internal.indexIntClass);
+    C = zeros(k,p,reps,'like',XZERO);
+    if nargout <= 2
+        parfor rep = ONE:reps
+            [totsumD(rep),idx(:,rep),C(:,:,rep)] = loopBody(X,k, ...
+                distanceType,emptyAction,onlinePhase,startType, ...
+                maxiter,rep,reps, ...
+                Cinput,Xmins,Xmaxs,iSorted,false);
+        end
+        [~,minrep] = min(totsumD);
+        idxbest = idx(:,minrep);
+        Cbest = C(:,:,minrep);
+    elseif nargout == 3
+        sumD = zeros(k,reps,'like',XZERO);
+        parfor rep = ONE:reps
+            [totsumD(rep),idx(:,rep),C(:,:,rep), ...
+                sumD(:,rep)] = loopBody(X,k, ...
+                distanceType,emptyAction,onlinePhase,startType, ...
+                maxiter,rep,reps, ...
+                Cinput,Xmins,Xmaxs,iSorted,false);
+        end
+        [~,minrep] = min(totsumD);
+        idxbest = idx(:,minrep);
+        Cbest = C(:,:,minrep);
+        varargout{1} = sumD(:,minrep);
+    else
+        sumD = zeros(k,reps,'like',XZERO);
+        D = zeros(n,k,reps,'like',XZERO);
+        parfor rep = ONE:reps
+            [totsumD(rep),idx(:,rep),C(:,:,rep),sumD(:,rep), ...
+                D(:,:,rep)] = loopBody(X,k, ...
+                distanceType,emptyAction,onlinePhase,startType, ...
+                maxiter,rep,reps, ...
+                Cinput,Xmins,Xmaxs,iSorted,false);
+        end
+        [~,minrep] = min(totsumD);
+        idxbest = idx(:,minrep);
+        Cbest = C(:,:,minrep);
+        varargout{1} = sumD(:,minrep);
+        varargout{2} = D(:,:,minrep);
+    end
+else
+    [totsumDbest,idxbest,Cbest,varargout{1:nargout-2}] = loopBody(X,k, ...
+  

@@ -1,0 +1,54 @@
+entity();
+  // Apply size delta from the child(container) layer.
+  expected_grand_child_transform.Translate(20.0, 20.0);
+
+  EXPECT_TRANSFORMATION_MATRIX_EQ(expected_child_transform,
+                                  child_impl_->DrawTransform());
+  EXPECT_TRANSFORMATION_MATRIX_EQ(expected_grand_child_transform,
+                                  grand_child_impl_->DrawTransform());
+}
+
+TEST_F(LayerPositionConstraintTest,
+     ScrollCompensationForFixedPositionLayerWithDistantContainer) {
+  // This test checks for correct scroll compensation when the fixed-position
+  // container is NOT the direct parent of the fixed-position layer.
+  child_->SetIsContainerForFixedPositionLayers(true);
+  grand_child_->SetPosition(gfx::PointF(8.f, 6.f));
+  great_grand_child_->SetPositionConstraint(fixed_to_top_left_);
+
+  CommitAndUpdateImplPointers();
+
+  // Case 1: scroll delta of 0, 0
+  SetScrollOffsetDelta(child_impl_, gfx::Vector2d(0, 0));
+  child_impl_->SetDrawsContent(true);
+  ExecuteCalculateDrawProperties(root_impl_);
+
+  gfx::Transform expected_child_transform;
+  gfx::Transform expected_grand_child_transform;
+  expected_grand_child_transform.Translate(8.0, 6.0);
+
+  gfx::Transform expected_great_grand_child_transform =
+      expected_grand_child_transform;
+
+  EXPECT_TRANSFORMATION_MATRIX_EQ(expected_child_transform,
+                                  child_impl_->DrawTransform());
+  EXPECT_TRANSFORMATION_MATRIX_EQ(expected_grand_child_transform,
+                                  grand_child_impl_->DrawTransform());
+  EXPECT_TRANSFORMATION_MATRIX_EQ(expected_great_grand_child_transform,
+                                  great_grand_child_impl_->DrawTransform());
+
+  // Case 2: scroll delta of 10, 10
+  SetScrollOffsetDelta(child_impl_, gfx::Vector2d(10, 10));
+  ExecuteCalculateDrawProperties(root_impl_);
+
+  // Here the child and grand_child are affected by scroll delta, but the fixed
+  // position great_grand_child should not be affected.
+  expected_child_transform.MakeIdentity();
+  expected_child_transform.Translate(-10.0, -10.0);
+  expected_grand_child_transform.MakeIdentity();
+  expected_grand_child_transform.Translate(-2.0, -4.0);
+  EXPECT_TRANSFORMATION_MATRIX_EQ(expected_child_transform,
+                                  child_impl_->DrawTransform());
+  EXPECT_TRANSFORMATION_MATRIX_EQ(expected_grand_child_transform,
+                                  grand_child_impl_->DrawTransform());
+  EXPECT_TRANSFORMA

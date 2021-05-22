@@ -1,0 +1,20 @@
+# depslib dependency file v1.0
+1555167907 source:d:\programming\cfiles\expr\main.c
+	<stdio.h>
+
+1555164466 source:d:\programming\cfiles\expr\stack.c
+	"stack.h"
+
+1555164466 d:\programming\cfiles\expr\stack.c
+	"stack.h"
+
+1555167073 d:\programming\cfiles\expr\calc.h
+	<stdlib.h>
+	"stack.h"
+
+1555164494 d:\programming\cfiles\expr\stack.h
+	<stdio.h>
+
+1555167980 source:d:\programming\cfiles\expr\calc.c
+	"calc.h"
+

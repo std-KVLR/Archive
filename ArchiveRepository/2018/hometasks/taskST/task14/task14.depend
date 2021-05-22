@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1547257867 source:d:\programming\cfiles\c++\tasksstroustrup\task14\main.cpp
+	<iostream>
+	<vector>
+	<stdexcept>
+

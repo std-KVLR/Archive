@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1545177872 source:d:\programming\cfiles\c++\tasksstroustrup\symbol_defines\main.cpp
+	<iostream>
+	<cctype>
+	<string>
+

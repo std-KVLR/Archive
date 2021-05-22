@@ -1,0 +1,22 @@
+# depslib dependency file v1.0
+1533917307 source:d:\programming\cfiles\c++\helloworld\combinations\calc_func.cpp
+	"calc_func.h"
+
+1533913852 d:\programming\cfiles\c++\helloworld\combinations\calc_func.h
+	<cmath>
+
+1533917069 source:d:\programming\cfiles\c++\helloworld\combinations\input_func.cpp
+	"input_func.h"
+
+1533916724 d:\programming\cfiles\c++\helloworld\combinations\input_func.h
+	<iostream>
+	<stdexcept>
+	<cstdlib>
+
+1533917330 source:d:\programming\cfiles\c++\helloworld\combinations\main.cpp
+	<iostream>
+	"input_func.h"
+	"calc_func.h"
+	<cstdio>
+	<climits>
+

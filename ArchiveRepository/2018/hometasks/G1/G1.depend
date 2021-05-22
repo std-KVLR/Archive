@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1529363430 source:d:\programming\cfiles\projectsfortests\test\main.cpp
+	<iostream>
+	<Sales_item.h>
+	<string.h>
+

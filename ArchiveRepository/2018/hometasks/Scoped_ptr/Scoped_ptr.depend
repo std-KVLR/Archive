@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1536689887 source:d:\programming\cfiles\c++\scoped_ptr\scoped_ptr.cpp
+	"Scoped_ptr.h"
+
+1536677967 source:d:\programming\cfiles\c++\scoped_ptr\storage.cpp
+	"storage.h"
+
+1536678196 source:d:\programming\cfiles\c++\scoped_ptr\main.cpp
+	<iostream>
+	"Scoped_ptr.h"
+	"storage.h"
+
+1536678623 d:\programming\cfiles\c++\scoped_ptr\scoped_ptr.h
+	"storage.h"
+
+1536677421 d:\programming\cfiles\c++\scoped_ptr\storage.h
+

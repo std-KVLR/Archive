@@ -1,0 +1,2791 @@
+// Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include <memory>
+
+#include "base/metrics/histogram_samples.h"
+#include "base/pickle.h"
+#include "base/stl_util.h"
+#include "base/strings/string_number_conversions.h"
+#include "base/test/histogram_tester.h"
+#include "base/time/time.h"
+#include "net/base/load_flags.h"
+#include "net/base/request_priority.h"
+#include "net/base/test_completion_callback.h"
+#include "net/traffic_annotation/network_traffic_annotation_test_helper.h"
+#include "net/url_request/url_request.h"
+#include "net/url_request/url_request_context.h"
+#include "net/url_request/url_request_test_util.h"
+#include "net/url_request/url_request_throttler_manager.h"
+#include "net/url_request/url_request_throttler_test_support.h"
+#include "testing/gtest/include/gtest/gtest.h"
+
+using base::TimeDelta;
+using base::TimeTicks;
+
+namespace net {
+
+namespace {
+
+const char kRequestThrottledHistogramName[] = "Throttling.RequestThrottled";
+
+class MockURLRequestThrottlerEntry : public URLRequestThrottlerEntry {
+ public:
+  explicit MockURLRequestThrottlerEntry(
+      URLRequestThrottlerManager* manager)
+      : URLRequestThrottlerEntry(manager, std::string()),
+        backoff_entry_(&backoff_policy_, &fake_clock_) {
+    InitPolicy();
+  }
+  MockURLRequestThrottlerEntry(
+      URLRequestThrottlerManager* manager,
+      const TimeTicks& exponential_backoff_release_time,
+      const TimeTicks& sliding_window_release_time,
+      const TimeTicks& fake_now)
+      : URLRequestThrottlerEntry(manager, std::string()),
+        fake_clock_(fake_now),
+        backoff_entry_(&backoff_policy_, &fake_clock_) {
+    InitPolicy();
+
+    set_exponential_backoff_release_time(exponential_backoff_release_time);
+    set_sliding_window_release_time(sliding_window_release_time);
+  }
+
+  void InitPolicy() {
+    // Some tests become flaky if we have jitter.
+    backoff_policy_.jitter_factor = 0.0;
+
+    // This lets us avoid having to make multiple failures initially (this
+    // logic is already tested in the BackoffEntry unit tests).
+    backoff_policy_.num_errors_to_ignore = 0;
+  }
+
+  const BackoffEntry* GetBackoffEntry() const override {
+    return &backoff_entry_;
+  }
+
+  BackoffEntry* GetBackoffEntry() override { return &backoff_entry_; }
+
+  void ResetToBlank(const TimeTicks& time_now) {
+    fake_clock_.set_now(time_now);
+
+    GetBackoffEntry()->Reset();
+    set_sliding_window_release_time(time_now);
+  }
+
+  // Overridden for tests.
+  TimeTicks ImplGetTimeNow() const override { return fake_clock_.NowTicks(); }
+
+  void set_fake_now(const TimeTicks& now) { fake_clock_.set_now(now); }
+
+  void set_exponential_backoff_release_time(const TimeTicks& release_time) {
+    GetBackoffEntry()->SetCustomReleaseTime(release_time);
+  }
+
+  TimeTicks sliding_window_release_time() const {
+    return URLRequestThrottlerEntry::sliding_window_release_time();
+  }
+
+  void set_sliding_window_release_time(const TimeTicks& release_time) {
+    URLRequestThrottlerEntry::set_sliding_window_release_time(release_time);
+  }
+
+ protected:
+  ~MockURLRequestThrottlerEntry() override {}
+
+ private:
+  mutable TestTickClock fake_clock_;
+  BackoffEntry backoff_entry_;
+};
+
+class MockURLRequestThrottlerManager : public URLRequestThrottlerManager {
+ public:
+  MockURLRequestThrottlerManager() : create_entry_index_(0) {}
+
+  // Method to process the URL using URLRequestThrottlerManager protected
+  // method.
+  std::string DoGetUrlIdFromUrl(const GURL& url) { return GetIdFromUrl(url); }
+
+  // Method to use the garbage collecting method of URLRequestThrottlerManager.
+  void DoGarbageCollectEntries() { GarbageCollectEntries(); }
+
+  // Returns the number of entries in the map.
+  int GetNumberOfEntries() const { return GetNumberOfEntriesForTests(); }
+
+  void CreateEntry(bool is_outdated) {
+    TimeTicks time = TimeTicks::Now();
+    if (is_outdated) {
+      time -= TimeDelta::FromMilliseconds(
+          MockURLRequestThrottlerEntry::kDefaultEntryLifetimeMs + 1000);
+    }
+    std::string fake_url_string("http://www.fakeurl.com/");
+    fake_url_string.append(base::IntToString(create_entry_index_++));
+    GURL fake_url(fake_url_string);
+    OverrideEntryForTests(
+        fake_url,
+        new MockURLRequestThrottlerEntry(this, time, TimeTicks::Now(),
+                                         TimeTicks::Now()));
+  }
+
+ private:
+  int create_entry_index_;
+};
+
+struct TimeAndBool {
+  TimeAndBool(const TimeTicks& time_value, bool expected, int line_num) {
+    time = time_value;
+    result = expected;
+    line = line_num;
+  }
+  TimeTicks time;
+  bool result;
+  int line;
+};
+
+struct GurlAndString {
+  GurlAndString(const GURL& url_value,
+                const std::string& expected,
+                int line_num) {
+    url = url_value;
+    result = expected;
+    line = line_num;
+  }
+  GURL url;
+  std::string result;
+  int line;
+};
+
+}  // namespace
+
+class URLRequestThrottlerEntryTest : public testing::Test {
+ protected:
+  URLRequestThrottlerEntryTest()
+      : request_(context_.CreateRequest(GURL(),
+                                        DEFAULT_PRIORITY,
+                                        NULL,
+                                        TRAFFIC_ANNOTATION_FOR_TESTS)) {}
+
+  void SetUp() override;
+
+  TimeTicks now_;
+  MockURLRequestThrottlerManager manager_;  // Dummy object, not used.
+  scoped_refptr<MockURLRequestThrottlerEntry> entry_;
+
+  TestURLRequestContext context_;
+  std::unique_ptr<URLRequest> request_;
+};
+
+void URLRequestThrottlerEntryTest::SetUp() {
+  request_->SetLoadFlags(0);
+
+  now_ = TimeTicks::Now();
+  entry_ = new MockURLRequestThrottlerEntry(&manager_);
+  entry_->ResetToBlank(now_);
+}
+
+std::ostream& operator<<(std::ostream& out, const base::TimeTicks& time) {
+  return out << time.ToInternalValue();
+}
+
+TEST_F(URLRequestThrottlerEntryTest, InterfaceDuringExponentialBackoff) {
+  base::HistogramTester histogram_tester;
+  entry_->set_exponential_backoff_release_time(
+      entry_->ImplGetTimeNow() + TimeDelta::FromMilliseconds(1));
+  EXPECT_TRUE(entry_->ShouldRejectRequest(*request_));
+
+  histogram_tester.ExpectBucketCount(kRequestThrottledHistogramName, 0, 0);
+  histogram_tester.ExpectBucketCount(kRequestThrottledHistogramName, 1, 1);
+}
+
+TEST_F(URLRequestThrottlerEntryTest, InterfaceNotDuringExponentialBackoff) {
+  base::HistogramTester histogram_tester;
+  entry_->set_exponential_backoff_release_time(entry_->ImplGetTimeNow());
+  EXPECT_FALSE(entry_->ShouldRejectRequest(*request_));
+  entry_->set_exponential_backoff_release_time(
+      entry_->ImplGetTimeNow() - TimeDelta::FromMilliseconds(1));
+  EXPECT_FALSE(entry_->ShouldRejectRequest(*request_));
+
+  histogram_tester.ExpectBucketCount(kRequestThrottledHistogramName, 0, 2);
+  histogram_tester.ExpectBucketCount(kRequestThrottledHistogramName, 1, 0);
+}
+
+TEST_F(URLRequestThrottlerEntryTest, InterfaceUpdateFailure) {
+  entry_->UpdateWithResponse(503);
+  EXPECT_GT(entry_->GetExponentialBackoffReleaseTime(),
+            entry_->ImplGetTimeNow())
+      << "A failure should increase the release_time";
+}
+
+TEST_F(URLRequestThrottlerEntryTest, InterfaceUpdateSuccess) {
+  entry_->UpdateWithResponse(200);
+  EXPECT_EQ(entry_->GetExponentialBackoffReleaseTime(),
+            entry_->ImplGetTimeNow())
+      << "A success should not add any delay";
+}
+
+TEST_F(URLRequestThrottlerEntryTest, InterfaceUpdateSuccessThenFailure) {
+  entry_->UpdateWithResponse(200);
+  entry_->UpdateWithResponse(503);
+  EXPECT_GT(entry_->GetExponentialBackoffReleaseTime(),
+            entry_->ImplGetTimeNow())
+      << "This scenario should add delay";
+  entry_->UpdateWithResponse(200);
+}
+
+TEST_F(URLRequestThrottlerEntryTest, IsEntryReallyOutdated) {
+  TimeDelta lifetime = TimeDelta::FromMilliseconds(
+      MockURLRequestThrottlerEntry::kDefaultEntryLifetimeMs);
+  const TimeDelta kFiveMs = TimeDelta::FromMilliseconds(5);
+
+  TimeAndBool test_values[] = {
+      TimeAndBool(now_, false, __LINE__),
+      TimeAndBool(now_ - kFiveMs, false, __LINE__),
+      TimeAndBool(now_ + kFiveMs, false, __LINE__),
+      TimeAndBool(now_ - (lifetime - kFiveMs), false, __LINE__),
+      TimeAndBool(now_ - lifetime, true, __LINE__),
+      TimeAndBool(now_ - (lifetime + kFiveMs), true, __LINE__)};
+
+  for (unsigned int i = 0; i < arraysize(test_values); ++i) {
+    entry_->set_exponential_backoff_release_time(test_values[i].time);
+    EXPECT_EQ(entry_->IsEntryOutdated(), test_values[i].result) <<
+        "Test case #" << i << " line " << test_values[i].line << " failed";
+  }
+}
+
+TEST_F(URLRequestThrottlerEntryTest, MaxAllowedBackoff) {
+  for (int i = 0; i < 30; ++i) {
+    entry_->UpdateWithResponse(503);
+  }
+
+  TimeDelta delay = entry_->GetExponentialBackoffReleaseTime() - now_;
+  EXPECT_EQ(delay.InMilliseconds(),
+            MockURLRequestThrottlerEntry::kDefaultMaximumBackoffMs);
+}
+
+TEST_F(URLRequestThrottlerEntryTest, MalformedContent) {
+  for (int i = 0; i < 5; ++i)
+    entry_->UpdateWithResponse(503);
+
+  TimeTicks release_after_failures = entry_->GetExponentialBackoffReleaseTime();
+
+  // Inform the entry that a response body was malformed, which is supposed to
+  // increase the back-off time.  Note that we also submit a successful
+  // UpdateWithResponse to pair with ReceivedContentWasMalformed() since that
+  // is what happens in practice (if a body is received, then a non-500
+  // response must also have been received).
+  entry_->ReceivedContentWasMalformed(200);
+  entry_->UpdateWithResponse(200);
+  EXPECT_GT(entry_->GetExponentialBackoffReleaseTime(), release_after_failures);
+}
+
+TEST_F(URLRequestThrottlerEntryTest, SlidingWindow) {
+  int max_send = URLRequestThrottlerEntry::kDefaultMaxSendThreshold;
+  int sliding_window =
+      URLRequestThrottlerEntry::kDefaultSlidingWindowPeriodMs;
+
+  TimeTicks time_1 = entry_->ImplGetTimeNow() +
+      TimeDelta::FromMilliseconds(sliding_window / 3);
+  TimeTicks time_2 = entry_->ImplGetTimeNow() +
+      TimeDelta::FromMilliseconds(2 * sliding_window / 3);
+  TimeTicks time_3 = entry_->ImplGetTimeNow() +
+      TimeDelta::FromMilliseconds(sliding_window);
+  TimeTicks time_4 = entry_->ImplGetTimeNow() +
+      TimeDelta::FromMilliseconds(sliding_window + 2 * sliding_window / 3);
+
+  entry_->set_exponential_backoff_release_time(time_1);
+
+  for (int i = 0; i < max_send / 2; ++i) {
+    EXPECT_EQ(2 * sliding_window / 3,
+              entry_->ReserveSendingTimeForNextRequest(time_2));
+  }
+  EXPECT_EQ(time_2, entry_->sliding_window_release_time());
+
+  entry_->set_fake_now(time_3);
+
+  for (int i = 0; i < (max_send + 1) / 2; ++i)
+    EXPECT_EQ(0, entry_->ReserveSendingTimeForNextRequest(TimeTicks()));
+
+  EXPECT_EQ(time_4, entry_->sliding_window_release_time());
+}
+
+class URLRequestThrottlerManagerTest : public testing::Test {
+ protected:
+  URLRequestThrottlerManagerTest()
+      : request_(context_.CreateRequest(GURL(),
+                                        DEFAULT_PRIORITY,
+                                        NULL,
+                                        TRAFFIC_ANNOTATION_FOR_TESTS)) {}
+
+  void SetUp() override { request_->SetLoadFlags(0); }
+
+  void ExpectEntryAllowsAllOnErrorIfOptedOut(
+      URLRequestThrottlerEntryInterface* entry,
+      bool opted_out,
+      const URLRequest& request) {
+    EXPECT_FALSE(entry->ShouldRejectRequest(request));
+    for (int i = 0; i < 10; ++i) {
+      entry->UpdateWithResponse(503);
+    }
+    EXPECT_NE(opted_out, entry->ShouldRejectRequest(request));
+
+    if (opted_out) {
+      // We're not mocking out GetTimeNow() in this scenario
+      // so add a 100 ms buffer to avoid flakiness (that should always
+      // give enough time to get from the TimeTicks::Now() call here
+      // to the TimeTicks::Now() call in the entry class).
+      EXPECT_GT(TimeTicks::Now() + TimeDelta::FromMilliseconds(100),
+                entry->GetExponentialBackoffReleaseTime());
+    } else {
+      // As above, add 100 ms.
+      EXPECT_LT(TimeTicks::Now() + TimeDelta::FromMilliseconds(100),
+                entry->GetExponentialBackoffReleaseTime());
+    }
+  }
+
+  // context_ must be declared before request_.
+  TestURLRequestContext context_;
+  std::unique_ptr<URLRequest> request_;
+};
+
+TEST_F(URLRequestThrottlerManagerTest, IsUrlStandardised) {
+  MockURLRequestThrottlerManager manager;
+  GurlAndString test_values[] = {
+      GurlAndString(GURL("http://www.example.com"),
+                    std::string("http://www.example.com/"),
+                    __LINE__),
+      GurlAndString(GURL("http://www.Example.com"),
+                    std::string("http://www.example.com/"),
+                    __LINE__),
+      GurlAndString(GURL("http://www.ex4mple.com/Pr4c71c41"),
+                    std::string("http://www.ex4mple.com/pr4c71c41"),
+                    __LINE__),
+      GurlAndString(GURL("http://www.example.com/0/token/false"),
+                    std::string("http://www.example.com/0/token/false"),
+                    __LINE__),
+      GurlAndString(GURL("http://www.example.com/index.php?code=javascript"),
+                    std::string("http://www.example.com/index.php"),
+                    __LINE__),
+      GurlAndString(GURL("http://www.example.com/index.php?code=1#superEntry"),
+                    std::string("http://www.example.com/index.php"),
+                    __LINE__),
+      GurlAndString(GURL("http://www.example.com/index.php#superEntry"),
+                    std::string("http://www.example.com/index.php"),
+                    __LINE__),
+      GurlAndString(GURL("http://www.example.com:1234/"),
+                    std::string("http://www.example.com:1234/"),
+                    __LINE__)};
+
+  for (unsigned int i = 0; i < arraysize(test_values); ++i) {
+    std::string temp = manager.DoGetUrlIdFromUrl(test_values[i].url);
+    EXPECT_EQ(temp, test_values[i].result) <<
+        "Test case #" << i << " line " << test_values[i].line << " failed";
+  }
+}
+
+TEST_F(URLRequestThrottlerManagerTest, AreEntriesBeingCollected) {
+  MockURLRequestThrottlerManager manager;
+
+  manager.CreateEntry(true);  // true = Entry is outdated.
+  manager.CreateEntry(true);
+  manager.CreateEntry(true);
+  manager.DoGarbageCollectEntries();
+  EXPECT_EQ(0, manager.GetNumberOfEntries());
+
+  manager.CreateEntry(false);
+  manager.CreateEntry(false);
+  manager.CreateEntry(false);
+  manager.CreateEntry(true);
+  manager.DoGarbageCollectEntries();
+  EXPECT_EQ(3, manager.GetNumberOfEntries());
+}
+
+TEST_F(URLRequestThrottlerManagerTest, IsHostBeingRegistered) {
+  MockURLRequestThrottlerManager manager;
+
+  manager.RegisterRequestUrl(GURL("http://www.example.com/"));
+  manager.RegisterRequestUrl(GURL("http://www.google.com/"));
+  manager.RegisterRequestUrl(GURL("http://www.google.com/index/0"));
+  manager.RegisterRequestUrl(GURL("http://www.google.com/index/0?code=1"));
+  manager.RegisterRequestUrl(GURL("http://www.google.com/index/0#lolsaure"));
+
+  EXPECT_EQ(3, manager.GetNumberOfEntries());
+}
+
+TEST_F(URLRequestThrottlerManagerTest, LocalHostOptedOut) {
+  MockURLRequestThrottlerManager manager;
+  // A localhost entry should always be opted out.
+  scoped_refptr<URLRequestThrottlerEntryInterface> localhost_entry =
+      manager.RegisterRequestUrl(GURL("http://localhost/hello"));
+  EXPECT_FALSE(localhost_entry->ShouldRejectRequest(*request_));
+  for (int i = 0; i < 10; ++i) {
+    localhost_entry->UpdateWithResponse(503);
+  }
+  EXPECT_FALSE(localhost_entry->ShouldRejectRequest(*request_));
+
+  // We're not mocking out GetTimeNow() in this scenario
+  // so add a 100 ms buffer to avoid flakiness (that should always
+  // give enough time to get from the TimeTicks::Now() call here
+  // to the TimeTicks::Now() call in the entry class).
+  EXPECT_GT(TimeTicks::Now() + TimeDelta::FromMilliseconds(100),
+            localhost_entry->GetExponentialBackoffReleaseTime());
+}
+
+TEST_F(URLRequestThrottlerManagerTest, ClearOnNetworkChange) {
+  for (int i = 0; i < 3; ++i) {
+    MockURLRequestThrottlerManager manager;
+    scoped_refptr<URLRequestThrottlerEntryInterface> entry_before =
+        manager.RegisterRequestUrl(GURL("http://www.example.com/"));
+    for (int j = 0; j < 10; ++j) {
+      entry_before->UpdateWithResponse(503);
+    }
+    EXPECT_TRUE(entry_before->ShouldRejectRequest(*request_));
+
+    switch (i) {
+      case 0:
+        manager.OnIPAddressChanged();
+        break;
+      case 1:
+        manager.OnConnectionTypeChanged(
+            NetworkChangeNotifier::CONNECTION_UNKNOWN);
+        break;
+      case 2:
+        manager.OnConnectionTypeChanged(NetworkChangeNotifier::CONNECTION_NONE);
+        break;
+      default:
+        FAIL();
+    }
+
+    scoped_refptr<URLRequestThrottlerEntryInterface> entry_after =
+        manager.RegisterRequestUrl(GURL("http://www.example.com/"));
+    EXPECT_FALSE(entry_after->ShouldRejectRequest(*request_));
+  }
+}
+
+}  // namespace net
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    //-*****************************************************************************
+//
+// Copyright (c) 2009-2012,
+//  Sony Pictures Imageworks, Inc. and
+//  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
+//
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// *       Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// *       Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//-*****************************************************************************
+
+#include <Alembic/AbcGeom/XformSample.h>
+#include <Alembic/AbcGeom/XformOp.h>
+
+#include <ImathMatrix.h>
+#include <ImathMatrixAlgo.h>
+#include <ImathQuat.h>
+
+#include <math.h>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+
+namespace Alembic {
+namespace AbcGeom {
+namespace ALEMBIC_VERSION_NS {
+
+//-*****************************************************************************
+XformSample::XformSample()
+{
+    m_setWithOpStack = 0;
+    m_inherits = true;
+    m_opIndex = 0;
+    m_hasBeenRead = false;
+}
+
+//-*****************************************************************************
+std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iVal )
+{
+    for ( size_t i = 0 ; i < 3 ; ++i )
+    {
+        iOp.setChannelValue( i, iVal[i] );
+    }
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 1;
+
+        m_ops.push_back( iOp );
+
+        return m_ops.size() - 1;
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( iOp.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = iOp;
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
+
+        return ret;
+    }
+}
+
+//-*****************************************************************************
+std::size_t XformSample::addOp( XformOp iOp, const Abc::V3d &iAxis,
+                                const double iAngleInDegrees )
+
+{
+    for ( size_t i = 0 ; i < 3 ; ++i )
+    {
+        iOp.setChannelValue( i, iAxis[i] );
+    }
+    iOp.setChannelValue( 3, iAngleInDegrees );
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 1;
+
+        m_ops.push_back( iOp );
+
+        return m_ops.size() - 1;
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( iOp.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        ABCA_ASSERT( m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_ops[ret] = iOp;
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
+
+        return ret;
+    }
+}
+
+//-*****************************************************************************
+std::size_t XformSample::addOp( XformOp iOp,
+                                const double iSingleAxisRotationInDegrees )
+
+{
+    iOp.setChannelValue( 0, iSingleAxisRotationInDegrees );
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 1;
+
+        m_ops.push_back( iOp );
+
+        return m_ops.size() - 1;
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( iOp.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        ABCA_ASSERT( m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_ops[ret] = iOp;
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
+
+        return ret;
+    }
+}
+
+//-*****************************************************************************
+std::size_t XformSample::addOp( XformOp iOp, const Abc::M44d &iVal )
+{
+    for ( size_t i = 0 ; i < 4 ; ++i )
+    {
+        for ( size_t j = 0 ; j < 4 ; ++j )
+        {
+            iOp.setChannelValue( ( i * 4 ) + j, iVal.x[i][j] );
+        }
+    }
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 1;
+
+        m_ops.push_back( iOp );
+
+        return m_ops.size() - 1;
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( iOp.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        ABCA_ASSERT( m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_ops[ret] = iOp;
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
+
+        return ret;
+    }
+}
+
+//-*****************************************************************************
+std::size_t XformSample::addOp( const XformOp &iOp )
+{
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 1;
+
+        m_ops.push_back( iOp );
+
+        return m_ops.size() - 1;
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( iOp.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        ABCA_ASSERT( m_setWithOpStack == 1,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_ops[ret] = iOp;
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
+
+        return ret;
+    }
+}
+
+//-*****************************************************************************
+XformOp XformSample::getOp( std::size_t iIndex ) const
+{
+    return m_ops[iIndex];
+}
+
+//-*****************************************************************************
+XformOp &XformSample::operator[]( const std::size_t &iIndex )
+{
+    return m_ops[iIndex];
+}
+
+//-*****************************************************************************
+const XformOp &XformSample::operator[]( const std::size_t &iIndex ) const
+{
+    return m_ops[iIndex];
+}
+
+//-*****************************************************************************
+std::size_t XformSample::getNumOps() const
+{
+    return m_ops.size();
+}
+
+//-*****************************************************************************
+std::size_t XformSample::getNumOpChannels() const
+{
+    std::size_t ret = 0;
+    for ( size_t i = 0 ; i < m_ops.size() ; ++i )
+    {
+        ret += m_ops[i].getNumChannels();
+    }
+
+    return ret;
+}
+
+//-*****************************************************************************
+void XformSample::setInheritsXforms( bool iInherits )
+{
+    m_inherits = iInherits;
+}
+
+//-*****************************************************************************
+bool XformSample::getInheritsXforms() const
+{
+    return m_inherits;
+}
+
+//-*****************************************************************************
+void XformSample::setTranslation( const Abc::V3d &iTrans )
+{
+    XformOp op( kTranslateOperation, kTranslateHint );
+
+    for ( size_t i = 0 ; i < 3 ; ++i )
+    {
+        op.setChannelValue( i, iTrans[i] );
+    }
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+void XformSample::setRotation( const Abc::V3d &iAxis,
+                               const double iAngleInDegrees )
+{
+    XformOp op( kRotateOperation, kRotateHint );
+
+    for ( size_t i = 0 ; i < 3 ; ++i )
+    {
+        op.setChannelValue( i, iAxis[i] );
+    }
+    op.setChannelValue( 3, iAngleInDegrees );
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+void XformSample::setScale( const Abc::V3d &iScale )
+{
+    XformOp op( kScaleOperation, kScaleHint );
+
+    for ( size_t i = 0 ; i < 3 ; ++i )
+    {
+        op.setChannelValue( i, iScale[i] );
+    }
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+void XformSample::setXRotation( const double iAngleInDegrees )
+{
+    XformOp op( kRotateXOperation, kRotateHint );
+
+    op.setChannelValue( 0, iAngleInDegrees );
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+void XformSample::setYRotation( const double iAngleInDegrees )
+{
+    XformOp op( kRotateYOperation, kRotateHint );
+
+    op.setChannelValue( 0, iAngleInDegrees );
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+void XformSample::setZRotation( const double iAngleInDegrees )
+{
+    XformOp op( kRotateZOperation, kRotateHint );
+
+    op.setChannelValue( 0, iAngleInDegrees );
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+void XformSample::setMatrix( const Abc::M44d &iMatrix )
+{
+    XformOp op( kMatrixOperation, kMatrixHint );
+
+    for ( size_t i = 0 ; i < 4 ; ++i )
+    {
+        for ( size_t j = 0 ; j < 4 ; ++j )
+        {
+            op.setChannelValue( ( i * 4 ) + j, iMatrix.x[i][j] );
+        }
+    }
+
+    if ( ! m_hasBeenRead )
+    {
+        ABCA_ASSERT( m_setWithOpStack == 0 || m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        m_setWithOpStack = 2;
+
+        m_ops.push_back( op );
+    }
+    else
+    {
+        std::size_t ret = m_opIndex;
+
+        ABCA_ASSERT( m_setWithOpStack == 2,
+                     "Cannot mix addOp() and set<Foo>() methods." );
+
+        ABCA_ASSERT( op.getType() == m_ops[ret].getType(),
+                     "Cannot update mismatched op-type in already-setted "
+                     << "XformSample!" );
+
+        m_ops[ret] = op;
+        ++m_opIndex;
+        m_opIndex = m_opIndex % m_ops.size();
+    }
+}
+
+//-*****************************************************************************
+Abc::M44d XformSample::getMatrix() const
+{
+    Abc::M44d ret;
+    ret.makeIdentity();
+
+    for ( std::size_t i = 0 ; i < m_ops.size() ; ++i )
+    {
+        Abc::M44d m;
+        m.makeIdentity();
+
+        XformOp op = m_ops[i];
+
+        XformOperationType otype = op.getType();
+
+        if ( otype == kMatrixOperation )
+        {
+            for ( std::size_t j = 0 ; j < 4 ; ++j )
+            {
+                for ( std::size_t k = 0 ; k < 4 ; ++k )
+                {
+                    m.x[j][k] = op.getChannelValue( ( 4 * j ) + k );
+                }
+            }
+        }
+        else if ( otype == kRotateXOperation )
+        {
+            m.setAxisAngle( Abc::V3d( 1.0, 0.0, 0.0 ),
+                            DegreesToRadians( op.getChannelValue( 0 ) ) );
+        }
+        else if ( otype == kRotateYOperation )
+        {
+            m.setAxisAngle( Abc::V3d( 0.0, 1.0, 0.0 ),
+                            DegreesToRadians( op.getChannelValue( 0 ) ) );
+        }
+        else if ( otype == kRotateZOperation )
+        {
+            m.setAxisAngle( Abc::V3d( 0.0, 0.0, 1.0 ),
+                            DegreesToRadians( op.getChannelValue( 0 ) ) );
+        }
+        else
+        {
+            Abc::V3d vec( op.getChannelValue( 0 ),
+                          op.getChannelValue( 1 ),
+                          op.getChannelValue( 2 ) );
+
+            if ( otype == kScaleOperation )
+            {
+                m.setScale( vec );
+            }
+            else if ( otype == kTranslateOperation )
+            {
+                m.setTranslation( vec );
+            }
+            else if ( otype == kRotateOperation )
+            {
+                m.setAxisAngle( vec,
+                                DegreesToRadians( op.getChannelValue( 3 ) ) );
+            }
+
+        }
+        ret = m * ret;
+    }
+
+    return ret;
+}
+
+//-*****************************************************************************
+Abc::V3d XformSample::getTranslation() const
+{
+    Abc::M44d m = this->getMatrix();
+    return m.translation();
+}
+
+//-*****************************************************************************
+Abc::V3d XformSample::getScale() const
+{
+    Abc::V3d scl;
+    Imath::extractScaling( this->getMatrix(), scl );
+    return scl;
+}
+
+//-*****************************************************************************
+Abc::V3d XformSample::getAxis() const
+{
+    Imath::Quatd q = Imath::extractQuat( this->getMatrix() );
+
+    return q.axis();
+}
+
+//-*****************************************************************************
+double XformSample::getAngle() const
+{
+    Imath::Quatd q = Imath::extractQuat( this->getMatrix() );
+
+    return RadiansToDegrees( q.angle() );
+}
+
+//-*****************************************************************************
+double XformSample::getXRotation() const
+{
+    Abc::V3d rot;
+    Imath::extractEulerXYZ( this->getMatrix(), rot );
+
+    return RadiansToDegrees( rot[0] );
+}
+
+//-*****************************************************************************
+double XformSample::getYRotation() const
+{
+    Abc::V3d rot;
+    Imath::extractEulerXYZ( this->getMatrix(), rot );
+
+    return RadiansToDegrees( rot[1] );
+}
+
+//-*****************************************************************************
+double XformSample::getZRotation() const
+{
+    Abc::V3d rot;
+    Imath::extractEulerXYZ( this->getMatrix(), rot );
+
+    return RadiansToDegrees( rot[2] );
+}
+
+//-*****************************************************************************
+void XformSample::freezeTopology()
+{
+    m_hasBeenRead = true;
+}
+
+//-*****************************************************************************
+void XformSample::clear()
+{
+    m_hasBeenRead = false;
+    m_ops.resize( 0 );
+    m_setWithOpStack = 0;
+    m_opIndex = 0;
+    m_inherits = true;
+}
+
+//-*****************************************************************************
+void XformSample::reset()
+{
+    this->clear();
+}
+
+//-*****************************************************************************
+bool XformSample::isTopologyEqual( const XformSample & iSample )
+{
+    if (getNumOps() != iSample.getNumOps())
+    {
+        return false;
+    }
+
+    std::vector<XformOp>::const_iterator opA, opB;
+    for ( opA = m_ops.begin(), opB = iSample.m_ops.begin(); opA != m_ops.end();
+          ++opA, ++opB )
+    {
+        if ( opA->getType() != opB->getType() )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+} // End namespace ALEMBIC_VERSION_NS
+} // End namespace AbcGeom
+} // End namespace Alembic
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  //-*****************************************************************************
+//
+// Copyright (c) 2009-2012,
+//  Sony Pictures Imageworks Inc. and
+//  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
+//
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// *       Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// *       Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//-*****************************************************************************
+
+
+#include <Alembic/AbcMaterial/IMaterial.h>
+#include "InternalUtil.h"
+
+#include <set>
+
+namespace Alembic {
+namespace AbcMaterial {
+namespace ALEMBIC_VERSION_NS {
+
+void IMaterialSchema::init()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterialSchema::init()" );
+
+    AbcCoreAbstract::CompoundPropertyReaderPtr _this = this->getPtr();
+
+    if ( this->getPropertyHeader( ".nodes" ) != NULL )
+    {
+        m_node = Abc::ICompoundProperty( _this, ".nodes" );
+    }
+
+    if ( this->getPropertyHeader( ".interfaceParams" ) != NULL )
+    {
+        m_interfaceParams = Abc::ICompoundProperty( _this, ".interfaceParams" );
+    }
+
+    if ( this->getPropertyHeader( ".terminals" ) != NULL )
+    {
+        Abc::IStringArrayProperty termProp( _this, ".terminals" );
+        Abc::StringArraySamplePtr samp;
+        termProp.get( samp );
+
+        size_t numTerms = samp->size() / 2;
+        for( size_t i = 0; i < numTerms; ++i )
+        {
+            m_terminals[( *samp )[2 * i]] = ( *samp )[2 * i + 1];
+        }
+    }
+
+    if ( this->getPropertyHeader( ".shaderNames" ) != NULL )
+    {
+        Abc::IStringArrayProperty shaderProp( _this, ".shaderNames" );
+        Abc::StringArraySamplePtr samp;
+        shaderProp.get( samp );
+
+        size_t numShaders = samp->size() / 2;
+        for( size_t i = 0; i < numShaders; ++i )
+        {
+            m_shaderNames[( *samp )[2 * i]] = ( *samp )[2 * i + 1];
+        }
+    }
+
+    if ( this->getPropertyHeader( ".interface" ) != NULL )
+    {
+        Abc::IStringArrayProperty interfaceProp( _this, ".interface" );
+        Abc::StringArraySamplePtr samp;
+        interfaceProp.get( samp );
+
+        size_t numInterface = samp->size() / 2;
+        m_interface.reserve( numInterface );
+        for( size_t i = 0; i < numInterface; ++i )
+        {
+            m_interfaceMap[( *samp )[2 * i]] = ( *samp )[2 * i + 1];
+            m_interface.push_back( ( *samp )[2 * i] );
+        }
+    }
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+void IMaterialSchema::getTargetNames( std::vector<std::string> & oTargetNames )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterial::getTargetNames" );
+    std::set<std::string> uniqueNames;
+
+    std::vector<std::string> tokens;
+
+    std::map<std::string, std::string>::iterator i;
+    for ( i = m_shaderNames.begin(); i != m_shaderNames.end(); ++i )
+    {
+        Util::split_tokens( i->first, tokens );
+
+        // target.shaderType
+        if ( tokens.size() == 2 )
+        {
+            uniqueNames.insert( tokens[0] );
+        }
+    }
+
+    oTargetNames.clear();
+    oTargetNames.reserve( uniqueNames.size() );
+    oTargetNames.insert( oTargetNames.end(), uniqueNames.begin(),
+                         uniqueNames.end() );
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+
+void IMaterialSchema::getShaderTypesForTarget( const std::string & iTargetName,
+    std::vector<std::string> & oShaderTypeNames )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterialSchema::getShaderTypesForTarget" );
+    std::set<std::string> uniqueNames;
+
+    std::vector<std::string> tokens;
+
+    std::map<std::string, std::string>::iterator i;
+    for ( i = m_shaderNames.begin(); i != m_shaderNames.end(); ++i )
+    {
+        Util::split_tokens( i->first, tokens );
+
+        if ( tokens.size() == 2 )
+        {
+            if ( tokens[0] == iTargetName )
+            {
+                uniqueNames.insert( tokens[1] );
+            }
+        }
+    }
+
+    oShaderTypeNames.clear();
+    oShaderTypeNames.reserve( uniqueNames.size() );
+    oShaderTypeNames.insert( oShaderTypeNames.end(),
+            uniqueNames.begin(), uniqueNames.end() );
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+bool IMaterialSchema::getShader( const std::string & iTarget,
+                                 const std::string & iShaderType,
+                                 std::string & oResult )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterialSchema::getShader" );
+    std::string propName = Util::buildTargetName( iTarget, iShaderType, "" );
+
+    std::map<std::string, std::string>::iterator i =
+        m_shaderNames.find( propName );
+
+    if ( i != m_shaderNames.end() )
+    {
+        oResult = i->second;
+        return true;
+    }
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+    return false;
+}
+
+
+Abc::ICompoundProperty IMaterialSchema::getShaderParameters(
+        const std::string & iTarget,
+        const std::string & iShaderType )
+{
+    Abc::ICompoundProperty result;
+
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterialSchema::getShaderParameters" );
+    std::string propName = Util::buildTargetName( iTarget, iShaderType,
+                                                  "params" );
+
+    if (const AbcCoreAbstract::PropertyHeader * header =
+        getPropertyHeader( propName ) )
+    {
+        if ( header->isCompound() )
+        {
+            result = Abc::ICompoundProperty( *this, propName );
+        }
+    }
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+
+    return result;
+}
+
+size_t IMaterialSchema::getNumNetworkNodes()
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMaterialSchema::getNumNetworkNodes" );
+    if ( m_node.valid() )
+    {
+        return m_node.getNumProperties();
+    }
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+
+    return 0;
+}
+
+void IMaterialSchema::getNetworkNodeNames( std::vector<std::string> & oNames )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMateriaSchema::getNetworkNodeNames" );
+    oNames.clear();
+
+    if ( !m_node.valid() )
+    {
+        return;
+    }
+
+    oNames.reserve( m_node.getNumProperties() );
+
+    for ( size_t i = 0, e = m_node.getNumProperties(); i < e; ++i )
+    {
+        const AbcCoreAbstract::PropertyHeader &header =
+            m_node.getPropertyHeader( i );
+
+        if ( header.isCompound() )
+        {
+            oNames.push_back( header.getName() );
+        }
+    }
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+IMaterialSchema::NetworkNode IMaterialSchema::getNetworkNode( size_t iIndex )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN( "IMateriaSchema::getNetworkNode" );
+    if ( !m_node.valid() || iIndex >= m_node.getNumProperties() )
+    {
+        return NetworkNode();
+    }
+
+    const AbcCoreAbstract::PropertyHeader &header =
+        m_node.getPropertyHeader( iIndex );
+
+    if ( !header.isCompound() )
+    {
+        return NetworkNode();
+    }
+
+    return NetworkNode(
+            Abc::ICompoundProperty( m_node, header.getName() ) );
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+
+    return NetworkNode();
+}
+
+
+IMaterialSchema::NetworkNode IMaterialSchema::getNetworkNode(
+    const std::string & iNodeName )
+{
+    return NetworkNode( m_node, iNodeName );
+}
+
+
+void IMaterialSchema::getNetworkTerminalTargetNames(
+    std::vector<std::string> & oTargetNames )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IMateriaSchema::getNetworkTerminalTargetNames" );
+    oTargetNames.clear();
+
+    std::set<std::string> uniqueNames;
+
+    std::vector<std::string> tokens;
+    std::map<std::string, std::string>::iterator i;
+    for ( i = m_terminals.begin(); i != m_terminals.end(); ++i )
+    {
+        Util::split_tokens( i->first, tokens );
+
+        // target.shaderType
+        if ( tokens.size() == 2 )
+        {
+            uniqueNames.insert( tokens[0] );
+        }
+    }
+
+    oTargetNames.reserve( uniqueNames.size() );
+    oTargetNames.insert( oTargetNames.end(),
+            uniqueNames.begin(), uniqueNames.end() );
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+void IMaterialSchema::getNetworkTerminalShaderTypesForTarget(
+    const std::string & iTargetName,
+    std::vector<std::string> & oShaderTypeNames)
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IMateriaSchema::getNetworkTerminalShaderTypesForTarget" );
+
+    oShaderTypeNames.clear();
+
+    std::set<std::string> uniqueNames;
+
+    std::vector<std::string> tokens;
+    std::map<std::string, std::string>::iterator i;
+    for ( i = m_terminals.begin(); i != m_terminals.end(); ++i )
+    {
+        Util::split_tokens( i->first, tokens );
+
+        if ( tokens.size() == 2 )
+        {
+            if ( tokens[0] == iTargetName )
+            {
+                uniqueNames.insert( tokens[1] );
+            }
+        }
+    }
+
+    oShaderTypeNames.reserve( uniqueNames.size() );
+    oShaderTypeNames.insert( oShaderTypeNames.end(),
+        uniqueNames.begin(), uniqueNames.end() );
+
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+}
+
+bool IMaterialSchema::getNetworkTerminal(
+        const std::string & iTarget,
+        const std::string & iShaderType,
+        std::string & oNodeName,
+        std::string & oOutputName)
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IMateriaSchema::getNetworkTerminal" );
+
+    std::string propName = iTarget + "." + iShaderType;
+
+    std::map<std::string, std::string>::iterator i =
+        m_terminals.find( propName );
+
+    if ( i == m_terminals.end() )
+    {
+        return false;
+    }
+
+    std::vector<std::string> tokens;
+    Util::split_tokens( i->second, tokens, 1 );
+
+    oNodeName = tokens[0];
+    oOutputName = tokens.size() > 1 ? tokens[1] : "";
+
+    return true;
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+
+    return false;
+}
+
+size_t IMaterialSchema::getNumNetworkInterfaceParameterMappings()
+{
+    return m_interface.size();
+}
+
+
+bool IMaterialSchema::getNetworkInterfaceParameterMapping( size_t iIndex,
+    std::string & oInterfaceParamName, std::string & oMapToNodeName,
+    std::string & oMapToParamName )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IMateriaSchema::getNetworkInterfaceParameterMapping(size_t,...)" );
+
+    if ( iIndex >= m_interface.size() )
+    {
+        return false;
+    }
+
+    oInterfaceParamName = m_interface[iIndex];
+
+    return getNetworkInterfaceParameterMapping( oInterfaceParamName,
+                                                oMapToNodeName,
+                                                oMapToParamName );
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+
+    return false;
+}
+
+
+
+
+void IMaterialSchema::getNetworkInterfaceParameterMappingNames(
+    std::vector<std::string> & oNames )
+{
+    oNames = m_interface;
+}
+
+
+bool IMaterialSchema::getNetworkInterfaceParameterMapping(
+    const std::string & iInterfaceParamName,
+    std::string & oMapToNodeName,
+    std::string & oMapToParamName )
+{
+    ALEMBIC_ABC_SAFE_CALL_BEGIN(
+        "IMateriaSchema::getNetworkInterfaceParameterMapping" );
+
+    std::map<std::string, std::string>::iterator i =
+        m_interfaceMap.find( iInterfaceParamName );
+
+    if ( i == m_interfaceMap.end() )
+    {
+        return false;
+    }
+
+    std::vector<std::string> tokens;
+
+    Util::split_tokens( i->second, tokens, 1 );
+
+    oMapToNodeName = tokens[0];
+    oMapToParamName = tokens.size() > 1 ? tokens[1] : "";
+
+    return true;
+    ALEMBIC_ABC_SAFE_CALL_END_RESET();
+
+    return false;
+}
+
+Abc::ICompoundProperty IMaterialSchema::getNetworkInterfaceParameters()
+{
+    return m_interfaceParams;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+IMaterialSchema::NetworkNode::NetworkNode()
+: m_connectionsChecked( false )
+{
+}
+
+
+IMaterialSchema::NetworkNode::NetworkNode( Abc::ICompoundProperty iCompound )
+: m_compound( iCompound )
+, m_connectionsChecked( false )
+{
+}
+
+
+IMaterialSchema::NetworkNode::NetworkNode( Abc::ICompoundProperty iParent,
+                                           const std::string & iNodeName )
+: m_connectionsChecked( false )
+{
+    if ( iParent.valid() )
+    {
+        if ( const AbcCoreAbstract::PropertyHeader * header =
+            iParent.getPropertyHeader( iNodeName ) )
+        {
+            if ( header->isCompound() )
+            {
+                m_compound =  Abc::ICompoundProperty( iParent, iNodeName );
+            }
+        }
+    }
+}
+
+bool IMaterialSchema::NetworkNode::valid()
+{
+    return m_compound.valid();
+}
+
+
+std::string IMaterialSchema::NetworkNode::getName()
+{
+    if ( valid() )
+    {
+        return m_compound.getName();
+    }
+
+    return "";
+}
+
+
+bool IMaterialSchema::NetworkNode::getTarget( std::string & oResult )
+{
+    if ( !valid() )
+    {
+        return false;
+    }
+
+    if ( const AbcCoreAbstract::PropertyHeader * header =
+        m_compound.getPropertyHeader( "target" ) )
+    {
+        if ( header->isScalar() && Abc::IStringProperty::matches( *header) )
+        {
+            Abc::IStringProperty prop( m_compound, header->getName() );
+
+            oResult = prop.getValue();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool IMaterialSchema::NetworkNode::getNodeType( std::string & oResult )
+{
+    if ( !valid() )
+    {
+        return false;
+    }
+
+    if ( const AbcCoreAbstract::PropertyHeader * header =
+        m_compound.getPropertyHeader( "type" ) )
+    {
+        if ( header->isScalar() && Abc::IStringProperty::matches( *header ) )
+        {
+            Abc::IStringProperty prop( m_compound, header->getName() );
+
+            oResult = prop.getValue();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+Abc::ICompoundProperty IMaterialSchema::NetworkNode::getParameters()
+{
+    Abc::ICompoundProperty result;
+    if ( !valid() )
+    {
+        return result;
+    }
+
+    if (const AbcCoreAbstract::PropertyHeader * header =
+        m_compound.getPropertyHeader( "params" ) )
+    {
+        if ( header->isCompound() )
+        {
+            result = Abc::ICompoundProperty( m_compound, "params" );
+        }
+    }
+
+    return result;
+}
+
+size_t IMaterialSchema::NetworkNode::getNumConnections()
+{
+    if ( ! m_connectionsChecked )
+    {
+        if ( m_compound.getPropertyHeader( ".connections" ) != NULL )
+        {
+            Abc::IStringArrayProperty connectProp( m_compound, ".connections" );
+            Abc::StringArraySamplePtr samp;
+            connectProp.get( samp );
+
+            size_t numConnect = samp->size() / 2;
+            m_connections.reserve( numConnect );
+            for( size_t i = 0; i < numConnect; ++i )
+            {
+                m_connectionsMap[( *samp )[2 * i]] = ( *samp )[2 * i + 1];
+                m_connections.push_back( ( *samp )[2 * i] );
+            }
+        }
+        m_connectionsChecked = true;
+    }
+
+    return m_connections.size();
+
+}
+
+void IMaterialSchema::NetworkNode::splitConnectionValue( const std::string & v,
+    std::string & a, std::string & b )
+{
+    std::vector<std::string> tokens;
+
+    Util::split_tokens(v, tokens, 1);
+
+    a = tokens[0];
+    b = tokens.size() > 1 ? tokens[1] : "";
+}
+
+bool IMaterialSchema::NetworkNode::getConnection(
+    size_t iIndex,
+    std::string & oInputName,
+    std::string & oConnectedNodeName,
+    std::string & oConnectedOutputName )
+{
+    if ( iIndex >= getNumConnections() )
+    {
+        return false;
+    }
+
+    oInputName = m_connections[iIndex];
+    return getConnection( oInputName, oConnectedNodeName,
+        oConnectedOutputName );
+}
+
+bool IMaterialSchema::NetworkNode::getConnection(
+    const std::string & iInputName,
+    std::string & oConnectedNodeName,
+    std::string & oConnectedOutputName )
+{
+    // loads the connections if it hasn't already
+    getNumConnections();
+
+    std::map< std::string, std::string >::iterator i =
+        m_connectionsMap.find( iInputName );
+
+    if ( i == m_connectionsMap.end() )
+    {
+        return false;
+    }
+
+    std::string value = i->second;
+    splitConnectionValue( value, oConnectedNodeName, oConnectedOutputName );
+
+    return true;
+}
+
+} // End namespace ALEMBIC_VERSION_NS
+} // End namespace AbcMaterial
+} // End namespace Alembic
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //-*****************************************************************************
+//
+// Copyright (c) 2009-2012,
+//  Sony Pictures Imageworks Inc. and
+//  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
+//
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// *       Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// *       Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//-*****************************************************************************
+
+#include <Alembic/AbcMaterial/MaterialFlatten.h>
+#include <Alembic/AbcMaterial/MaterialAssignment.h>
+
+#include <set>
+
+namespace Alembic {
+namespace AbcMaterial {
+namespace ALEMBIC_VERSION_NS {
+
+MaterialFlatten::MaterialFlatten()
+: m_networkFlattened( false )
+{
+}
+
+MaterialFlatten::MaterialFlatten( IMaterialSchema iMaterialSchema )
+: m_networkFlattened( false )
+{
+    m_schemas.push_back( iMaterialSchema );
+}
+
+MaterialFlatten::MaterialFlatten( IMaterial iMaterialObject )
+: m_networkFlattened( false )
+{
+    append( iMaterialObject );
+}
+
+MaterialFlatten::MaterialFlatten( Abc::IObject iObject,
+        Abc::IArchive iAlternateSearchArchive )
+: m_networkFlattened( false )
+{
+    //first apply a local material
+    IMaterialSchema localMaterial;
+
+    if ( hasMaterial( iObject, localMaterial ) )
+    {
+        append( localMaterial );
+    }
+
+    //then apply the inheritance chain of an assigned material
+    std::string assignedPath;
+    if ( getMaterialAssignmentPath( iObject, assignedPath ) )
+    {
+        //now walk to that object, confirm it's a material,
+        //and then append it.
+
+        //For now, walk from root and then back down
+        //eventually, support relative paths
+
+        Abc::IObject parent;
+        if ( iAlternateSearchArchive.valid() &&
+             iAlternateSearchArchive.getTop().valid() )
+        {
+            parent = iAlternateSearchArchive.getTop();
+        }
+        else
+        {
+            parent = iObject.getArchive().getTop();
+        }
+
+
+        size_t lastPos = 0;
+        bool isDone = false;
+
+        while ( ! isDone )
+        {
+            size_t curPos = assignedPath.find( '/', lastPos );
+            size_t length = 0;
+
+            if ( curPos == std::string::npos )
+            {
+                isDone = true;
+                length = std::string::npos;
+            }
+            // no other characters between / (starting / or multiple / in a row)
+            else if ( lastPos == curPos )
+            {
+                lastPos = curPos + 1;
+                if ( lastPos == assignedPath.size() )
+                {
+                    isDone = true;
+                }
+                continue;
+            }
+            else
+            {
+                length = curPos - lastPos;
+            }
+
+            std::string childName = assignedPath.substr( lastPos, length );
+            lastPos = curPos + 1;
+
+            if ( parent.getChildHeader( childName ) )
+            {
+                parent = parent.getChild( childName );
+            }
+            else
+            {
+                parent = Abc::IObject();
+                break;
+            }
+        }
+
+        if ( parent.valid() && IMaterial::matches( parent.getHeader() ) )
+        {
+            append( IMaterial( parent, Abc::kWrapExisting ) );
+        }
+    }
+}
+
+void MaterialFlatten::append( IMaterialSchema iMaterialSchema )
+{
+    m_schemas.push_back( iMaterialSchema );
+
+    m_networkFlattened = false;
+}
+
+
+void MaterialFlatten::append( IMaterial iMaterialObject )
+{
+    //append the schema objects
+    m_schemas.push_back( iMaterialObject.getSchema() );
+
+    Abc::IObject parent = iMaterialObject.getParent();
+
+    while ( parent.valid() )
+    {
+        if ( IMaterial::matches( parent.getHeader() ) )
+        {
+            m_schemas.push_back(
+                IMaterial( parent, Abc::kWrapExisting ).getSchema() );
+        }
+
+        parent = parent.getParent();
+    }
+
+    m_networkFlattened = false;
+}
+
+
+
+
+bool MaterialFlatten::empty()
+{
+    return m_schemas.empty();
+}
+
+void MaterialFlatten::getTargetNames( std::vector<std::string> & oTargetNames )
+{
+    std::set<std::string> uniqueNames;
+
+    for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
+          ++i )
+    {
+        std::vector<std::string> names;
+        ( *i ).getTargetNames( names );
+        uniqueNames.insert( names.begin(), names.end() );
+    }
+
+    oTargetNames.clear();
+
+    oTargetNames.reserve( uniqueNames.size() );
+    oTargetNames.insert( oTargetNames.end(), uniqueNames.begin(),
+                         uniqueNames.end() );
+}
+
+void MaterialFlatten::getShaderTypesForTarget( const std::string & iTargetName,
+    std::vector<std::string> & oShaderTypeNames )
+{
+    std::set<std::string> uniqueNames;
+
+    for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
+          ++i )
+    {
+        std::vector<std::string> names;
+        ( *i ).getShaderTypesForTarget( iTargetName, names );
+        uniqueNames.insert( names.begin(), names.end() );
+    }
+
+    oShaderTypeNames.clear();
+    oShaderTypeNames.reserve( uniqueNames.size() );
+    oShaderTypeNames.insert( oShaderTypeNames.end(), uniqueNames.begin(),
+                            uniqueNames.end() );
+}
+
+bool MaterialFlatten::getShader( const std::string & iTarget,
+                                 const std::string & iShaderType,
+                                 std::string & oResult)
+{
+    for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
+          ++i )
+    {
+        if ( ( *i ).getShader( iTarget, iShaderType, oResult ) )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void MaterialFlatten::getShaderParameters( const std::string & iTarget,
+                                           const std::string & iShaderType,
+                                           ParameterEntryVector & oResult )
+{
+    oResult.clear();
+    std::set<std::string> uniqueNames;
+
+    for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
+          ++i )
+    {
+        Abc::ICompoundProperty params = ( *i ).getShaderParameters(
+            iTarget, iShaderType );
+
+        if (!params.valid())
+        {
+            continue;
+        }
+
+        oResult.reserve(params.getNumProperties());
+
+        for ( size_t j = 0; j < params.getNumProperties(); ++j )
+        {
+            const AbcCoreAbstract::PropertyHeader &propHeader =
+                params.getPropertyHeader( j );
+
+            if ( uniqueNames.find( propHeader.getName() ) != uniqueNames.end() )
+            {
+                continue;
+            }
+
+            uniqueNames.insert( propHeader.getName() );
+
+            oResult.push_back( ParameterEntry( propHeader.getName(),
+                                               params, &propHeader ) );
+        }
+    }
+}
+
+void MaterialFlatten::getNetworkTerminalTargetNames(
+    std::vector<std::string> & oTargetNames )
+{
+    std::set<std::string> uniqueNames;
+
+    for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
+          ++i)
+    {
+        std::vector<std::string> names;
+        ( *i ).getNetworkTerminalTargetNames( names );
+        uniqueNames.insert( names.begin(), names.end() );
+    }
+
+    oTargetNames.clear();
+    oTargetNames.reserve( uniqueNames.size() );
+    oTargetNames.insert( oTargetNames.end(), uniqueNames.begin(),
+                         uniqueNames.end() );
+}
+
+void MaterialFlatten::getNetworkTerminalShaderTypesForTarget(
+    const std::string & iTargetName,
+    std::vector<std::string> & oShaderTypeNames )
+{
+    std::set<std::string> uniqueNames;
+
+    for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
+          ++i )
+    {
+        std::vector<std::string> names;
+        ( *i ).getNetworkTerminalShaderTypesForTarget(
+            iTargetName, names );
+
+        uniqueNames.insert( names.begin(), names.end() );
+    }
+
+    oShaderTypeNames.clear();
+    oShaderTypeNames.reserve( uniqueNames.size() );
+    oShaderTypeNames.insert( oShaderTypeNames.end(), uniqueNames.begin(),
+                             uniqueNames.end() );
+}
+
+bool MaterialFlatten::getNetworkTerminal( const std::string & iTarget,
+                                          const std::string & iShaderType,
+                                          std::string & oNodeName,
+                                          std::string & oOutputName )
+{
+    for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
+          ++i)
+    {
+        if ( ( *i ).getNetworkTerminal( iTarget, iShaderType, oNodeName,
+                                        oOutputName ) )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+
+
+void MaterialFlatten::flattenNetwork()
+{
+    if ( m_networkFlattened )
+    {
+        return;
+    }
+
+    m_networkFlattened = true;
+
+    m_nodeNames.clear();
+    m_nodesToInterfaceMappings.clear();
+
+    std::set<std::string> foundNodes;
+    std::vector<std::string> workingNames;
+    std::string interfaceParamName, mapToNodeName, mapToParamName;
+
+    for ( SchemaVector::iterator i = m_schemas.begin(); i != m_schemas.end();
+          ++i)
+    {
+        IMaterialSchema & schema = ( *i );
+
+        //find the unique node names
+        schema.getNetworkNodeNames( workingNames );
+        for ( std::vector<std::string>::iterator j = workingNames.begin();
+              j != workingNames.end(); ++j )
+        {
+            const std::string & name = ( *j );
+
+            if ( foundNodes.find( name ) != foundNodes.end() )
+            {
+                foundNodes.insert( name );
+                m_nodeNames.push_back( name );
+            }
+        }
+
+        //build the public interface mappings
+        for ( size_t j = 0,
+              e = schema.getNumNetworkInterfaceParameterMappings();
+              j < e; ++j)
+        {
+            if ( !schema.getNetworkInterfaceParameterMapping( j,
+                interfaceParamName, mapToNodeName, mapToParamName ) )
+            {
+                continue;
+            }
+
+            StringMapPtr nodeParameterMappings;
+            StringMapMap::iterator nI = m_nodesToInterfaceMappings.find(
+                mapToNodeName );
+
+            if ( nI != m_nodesToInterfaceMappings.end() )
+            {
+                nodeParameterMappings = ( *nI ).second;
+            }
+            else
+            {
+                nodeParameterMappings = StringMapPtr( new StringMap );
+                m_nodesToInterfaceMappings[mapToNodeName] =
+                    nodeParameterMappings;
+            }
+
+            if ( nodeParameterMappings->find( mapToParamName ) ==
+                 nodeParameterMappings->end() )
+            {
+                ( *nodeParameterMappings )[mapToParamName] = interfaceParamName;
+            }
+        }
+    }
+}
+
+size_t MaterialFlatten::getNumNetworkNodes()
+{
+    flattenNetwork();
+    return m_nodeNames.size();
+}
+
+MaterialFlatten::NetworkNode MaterialFlatten::getNetworkNode( size_t iIndex )
+{
+    flattenNetwork();
+
+    if ( iIndex >= m_nodeNames.size() )
+    {
+        return NetworkNode();
+    }
+
+    return getNetworkNode( m_nodeNames[iIndex] );
+}
+
+MaterialFlatten::NetworkNode MaterialFlatten::getNetworkNode(
+    const std::string & iNodeName)
+{
+    flattenNetwork();
+
+    StringMapPtr interfaceMappings;
+    StringMapMap::iterator i = m_nodesToInterfaceMappings.find( iNodeName );
+    if ( i != m_nodesToInterfaceMappings.end() )
+    {
+        interfaceMappings = ( *i ).second;
+    }
+
+   return NetworkNode( iNodeName, m_schemas, interfaceMappings );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MaterialFlatten::NetworkNode::NetworkNode()
+{
+}
+
+
+MaterialFlatten::NetworkNode::NetworkNode( const std::string & iName,
+    SchemaVector & iSchemas, StringMapPtr iInterfaceMappings )
+: m_name( iName )
+, m_interfaceMappings( iInterfaceMappings )
+{
+    m_nodes.reserve( iSchemas.size() );
+    m_networkParameters.reserve( iSchemas.size() );
+
+    for ( SchemaVector::iterator i = iSchemas.begin(); i != iSchemas.end();
+          ++i )
+    {
+        IMaterialSchema & schema = ( *i );
+
+        IMaterialSchema::NetworkNode node = schema.getNetworkNode( iName );
+        if ( node.valid() )
+        {
+            m_nodes.push_back( node );
+        }
+
+        Abc::ICompoundProperty networkParams =
+            schema.getNetworkInterfaceParameters();
+
+        if ( networkParams.valid() )
+        {
+            m_networkParameters.push_back( networkParams );
+        }
+
+    }
+}
+
+
+
+
+
+
+bool MaterialFlatten::NetworkNode::valid()
+{
+    //TODO! confirm IMaterialSchema node validity for cases in which type,
+    // etc are not specified locally
+    return !m_nodes.empty();
+}
+
+
+std::string MaterialFlatten::NetworkNode::getName()
+{
+    return m_name;
+}
+
+bool MaterialFlatten::NetworkNode::getTarget( std::string & oResult )
+{
+    for ( std::vector<IMaterialSchema::NetworkNode>::iterator i =
+          m_nodes.begin(); i != m_nodes.end(); ++i)
+    {
+        if ( ( *i ).getTarget( oResult ) && !oResult.empty() )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+bool MaterialFlatten::NetworkNode::getNodeType( std::string & oResult )
+{
+    for ( std::vector<IMaterialSchema::NetworkNode>::iterator i =
+          m_nodes.begin(); i != m_nodes.end(); ++i )
+    {
+        if ( ( *i ).getNodeType( oResult ) && !oResult.empty() )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void
+MaterialFlatten::NetworkNode::getParameters( ParameterEntryVector & oResult )
+{
+    oResult.clear();
+    std::set<std::string> uniqueNames;
+
+    if ( m_interfaceMappings )
+    {
+        for ( StringMap::iterator i = m_interfaceMappings->begin();
+              i != m_interfaceMappings->end(); ++i )
+        {
+            const std::string & nodeParamName = (*i).first;
+            const std::string & networkParamName = (*i).second;
+
+            if ( uniqueNames.find( nodeParamName ) != uniqueNames.end() )
+            {
+                continue;
+            }
+
+            std::vector<Abc::ICompoundProperty>::iterator j;
+            for ( j = m_networkParameters.begin();
+                  j != m_networkParameters.end(); ++j )
+            {
+                Abc::ICompoundProperty & networkParams = ( *j );
+
+                if ( const AbcCoreAbstract::PropertyHeader * header =
+                     networkParams.getPropertyHeader( networkParamName ) )
+                {
+                    oResult.push_back( ParameterEntry( nodeParamName,
+                                                       networkParams,
+                                                       header ) );
+                    uniqueNames.insert( nodeParamName );
+                    break;
+                }
+            }
+        }
+    }
+
+    for ( std::vector<IMaterialSchema::NetworkNode>::iterator i =
+          m_nodes.begin(); i != m_nodes.end(); ++i )
+    {
+        IMaterialSchema::NetworkNode & node = ( *i );
+
+        Abc::ICompoundProperty nodeParameters = node.getParameters();
+
+        if (!nodeParameters.valid())
+        {
+            continue;
+        }
+
+        for ( size_t j = 0; j < nodeParameters.getNumProperties(); ++j)
+        {
+            const AbcCoreAbstract::PropertyHeader &propHeader =
+                nodeParameters.getPropertyHeader( j );
+
+            if ( uniqueNames.find(propHeader.getName()) != uniqueNames.end() )
+            {
+                continue;
+            }
+
+            uniqueNames.insert(propHeader.getName());
+
+            oResult.push_back( ParameterEntry( propHeader.getName(),
+                                               nodeParameters, &propHeader ) );
+        }
+    }
+}
+
+
+void MaterialFlatten::NetworkNode::getConnections( ConnectionVector & oResult )
+{
+    oResult.clear();
+
+    std::set<std::string> uniqueNames;
+
+    std::string inputName;
+    std::string connectedNodeName;
+    std::string connectedOutputName;
+
+    for ( std::vector<IMaterialSchema::NetworkNode>::iterator i =
+          m_nodes.begin(); i != m_nodes.end(); ++i )
+    {
+        IMaterialSchema::NetworkNode & node = ( *i );
+
+        for (size_t j = 0, e = node.getNumConnections(); j < e; ++j)
+        {
+            if ( node.getConnection(j, inputName, connectedNodeName,
+                                    connectedOutputName ) )
+            {
+                if ( uniqueNames.find( inputName ) != uniqueNames.end() )
+                {
+                    continue;
+                }
+
+                uniqueNames.insert( inputName );
+                oResult.push_back( NetworkNode::Connection( inputName,
+                    connectedNodeName, connectedOutputName ) );
+            }
+        }
+    }
+
+}
+
+} // End namespace ALEMBIC_VERSION_NS
+} // End namespace AbcMaterial
+} // End namespace Alembic
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 //-*****************************************************************************
+//
+// Copyright (c) 2009-2012,
+//  Sony Pictures Imageworks Inc. and
+//  Industrial Light & Magic, a division of Lucasfilm Entertainment Company Ltd.
+//
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+// *       Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// *       Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// *       Neither the name of Sony Pictures Imageworks, nor
+// Industrial Light & Magic, nor the names of their contributors may be used
+// to endorse or promote products derived from this software without specific
+// prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//-*****************************************************************************
+
+#ifndef _Alembic_Util_PlainOldDataType_h_
+#define _Alembic_Util_PlainOldDataType_h_
+
+#include <Alembic/Util/Foundation.h>
+#include <Alembic/Util/Exception.h>
+
+// stdint.h is not in anything prior to Visual Studio 2010
+#if !defined(_MSC_VER) || _MSC_VER >= 1600
+#include <stdint.h>
+#endif
+
+namespace Alembic {
+namespace Util {
+namespace ALEMBIC_VERSION_NS {
+
+//-*****************************************************************************
+//! Bytes are unsigned chars, by definition.
+//! We use bytes in Alembic as the name of anonymous storage memory, since
+//! it is not possible to create arrays of voids. 
+typedef unsigned char           byte_t;
+
+//-*****************************************************************************
+//-*****************************************************************************
+//! BOOLEAN BASE TYPE - since C++ doesn't explicitly demand that bool
+//! be a given bit depth, but we need it to be here, we make our own
+//! bool type, which is a bit silly. This is purely for storage reasons.
+//-*****************************************************************************
+class bool_t
+{
+public:
+    bool_t() : m_byte( 0 ) {}
+    
+    bool_t( bool tf ) : m_byte( static_cast<byte_t>( tf ) ) {}
+    bool_t( byte_t b ) : m_byte( b ) {}
+
+    
+    //! Using default copy constructor
+    //! ...
+    
+    //! Using default assignment operator
+    //! ...
+    
+    bool_t& operator=( bool tf )
+    {
+        m_byte = static_cast<byte_t>( tf );
+        return *this;
+    }
+
+    bool_t& operator=( byte_t b )
+    {
+        m_byte = b;
+        return *this;
+    }
+
+    bool_t operator!( void )
+    {
+        return bool_t( m_byte == 0 );
+    }
+
+    bool asBool() const { return ( m_byte != 0 ); }
+    operator bool() const { return ( m_byte != 0 ); }
+
+private:
+    byte_t m_byte;
+};
+
+//-*****************************************************************************
+inline bool operator==( const bool_t &a, const bool_t &b )
+{
+    return a.asBool() == b.asBool();
+}
+
+//-*****************************************************************************
+inline bool operator==( const bool_t &a, bool b )
+{
+    return a.asBool() == b;
+}
+
+//-*****************************************************************************
+inline bool operator==( bool a, const bool_t &b )
+{
+    return a == b.asBool();
+}
+
+//-*****************************************************************************
+inline bool operator!=( const bool_t &a, const bool_t &b )
+{
+    return a.asBool() != b.asBool();
+}
+
+//-*****************************************************************************
+inline bool operator!=( const bool_t &a, bool b )
+{
+    return a.asBool() != b;
+}
+
+//-*****************************************************************************
+inline bool operator!=( bool a, const bool_t &b )
+{
+    return a != b.asBool();
+}
+
+#if !defined(_MSC_VER)
+using ::uint8_t;
+using ::int8_t;
+using ::uint16_t;
+using ::int16_t;
+using ::uint32_t;
+using ::int32_t;
+using ::uint64_t;
+using ::int64_t;
+#else
+typedef unsigned char           uint8_t;
+typedef signed char             int8_t;
+typedef unsigned short          uint16_t;
+typedef signed short            int16_t;
+typedef unsigned int            uint32_t;
+typedef int                     int32_t;
+typedef unsigned long long      uint64_t;
+typedef long long               int64_t;
+#endif
+
+typedef half                    float16_t;
+typedef float                   float32_t;
+typedef double                  float64_t;
+
+//! Last, but not least, standard strings.
+//! These are CLEARLY not "Plain Old Data Types", however, "strings" are
+//! such ubiquitous components of programming, and without an enclosing
+//! structure like std::string, they're so difficult to use from an API
+//! point of view (call first time to find out length! allocate your own array!
+//! call second time to get string value!), that I'm going to put my foot down
+//! and say - from Alembic's point of view, std::string and std::wstring are
+//! "Kinda Sorta POD types". Please pardon the abuse of the idiom.
+using std::string;
+using std::wstring;
+
+//-*****************************************************************************
+//! I'm using explicit names here because the terms 'int', 'short', 'long', etc,
+//! have different bit-depths on different machine architectures. To avoid
+//! any ambiguity whatsoever, I'm just making these explicit. End users will
+//! rarely see these anyway, so it's okay to be a bit pedantic.
+//!
+//! These are always represented in the endian-ness of the host machine when
+//! resident in working memory, but need to have an explicit endian-ness when
+//! being written out. That's hidden from the user by HDF5.
+enum PlainOldDataType
+{
+    //! Booleans are difficult to store in arrays in a 'one bit per bool'
+    //! kind of way, so we actually file them as bytes (uint8).  But again
+    //! this is entirely hidden from the end user. Implemented via the
+    //! "bool_t" type defined above.
+    kBooleanPOD,
+
+    //! Char/UChar
+    kUint8POD,
+    kInt8POD,
+
+    //! Short/UShort
+    kUint16POD,
+    kInt16POD,
+
+    //! Int/UInt
+    kUint32POD,
+    kInt32POD,
+
+    //! Long/ULong
+    kUint64POD,
+    kInt64POD,
+
+    //! Half/Float/Double
+    kFloat16POD,
+    kFloat32POD,
+    kFloat64POD,
+
+    //! String Pointer
+    kStringPOD,
+
+    //! Wide String Pointer
+    kWstringPOD,
+
+    //! Number of POD
+    kNumPlainOldDataTypes,
+
+    //! Unknown
+    kUnknownPOD = 127
+};
+
+//-*****************************************************************************
+//-*****************************************************************************
+//-*****************************************************************************
+// A little traits class that binds these things together.
+//-*****************************************************************************
+//-*****************************************************************************
+//-*****************************************************************************
+template <PlainOldDataType PODT, class T > struct PODTraits {};
+
+//-*****************************************************************************
+//! Unfortunately, C++ only allows for static const declaration of constants
+//! with integral types, not floating. Therefore, we have the whole
+//! inlined static function for default values.
+#define DECLARE_TRAITS( PENUM, PTYPE, PNAME, DFLT, PTDEF )                    \
+template <>                                                                   \
+struct PODTraits< PENUM , PTYPE >                                             \
+{                                                                             \
+    static const PlainOldDataType       pod_enum = PENUM ;                    \
+    typedef PTYPE                       value_type ;                          \
+    static const char *                 name() { return PNAME ; }             \
+    static PTYPE                        default_value()                       \
+    { return ( DFLT ) ; }                                                     \
+    static size_t                       numBytes()                            \
+    { return sizeof( PTYPE ) ; }                                              \
+};                                                                            \
+typedef PODTraits< PENUM , PTYPE > PTDEF 
+
+//-*****************************************************************************
+// Actual specialized traits
+DECLARE_TRAITS( kBooleanPOD, bool_t,    "bool_t",    false, BooleanPODTraits );
+DECLARE_TRAITS( kUint8POD,   uint8_t,   "uint8_t",   0,     Uint8PODTraits );
+DECLARE_TRAITS( kInt8POD,    int8_t,    "int8_t",    0,     Int8PODTraits );
+DECLARE_TRAITS( kUint16POD,  uint16_t,  "uint16_t",  0,     Uint16PODTraits );
+DECLARE_TRAITS( kInt16POD,   int16_t,   "int16_t",   0,     Int16PODTraits );
+DECLARE_TRAITS( kUint32POD,  uint32_t,  "uint32_t",  0,     Uint32PODTraits );
+DECLARE_TRAITS( kInt32POD,   int32_t,   "int32_t",   0,     Int32PODTraits );
+DECLARE_TRAITS( kUint64POD,  uint64_t,  "uint64_t",  0,     Uint64PODTraits );
+DECLARE_TRAITS( kInt64POD,   int64_t,   "int64_t",   0,     Int64PODTraits );
+DECLARE_TRAITS( kFloat16POD, float16_t, "float16_t", 0,     Float16PODTraits );
+DECLARE_TRAITS( kFloat32POD, float32_t, "float32_t", 0,     Float32PODTraits );
+DECLARE_TRAITS( kFloat64POD, float64_t, "float64_t", 0,     Float64PODTraits );
+DECLARE_TRAITS( kStringPOD,  string,    "string",    "",    StringPODTraits );
+DECLARE_TRAITS( kWstringPOD, wstring,   "wstring",   L"",   WstringPODTraits );
+
+#undef DECLARE_TRAITS
+
+//-*****************************************************************************
+//-*****************************************************************************
+// Okay, now tools for extracting POD Traits from enums and from types.
+// No easy way to do it from a name.
+//-*****************************************************************************
+
+//-*****************************************************************************
+//-*****************************************************************************
+// FROM ENUMS
+//-*****************************************************************************
+//-*****************************************************************************
+template <PlainOldDataType PENUM>
+struct PODTraitsFromEnum {};
+
+//-*****************************************************************************
+// Actual specializations
+template <> struct PODTraitsFromEnum<kBooleanPOD> : public BooleanPODTraits {};
+template <> struct PODTraitsFromEnum<kUint8POD> : public Uint8PODTraits {};
+template <> struct PODTraitsFromEnum<kInt8POD> : public Int8PODTraits {};
+template <> struct PODTraitsFromEnum<kUint16POD> : public Uint16PODTraits {};
+template <> struct PODTraitsFromEnum<kInt16POD> : public Int16PODTraits {};
+template <> struct PODTraitsFromEnum<kUint32POD> : public Uint32PODTraits {};
+template <> struct PODTraitsFromEnum<kInt32POD> : public Int32PODTraits {};
+template <> struct PODTraitsFromEnum<kUint64POD> : public Uint64PODTraits {};
+template <> struct PODTraitsFromEnum<kInt64POD> : public Int64PODTraits {};
+template <> struct PODTraitsFromEnum<kFloat16POD> : public Float16PODTraits {};
+template <> struct PODTraitsFromEnum<kFloat32POD> : public Float32PODTraits {};
+template <> struct PODTraitsFromEnum<kFloat64POD> : public Float64PODTraits {};
+template <> struct PODTraitsFromEnum<kStringPOD> : public StringPODTraits {};
+template <> struct PODTraitsFromEnum<kWstringPOD> : public WstringPODTraits {};
+
+//-*****************************************************************************
+//-*****************************************************************************
+// FROM TYPES
+//-*****************************************************************************
+//-*****************************************************************************
+template <class PTYPE>
+struct PODTraitsFromType {};
+
+//-*****************************************************************************
+// Actual specializations
+template <> struct PODTraitsFromType<bool_t> : public BooleanPODTraits {};
+template <> struct PODTraitsFromType<uint8_t> : public Uint8PODTraits {};
+template <> struct PODTraitsFromType<int8_t> : public Int8PODTraits {};
+template <> struct PODTraitsFromType<uint16_t> : public Uint16PODTraits {};
+template <> struct PODTraitsFromType<int16_t> : public Int16PODTraits {};
+template <> struct PODTraitsFromType<uint32_t> : public Uint32PODTraits {};
+template <> struct PODTraitsFromType<int32_t> : public Int32PODTraits {};
+template <> struct PODTraitsFromType<uint64_t> : public Uint64PODTraits {};
+template <> struct PODTraitsFromType<int64_t> : public Int64PODTraits {};
+template <> struct PODTraitsFromType<float16_t> : public Float16PODTraits {};
+template <> struct PODTraitsFromType<float32_t> : public Float32PODTraits {};
+template <> struct PODTraitsFromType<float64_t> : public Float64PODTraits {};
+template <> struct PODTraitsFromType<string> : public StringPODTraits {};
+template <> struct PODTraitsFromType<wstring> : public WstringPODTraits {};
+
+//-*****************************************************************************
+//-*****************************************************************************
+// Some runtime stuff, for when templates won't help.
+//-*****************************************************************************
+//-*****************************************************************************
+inline size_t PODNumBytes( PlainOldDataType pod )
+{
+    switch ( pod )
+    {
+    case kBooleanPOD: return BooleanPODTraits::numBytes();
+    case kUint8POD: return Uint8PODTraits::numBytes();
+    case kInt8POD: return Int8PODTraits::numBytes();
+    case kUint16POD: return Uint16PODTraits::numBytes();
+    case kInt16POD: return Int16PODTraits::numBytes();
+    case kUint32POD: return Uint32PODTraits::numBytes();
+    case kInt32POD: return Int32PODTraits::numBytes();
+    case kUint64POD: return Uint64PODTraits::numBytes();
+    case kInt64POD: return Int64PODTraits::numBytes();
+    case kFloat16POD: return Float16PODTraits::numBytes();
+    case kFloat32POD: return Float32PODTraits::numBytes();
+    case kFloat64POD: return Float64PODTraits::numBytes();
+    case kStringPOD: return StringPODTraits::numBytes();
+    case kWstr

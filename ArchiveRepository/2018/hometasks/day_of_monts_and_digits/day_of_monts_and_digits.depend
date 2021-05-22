@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1533217062 source:d:\programming\cfiles\c++\helloworld\day_of_monts_and_digits\main.cpp
+	<iostream>
+	<vector>
+	<string>
+	"work_f.h"
+
+1533213998 source:d:\programming\cfiles\c++\helloworld\day_of_monts_and_digits\work_f.cpp
+	"work_f.h"
+
+1533213998 d:\programming\cfiles\c++\helloworld\day_of_monts_and_digits\work_f.h
+	<vector>
+	<string>
+	<stdexcept>
+	<iostream>
+	<cstdlib>
+

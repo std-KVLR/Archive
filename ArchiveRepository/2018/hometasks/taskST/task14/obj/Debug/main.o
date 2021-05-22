@@ -1,0 +1,1254 @@
+,0
+ dw avx_movmskpd_instruction-instruction_handler
+ db 'vmovmskps',0
+ dw avx_movmskps_instruction-instruction_handler
+ db 'vmovntdqa',2Ah
+ dw avx_movntdqa_instruction-instruction_handler
+ db 'vmovshdup',16h
+ dw avx_movshdup_instruction-instruction_handler
+ db 'vmovsldup',12h
+ dw avx_movshdup_instruction-instruction_handler
+ db 'vpackssdw',6Bh
+ dw avx_d_instruction-instruction_handler
+ db 'vpacksswb',63h
+ dw avx_bw_instruction-instruction_handler
+ db 'vpackusdw',2Bh
+ dw avx_d_instruction_38-instruction_handler
+ db 'vpackuswb',67h
+ dw avx_bw_instruction-instruction_handler
+ db 'vpblendmb',66h
+ dw avx_bw_instruction_38_evex-instruction_handler
+ db 'vpblendmd',64h
+ dw avx_d_instruction_38_evex-instruction_handler
+ db 'vpblendmq',64h
+ dw avx_q_instruction_38_evex-instruction_handler
+ db 'vpblendmw',66h
+ dw avx_bw_instruction_38_w1_evex-instruction_handler
+ db 'vpblendvb',4Ch
+ dw avx_triple_source_instruction_3a_noevex-instruction_handler
+ db 'vpcmpleub',2
+ dw avx512_cmp_ub_instruction-instruction_handler
+ db 'vpcmpleud',2
+ dw avx512_cmp_ud_instruction-instruction_handler
+ db 'vpcmpleuq',2
+ dw avx512_cmp_uq_instruction-instruction_handler
+ db 'vpcmpleuw',2
+ dw avx512_cmp_uw_instruction-instruction_handler
+ db 'vpcmpltub',1
+ dw avx512_cmp_ub_instruction-instruction_handler
+ db 'vpcmpltud',1
+ dw avx512_cmp_ud_instruction-instruction_handler
+ db 'vpcmpltuq',1
+ dw avx512_cmp_uq_instruction-instruction_handler
+ db 'vpcmpltuw',1
+ dw avx512_cmp_uw_instruction-instruction_handler
+ db 'vpcmpneqb',4
+ dw avx512_cmp_b_instruction-instruction_handler
+ db 'vpcmpneqd',4
+ dw avx512_cmp_d_instruction-instruction_handler
+ db 'vpcmpneqq',4
+ dw avx512_cmp_q_instruction-instruction_handler
+ db 'vpcmpneqw',4
+ dw avx512_cmp_b_instruction-instruction_handler
+ db 'vpcmpnleb',6
+ dw avx512_cmp_b_instruction-instruction_handler
+ db 'vpcmpnled',6
+ dw avx512_cmp_d_instruction-instruction_handler
+ db 'vpcmpnleq',6
+ dw avx512_cmp_q_instruction-instruction_handler
+ db 'vpcmpnlew',6
+ dw avx512_cmp_b_instruction-instruction_handler
+ db 'vpcmpnltb',5
+ dw avx512_cmp_b_instruction-instruction_handler
+ db 'vpcmpnltd',5
+ dw avx512_cmp_d_instruction-instruction_handler
+ db 'vpcmpnltq',5
+ dw avx512_cmp_q_instruction-instruction_handler
+ db 'vpcmpnltw',5
+ dw avx512_cmp_b_instruction-instruction_handler
+ db 'vpcomequb',4
+ dw xop_pcom_ub_instruction-instruction_handler
+ db 'vpcomequd',4
+ dw xop_pcom_ud_instruction-instruction_handler
+ db 'vpcomequq',4
+ dw xop_pcom_uq_instruction-instruction_handler
+ db 'vpcomequw',4
+ dw xop_pcom_uw_instruction-instruction_handler
+ db 'vpcomgeub',3
+ dw xop_pcom_ub_instruction-instruction_handler
+ db 'vpcomgeud',3
+ dw xop_pcom_ud_instruction-instruction_handler
+ db 'vpcomgeuq',3
+ dw xop_pcom_uq_instruction-instruction_handler
+ db 'vpcomgeuw',3
+ dw xop_pcom_uw_instruction-instruction_handler
+ db 'vpcomgtub',2
+ dw xop_pcom_ub_instruction-instruction_handler
+ db 'vpcomgtud',2
+ dw xop_pcom_ud_instruction-instruction_handler
+ db 'vpcomgtuq',2
+ dw xop_pcom_uq_instruction-instruction_handler
+ db 'vpcomgtuw',2
+ dw xop_pcom_uw_instruction-instruction_handler
+ db 'vpcomleub',1
+ dw xop_pcom_ub_instruction-instruction_handler
+ db 'vpcomleud',1
+ dw xop_pcom_ud_instruction-instruction_handler
+ db 'vpcomleuq',1
+ dw xop_pcom_uq_instruction-instruction_handler
+ db 'vpcomleuw',1
+ dw xop_pcom_uw_instruction-instruction_handler
+ db 'vpcomltub',0
+ dw xop_pcom_ub_instruction-instruction_handler
+ db 'vpcomltud',0
+ dw xop_pcom_ud_instruction-instruction_handler
+ db 'vpcomltuq',0
+ dw xop_pcom_uq_instruction-instruction_handler
+ db 'vpcomltuw',0
+ dw xop_pcom_uw_instruction-instruction_handler
+ db 'vpcomneqb',5
+ dw xop_pcom_b_instruction-instruction_handler
+ db 'vpcomneqd',5
+ dw xop_pcom_d_instruction-instruction_handler
+ db 'vpcomneqq',5
+ dw xop_pcom_q_instruction-instruction_handler
+ db 'vpcomneqw',5
+ dw xop_pcom_w_instruction-instruction_handler
+ db 'vpermi2pd',77h
+ dw avx_q_instruction_38_evex-instruction_handler
+ db 'vpermi2ps',77h
+ dw avx_d_instruction_38_evex-instruction_handler
+ db 'vpermilpd',5
+ dw avx_permilpd_instruction-instruction_handler
+ db 'vpermilps',4
+ dw avx_permilps_instruction-instruction_handler
+ db 'vpermt2pd',7Fh
+ dw avx_q_instruction_38_evex-instruction_handler
+ db 'vpermt2ps',7Fh
+ dw avx_d_instruction_38_evex-instruction_handler
+ db 'vpexpandd',89h
+ dw avx_single_source_d_instruction_38_evex-instruction_handler
+ db 'vpexpandq',89h
+ dw avx_single_source_q_instruction_38_evex-instruction_handler
+ db 'vphaddubd',0D2h
+ dw xop_single_source_128bit_instruction-instruction_handler
+ db 'vphaddubq',0D3h
+ dw xop_single_source_128bit_instruction-instruction_handler
+ db 'vphaddubw',0D1h
+ dw xop_single_source_128bit_instruction-instruction_handler
+ db 'vphaddudq',0DBh
+ dw xop_single_source_128bit_instruction-instruction_handler
+ db 'vphadduwd',0D6h
+ dw xop_single_source_128bit_instruction-instruction_handler
+ db 'vphadduwq',0D7h
+ dw xop_single_source_128bit_instruction-instruction_handler
+ db 'vpmacsdqh',9Fh
+ dw xop_triple_source_128bit_instruction-instruction_handler
+ db 'vpmacsdql',97h
+ dw xop_triple_source_128bit_instruction-instruction_handler
+ db 'vpmacssdd',8Eh
+ dw xop_triple_source_128bit_instruction-instruction_handler
+ db 'vpmacsswd',86h
+ dw xop_triple_source_128bit_instruction-instruction_handler
+ db 'vpmacssww',85h
+ dw xop_triple_source_128bit_instruction-instruction_handler
+ db 'vpmadcswd',0B6h
+ dw xop_triple_source_128bit_instruction-instruction_handler
+ db 'vpmovmskb',0D7h
+ dw avx_pmovmskb_instruction-instruction_handler
+ db 'vpmovsxbd',21h
+ dw avx_pmovsxbd_instruction-instruction_handler
+ db 'vpmovsxbq',22h
+ dw avx_pmovsxbq_instruction-instruction_handler
+ db 'vpmovsxbw',20h
+ dw avx_pmovsxbw_instruction-instruction_handler
+ db 'vpmovsxdq',25h
+ dw avx_pmovsxbw_instruction-instruction_handler
+ db 'vpmovsxwd',23h
+ dw avx_pmovsxbw_instruction-instruction_handler
+ db 'vpmovsxwq',24h
+ dw avx_pmovsxbd_instruction-instruction_handler
+ db 'vpmovusdb',11h
+ dw avx512_pmovdb_instruction-instruction_handler
+ db 'vpmovusdw',13h
+ dw avx512_pmovwb_instruction-instruction_handler
+ db 'vpmovusqb',12h
+ dw avx512_pmovqb_instruction-instruction_handler
+ db 'vpmovusqd',15h
+ dw avx512_pmovwb_instruction-instruction_handler
+ db 'vpmovusqw',14h
+ dw avx512_pmovdb_instruction-instruction_handler
+ db 'vpmovuswb',10h
+ dw avx512_pmovwb_instruction-instruction_handler
+ db 'vpmovzxbd',31h
+ dw avx_pmovsxbd_instruction-instruction_handler
+ db 'vpmovzxbq',32h
+ dw avx_pmovsxbq_instruction-instruction_handler
+ db 'vpmovzxbw',30h
+ dw avx_pmovsxbw_instruction-instruction_handler
+ db 'vpmovzxdq',35h
+ dw avx_pmovsxbw_instruction-instruction_handler
+ db 'vpmovzxwd',33h
+ dw avx_pmovsxbw_instruction-instruction_handler
+ db 'vpmovzxwq',34h
+ dw avx_pmovsxbd_instruction-instruction_handler
+ db 'vpmulhrsw',0Bh
+ dw avx_bw_instruction_38-instruction_handler
+ db 'vptestnmb',26h
+ dw avx512_ptestnmb_instruction-instruction_handler
+ db 'vptestnmd',27h
+ dw avx512_ptestnmd_instruction-instruction_handler
+ db 'vptestnmq',27h
+ dw avx512_ptestnmq_instruction-instruction_handler
+ db 'vptestnmw',26h
+ dw avx512_ptestnmw_instruction-instruction_handler
+ db 'vreducepd',56h
+ dw avx512_single_source_pd_instruction_sae_imm8-instruction_handler
+ db 'vreduceps',56h
+ dw avx512_single_source_ps_instruction_sae_imm8-instruction_handler
+ db 'vreducesd',57h
+ dw avx512_sd_instruction_sae_imm8-instruction_handler
+ db 'vreducess',57h
+ dw avx512_ss_instruction_sae_imm8-instruction_handler
+ db 'vscalefpd',2Ch
+ dw avx512_pd_instruction_er-instruction_handler
+ db 'vscalefps',2Ch
+ dw avx512_ps_instruction_er-instruction_handler
+ db 'vscalefsd',2Dh
+ dw avx512_sd_instruction_er-instruction_handler
+ db 'vscalefss',2Dh
+ dw avx512_ss_instruction_er-instruction_handler
+ db 'vunpckhpd',15h
+ dw avx_pd_instruction-instruction_handler
+ db 'vunpckhps',15h
+ dw avx_ps_instruction-instruction_handler
+ db 'vunpcklpd',14h
+ dw avx_pd_instruction-instruction_handler
+ db 'vunpcklps',14h
+ dw avx_ps_instruction-instruction_handler
+instructions_10:
+ db 'aesdeclast',0DFh
+ dw sse4_instruction_66_38-instruction_handler
+ db 'aesenclast',0DDh
+ dw sse4_instruction_66_38-instruction_handler
+ db 'clflushopt',7
+ dw clflushopt_instruction-instruction_handler
+ db 'cmpunordpd',3
+ dw cmp_pd_instruction-instruction_handler
+ db 'cmpunordps',3
+ dw cmp_ps_instruction-instruction_handler
+ db 'cmpunordsd',3
+ dw cmp_sd_instruction-instruction_handler
+ db 'cmpunordss',3
+ dw cmp_ss_instruction-instruction_handler
+ db 'cmpxchg16b',16
+ dw cmpxchgx_instruction-instruction_handler
+ db 'loadall286',5
+ dw simple_extended_instruction-instruction_handler
+ db 'loadall386',7
+ dw simple_extended_instruction-instruction_handler
+ db 'maskmovdqu',0
+ dw maskmovdqu_instruction-instruction_handler
+ db 'phminposuw',41h
+ dw sse4_instruction_66_38-instruction_handler
+ db 'prefetcht0',1
+ dw prefetch_instruction-instruction_handler
+ db 'prefetcht1',2
+ dw prefetch_instruction-instruction_handler
+ db 'prefetcht2',3
+ dw prefetch_instruction-instruction_handler
+ db 'punpckhqdq',6Dh
+ dw sse_pd_instruction-instruction_handler
+ db 'punpcklqdq',6Ch
+ dw sse_pd_instruction-instruction_handler
+ db 'sha256msg1',0CCh
+ dw sse4_instruction_38-instruction_handler
+ db 'sha256msg2',0CDh
+ dw sse4_instruction_38-instruction_handler
+ db 'vcmptruepd',0Fh
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmptrueps',0Fh
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmptruesd',0Fh
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmptruess',0Fh
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcvtpd2udq',79h
+ dw avx_cvtpd2udq_instruction-instruction_handler
+ db 'vcvtpd2uqq',79h
+ dw avx_single_source_pd_instruction_er_evex-instruction_handler
+ db 'vcvtps2udq',79h
+ dw avx_single_source_ps_instruction_er_evex-instruction_handler
+ db 'vcvtps2uqq',79h
+ dw avx_cvtps2qq_instruction-instruction_handler
+ db 'vcvtsd2usi',79h
+ dw avx_cvtsd2usi_instruction-instruction_handler
+ db 'vcvtss2usi',79h
+ dw avx_cvtss2usi_instruction-instruction_handler
+ db 'vcvttpd2dq',0E6h
+ dw avx_cvttpd2dq_instruction-instruction_handler
+ db 'vcvttpd2qq',7Ah
+ dw avx_single_source_pd_instruction_sae_evex-instruction_handler
+ db 'vcvttps2dq',5Bh
+ dw avx_cvttps2dq_instruction-instruction_handler
+ db 'vcvttps2qq',7Ah
+ dw avx_cvttps2qq_instruction-instruction_handler
+ db 'vcvttsd2si',2Ch
+ dw avx_cvttsd2si_instruction-instruction_handler
+ db 'vcvttss2si',2Ch
+ dw avx_cvttss2si_instruction-instruction_handler
+ db 'vcvtudq2pd',7Ah
+ dw avx_cvtudq2pd_instruction-instruction_handler
+ db 'vcvtudq2ps',7Ah
+ dw avx_cvtudq2ps_instruction-instruction_handler
+ db 'vcvtuqq2pd',7Ah
+ dw avx_cvtqq2pd_instruction-instruction_handler
+ db 'vcvtuqq2ps',7Ah
+ dw avx_cvtuqq2ps_instruction-instruction_handler
+ db 'vcvtusi2sd',7Bh
+ dw avx_cvtusi2sd_instruction-instruction_handler
+ db 'vcvtusi2ss',7Bh
+ dw avx_cvtusi2ss_instruction-instruction_handler
+ db 'vextractps',17h
+ dw avx_extract_d_instruction-instruction_handler
+ db 'vfpclasspd',66h
+ dw avx512_fpclasspd_instruction-instruction_handler
+ db 'vfpclassps',66h
+ dw avx512_fpclassps_instruction-instruction_handler
+ db 'vfpclasssd',67h
+ dw avx512_fpclasssd_instruction-instruction_handler
+ db 'vfpclassss',67h
+ dw avx512_fpclassss_instruction-instruction_handler
+ db 'vgatherdpd',92h
+ dw gather_pd_instruction-instruction_handler
+ db 'vgatherdps',92h
+ dw gather_ps_instruction-instruction_handler
+ db 'vgatherqpd',93h
+ dw gather_pd_instruction-instruction_handler
+ db 'vgatherqps',93h
+ dw gather_ps_instruction-instruction_handler
+ db 'vgetmantpd',26h
+ dw avx512_single_source_pd_instruction_sae_imm8-instruction_handler
+ db 'vgetmantps',26h
+ dw avx512_single_source_ps_instruction_sae_imm8-instruction_handler
+ db 'vgetmantsd',27h
+ dw avx512_sd_instruction_sae_imm8-instruction_handler
+ db 'vgetmantss',27h
+ dw avx512_ss_instruction_sae_imm8-instruction_handler
+ db 'vmaskmovpd',2Dh
+ dw avx_maskmov_instruction-instruction_handler
+ db 'vmaskmovps',2Ch
+ dw avx_maskmov_instruction-instruction_handler
+ db 'vpclmulqdq',-1
+ dw avx_pclmulqdq_instruction-instruction_handler
+ db 'vpcmpestri',61h
+ dw avx_single_source_128bit_instruction_3a_imm8_noevex-instruction_handler
+ db 'vpcmpestrm',60h
+ dw avx_single_source_128bit_instruction_3a_imm8_noevex-instruction_handler
+ db 'vpcmpistri',63h
+ dw avx_single_source_128bit_instruction_3a_imm8_noevex-instruction_handler
+ db 'vpcmpistrm',62h
+ dw avx_single_source_128bit_instruction_3a_imm8_noevex-instruction_handler
+ db 'vpcmpnequb',4
+ dw avx512_cmp_ub_instruction-instruction_handler
+ db 'vpcmpnequd',4
+ dw avx512_cmp_ud_instruction-instruction_handler
+ db 'vpcmpnequq',4
+ dw avx512_cmp_uq_instruction-instruction_handler
+ db 'vpcmpnequw',4
+ dw avx512_cmp_uw_instruction-instruction_handler
+ db 'vpcmpnleub',6
+ dw avx512_cmp_ub_instruction-instruction_handler
+ db 'vpcmpnleud',6
+ dw avx512_cmp_ud_instruction-instruction_handler
+ db 'vpcmpnleuq',6
+ dw avx512_cmp_uq_instruction-instruction_handler
+ db 'vpcmpnleuw',6
+ dw avx512_cmp_uw_instruction-instruction_handler
+ db 'vpcmpnltub',5
+ dw avx512_cmp_ub_instruction-instruction_handler
+ db 'vpcmpnltud',5
+ dw avx512_cmp_ud_instruction-instruction_handler
+ db 'vpcmpnltuq',5
+ dw avx512_cmp_uq_instruction-instruction_handler
+ db 'vpcmpnltuw',5
+ dw avx512_cmp_uw_instruction-instruction_handler
+ db 'vpcomnequb',5
+ dw xop_pcom_ub_instruction-instruction_handler
+ db 'vpcomnequd',5
+ dw xop_pcom_ud_instruction-instruction_handler
+ db 'vpcomnequq',5
+ dw xop_pcom_uq_instruction-instruction_handler
+ db 'vpcomnequw',5
+ dw xop_pcom_uw_instruction-instruction_handler
+ db 'vpcomtrueb',7
+ dw xop_pcom_b_instruction-instruction_handler
+ db 'vpcomtrued',7
+ dw xop_pcom_d_instruction-instruction_handler
+ db 'vpcomtrueq',7
+ dw xop_pcom_q_instruction-instruction_handler
+ db 'vpcomtruew',7
+ dw xop_pcom_w_instruction-instruction_handler
+ db 'vperm2f128',6
+ dw avx_perm2f128_instruction-instruction_handler
+ db 'vperm2i128',46h
+ dw avx_perm2f128_instruction-instruction_handler
+ db 'vpermil2pd',49h
+ dw vpermil2_instruction-instruction_handler
+ db 'vpermil2ps',48h
+ dw vpermil2_instruction-instruction_handler
+ db 'vpgatherdd',90h
+ dw gather_ps_instruction-instruction_handler
+ db 'vpgatherdq',90h
+ dw gather_pd_instruction-instruction_handler
+ db 'vpgatherqd',91h
+ dw gather_ps_instruction-instruction_handler
+ db 'vpgatherqq',91h
+ dw gather_pd_instruction-instruction_handler
+ db 'vpmacssdqh',8Fh
+ dw xop_triple_source_128bit_instruction-instruction_handler
+ db 'vpmacssdql',87h
+ dw xop_triple_source_128bit_instruction-instruction_handler
+ db 'vpmadcsswd',0A6h
+ dw xop_triple_source_128bit_instruction-instruction_handler
+ db 'vpmaddubsw',4
+ dw avx_bw_instruction_38-instruction_handler
+ db 'vpmaskmovd',8Ch
+ dw avx_maskmov_instruction-instruction_handler
+ db 'vpmaskmovq',8Ch
+ dw avx_maskmov_w1_instruction-instruction_handler
+ db 'vpternlogd',25h
+ dw avx_d_instruction_3a_imm8_evex-instruction_handler
+ db 'vpternlogq',25h
+ dw avx_q_instruction_3a_imm8_evex-instruction_handler
+ db 'vpunpckhbw',68h
+ dw avx_bw_instruction-instruction_handler
+ db 'vpunpckhdq',6Ah
+ dw avx_d_instruction-instruction_handler
+ db 'vpunpckhwd',69h
+ dw avx_bw_instruction-instruction_handler
+ db 'vpunpcklbw',60h
+ dw avx_bw_instruction-instruction_handler
+ db 'vpunpckldq',62h
+ dw avx_d_instruction-instruction_handler
+ db 'vpunpcklwd',61h
+ dw avx_bw_instruction-instruction_handler
+ db 'vrsqrt14pd',4Eh
+ dw avx512_single_source_pd_instruction-instruction_handler
+ db 'vrsqrt14ps',4Eh
+ dw avx512_single_source_ps_instruction-instruction_handler
+ db 'vrsqrt14sd',4Fh
+ dw avx512_sd_instruction-instruction_handler
+ db 'vrsqrt14ss',4Fh
+ dw avx512_ss_instruction-instruction_handler
+ db 'vrsqrt28pd',0CCh
+ dw avx512_exp2pd_instruction-instruction_handler
+ db 'vrsqrt28ps',0CCh
+ dw avx512_exp2ps_instruction-instruction_handler
+ db 'vrsqrt28sd',0CDh
+ dw avx512_sd_instruction_sae-instruction_handler
+ db 'vrsqrt28ss',0CDh
+ dw avx512_ss_instruction_sae-instruction_handler
+ db 'vshuff32x4',23h
+ dw avx512_shuf_d_instruction-instruction_handler
+ db 'vshuff64x2',23h
+ dw avx512_shuf_q_instruction-instruction_handler
+ db 'vshufi32x4',43h
+ dw avx512_shuf_d_instruction-instruction_handler
+ db 'vshufi64x2',43h
+ dw avx512_shuf_q_instruction-instruction_handler
+ db 'vzeroupper',77h
+ dw vzeroupper_instruction-instruction_handler
+ db 'xsaveopt64',110b
+ dw fxsave_instruction_64bit-instruction_handler
+instructions_11:
+ db 'pclmulhqhdq',10001b
+ dw pclmulqdq_instruction-instruction_handler
+ db 'pclmullqhdq',10000b
+ dw pclmulqdq_instruction-instruction_handler
+ db 'prefetchnta',0
+ dw prefetch_instruction-instruction_handler
+ db 'prefetchwt1',2
+ dw amd_prefetch_instruction-instruction_handler
+ db 'sha256rnds2',0CBh
+ dw sse4_instruction_38_xmm0-instruction_handler
+ db 'vaesdeclast',0DFh
+ dw avx_128bit_instruction_38_noevex-instruction_handler
+ db 'vaesenclast',0DDh
+ dw avx_128bit_instruction_38_noevex-instruction_handler
+ db 'vcmpeq_ospd',10h
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpeq_osps',10h
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpeq_ossd',10h
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpeq_osss',10h
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpeq_uqpd',8
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpeq_uqps',8
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpeq_uqsd',8
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpeq_uqss',8
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpeq_uspd',18h
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpeq_usps',18h
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpeq_ussd',18h
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpeq_usss',18h
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpfalsepd',0Bh
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpfalseps',0Bh
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpfalsesd',0Bh
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpfalsess',0Bh
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpge_oqpd',1Dh
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpge_oqps',1Dh
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpge_oqsd',1Dh
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpge_oqss',1Dh
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpgt_oqpd',1Eh
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpgt_oqps',1Eh
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpgt_oqsd',1Eh
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpgt_oqss',1Eh
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmple_oqpd',12h
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmple_oqps',12h
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmple_oqsd',12h
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmple_oqss',12h
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmplt_oqpd',11h
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmplt_oqps',11h
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmplt_oqsd',11h
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmplt_oqss',11h
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpord_spd',17h
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpord_sps',17h
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpord_ssd',17h
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpord_sss',17h
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpunordpd',3
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpunordps',3
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpunordsd',3
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpunordss',3
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcompresspd',8Ah
+ dw avx_compress_q_instruction-instruction_handler
+ db 'vcompressps',8Ah
+ dw avx_compress_d_instruction-instruction_handler
+ db 'vcvttpd2udq',78h
+ dw avx_cvttpd2udq_instruction-instruction_handler
+ db 'vcvttpd2uqq',78h
+ dw avx_single_source_pd_instruction_sae_evex-instruction_handler
+ db 'vcvttps2udq',78h
+ dw avx_cvttps2udq_instruction-instruction_handler
+ db 'vcvttps2uqq',78h
+ dw avx_cvttps2qq_instruction-instruction_handler
+ db 'vcvttsd2usi',78h
+ dw avx_cvttsd2usi_instruction-instruction_handler
+ db 'vcvttss2usi',78h
+ dw avx_cvttss2usi_instruction-instruction_handler
+ db 'vfixupimmpd',54h
+ dw avx512_pd_instruction_sae_imm8-instruction_handler
+ db 'vfixupimmps',54h
+ dw avx512_ps_instruction_sae_imm8-instruction_handler
+ db 'vfixupimmsd',55h
+ dw avx512_sd_instruction_sae_imm8-instruction_handler
+ db 'vfixupimmss',55h
+ dw avx512_ss_instruction_sae_imm8-instruction_handler
+ db 'vfmadd132pd',98h
+ dw fma_instruction_pd-instruction_handler
+ db 'vfmadd132ps',98h
+ dw fma_instruction_ps-instruction_handler
+ db 'vfmadd132sd',99h
+ dw fma_instruction_sd-instruction_handler
+ db 'vfmadd132ss',99h
+ dw fma_instruction_ss-instruction_handler
+ db 'vfmadd213pd',0A8h
+ dw fma_instruction_pd-instruction_handler
+ db 'vfmadd213ps',0A8h
+ dw fma_instruction_ps-instruction_handler
+ db 'vfmadd213sd',0A9h
+ dw fma_instruction_sd-instruction_handler
+ db 'vfmadd213ss',0A9h
+ dw fma_instruction_ss-instruction_handler
+ db 'vfmadd231pd',0B8h
+ dw fma_instruction_pd-instruction_handler
+ db 'vfmadd231ps',0B8h
+ dw fma_instruction_ps-instruction_handler
+ db 'vfmadd231sd',0B9h
+ dw fma_instruction_sd-instruction_handler
+ db 'vfmadd231ss',0B9h
+ dw fma_instruction_ss-instruction_handler
+ db 'vfmaddsubpd',5Dh
+ dw fma4_instruction_p-instruction_handler
+ db 'vfmaddsubps',5Ch
+ dw fma4_instruction_p-instruction_handler
+ db 'vfmsub132pd',9Ah
+ dw fma_instruction_pd-instruction_handler
+ db 'vfmsub132ps',9Ah
+ dw fma_instruction_ps-instruction_handler
+ db 'vfmsub132sd',9Bh
+ dw fma_instruction_sd-instruction_handler
+ db 'vfmsub132ss',9Bh
+ dw fma_instruction_ss-instruction_handler
+ db 'vfmsub213pd',0AAh
+ dw fma_instruction_pd-instruction_handler
+ db 'vfmsub213ps',0AAh
+ dw fma_instruction_ps-instruction_handler
+ db 'vfmsub213sd',0ABh
+ dw fma_instruction_sd-instruction_handler
+ db 'vfmsub213ss',0ABh
+ dw fma_instruction_ss-instruction_handler
+ db 'vfmsub231pd',0BAh
+ dw fma_instruction_pd-instruction_handler
+ db 'vfmsub231ps',0BAh
+ dw fma_instruction_ps-instruction_handler
+ db 'vfmsub231sd',0BBh
+ dw fma_instruction_sd-instruction_handler
+ db 'vfmsub231ss',0BBh
+ dw fma_instruction_ss-instruction_handler
+ db 'vfmsubaddpd',5Fh
+ dw fma4_instruction_p-instruction_handler
+ db 'vfmsubaddps',5Eh
+ dw fma4_instruction_p-instruction_handler
+ db 'vinsertf128',18h
+ dw avx_insertf128_instruction-instruction_handler
+ db 'vinserti128',38h
+ dw avx_insertf128_instruction-instruction_handler
+ db 'vmaskmovdqu',0
+ dw avx_maskmovdqu_instruction-instruction_handler
+ db 'vpcomfalseb',6
+ dw xop_pcom_b_instruction-instruction_handler
+ db 'vpcomfalsed',6
+ dw xop_pcom_d_instruction-instruction_handler
+ db 'vpcomfalseq',6
+ dw xop_pcom_q_instruction-instruction_handler
+ db 'vpcomfalsew',6
+ dw xop_pcom_w_instruction-instruction_handler
+ db 'vpcompressd',8Bh
+ dw avx_compress_d_instruction-instruction_handler
+ db 'vpcompressq',8Bh
+ dw avx_compress_q_instruction-instruction_handler
+ db 'vpcomtrueub',7
+ dw xop_pcom_ub_instruction-instruction_handler
+ db 'vpcomtrueud',7
+ dw xop_pcom_ud_instruction-instruction_handler
+ db 'vpcomtrueuq',7
+ dw xop_pcom_uq_instruction-instruction_handler
+ db 'vpcomtrueuw',7
+ dw xop_pcom_uw_instruction-instruction_handler
+ db 'vpconflictd',0C4h
+ dw avx_single_source_d_instruction_38_evex-instruction_handler
+ db 'vpconflictq',0C4h
+ dw avx_single_source_q_instruction_38_evex-instruction_handler
+ db 'vphminposuw',41h
+ dw avx_single_source_instruction_38_noevex-instruction_handler
+ db 'vpmadd52huq',0B5h
+ dw avx_q_instruction_38_evex-instruction_handler
+ db 'vpmadd52luq',0B4h
+ dw avx_q_instruction_38_evex-instruction_handler
+ db 'vpscatterdd',0A0h
+ dw scatter_ps_instruction-instruction_handler
+ db 'vpscatterdq',0A0h
+ dw scatter_pd_instruction-instruction_handler
+ db 'vpscatterqd',0A1h
+ dw scatter_ps_instruction-instruction_handler
+ db 'vpscatterqq',0A1h
+ dw scatter_pd_instruction-instruction_handler
+ db 'vpunpckhqdq',6Dh
+ dw avx_q_instruction-instruction_handler
+ db 'vpunpcklqdq',6Ch
+ dw avx_q_instruction-instruction_handler
+ db 'vrndscalepd',9
+ dw avx512_single_source_pd_instruction_sae_imm8-instruction_handler
+ db 'vrndscaleps',8
+ dw avx512_single_source_ps_instruction_sae_imm8-instruction_handler
+ db 'vrndscalesd',0Bh
+ dw avx512_sd_instruction_sae_imm8-instruction_handler
+ db 'vrndscaless',0Ah
+ dw avx512_ss_instruction_sae_imm8-instruction_handler
+ db 'vscatterdpd',0A2h
+ dw scatter_pd_instruction-instruction_handler
+ db 'vscatterdps',0A2h
+ dw scatter_ps_instruction-instruction_handler
+ db 'vscatterqpd',0A3h
+ dw scatter_pd_instruction-instruction_handler
+ db 'vscatterqps',0A3h
+ dw scatter_ps_instruction-instruction_handler
+instructions_12:
+ db 'pclmulhqhqdq',10001b
+ dw pclmulqdq_instruction-instruction_handler
+ db 'pclmulhqlqdq',1
+ dw pclmulqdq_instruction-instruction_handler
+ db 'pclmullqhqdq',10000b
+ dw pclmulqdq_instruction-instruction_handler
+ db 'pclmullqlqdq',0
+ dw pclmulqdq_instruction-instruction_handler
+ db 'vbroadcastsd',19h
+ dw avx_broadcastsd_instruction-instruction_handler
+ db 'vbroadcastss',18h
+ dw avx_broadcastss_instruction-instruction_handler
+ db 'vcmpneq_oqpd',0Ch
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpneq_oqps',0Ch
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpneq_oqsd',0Ch
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpneq_oqss',0Ch
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpneq_ospd',1Ch
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpneq_osps',1Ch
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpneq_ossd',1Ch
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpneq_osss',1Ch
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpneq_uspd',14h
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpneq_usps',14h
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpneq_ussd',14h
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpneq_usss',14h
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpnge_uqpd',19h
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpnge_uqps',19h
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpnge_uqsd',19h
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpnge_uqss',19h
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpngt_uqpd',1Ah
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpngt_uqps',1Ah
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpngt_uqsd',1Ah
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpngt_uqss',1Ah
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpnle_uqpd',16h
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpnle_uqps',16h
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpnle_uqsd',16h
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpnle_uqss',16h
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpnlt_uqpd',15h
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpnlt_uqps',15h
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpnlt_uqsd',15h
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpnlt_uqss',15h
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vextractf128',19h
+ dw avx_extractf128_instruction-instruction_handler
+ db 'vextracti128',39h
+ dw avx_extractf128_instruction-instruction_handler
+ db 'vfnmadd132pd',9Ch
+ dw fma_instruction_pd-instruction_handler
+ db 'vfnmadd132ps',9Ch
+ dw fma_instruction_ps-instruction_handler
+ db 'vfnmadd132sd',9Dh
+ dw fma_instruction_sd-instruction_handler
+ db 'vfnmadd132ss',9Dh
+ dw fma_instruction_ss-instruction_handler
+ db 'vfnmadd213pd',0ACh
+ dw fma_instruction_pd-instruction_handler
+ db 'vfnmadd213ps',0ACh
+ dw fma_instruction_ps-instruction_handler
+ db 'vfnmadd213sd',0ADh
+ dw fma_instruction_sd-instruction_handler
+ db 'vfnmadd213ss',0ADh
+ dw fma_instruction_ss-instruction_handler
+ db 'vfnmadd231pd',0BCh
+ dw fma_instruction_pd-instruction_handler
+ db 'vfnmadd231ps',0BCh
+ dw fma_instruction_ps-instruction_handler
+ db 'vfnmadd231sd',0BDh
+ dw fma_instruction_sd-instruction_handler
+ db 'vfnmadd231ss',0BDh
+ dw fma_instruction_ss-instruction_handler
+ db 'vfnmsub132pd',9Eh
+ dw fma_instruction_pd-instruction_handler
+ db 'vfnmsub132ps',9Eh
+ dw fma_instruction_ps-instruction_handler
+ db 'vfnmsub132sd',9Fh
+ dw fma_instruction_sd-instruction_handler
+ db 'vfnmsub132ss',9Fh
+ dw fma_instruction_ss-instruction_handler
+ db 'vfnmsub213pd',0AEh
+ dw fma_instruction_pd-instruction_handler
+ db 'vfnmsub213ps',0AEh
+ dw fma_instruction_ps-instruction_handler
+ db 'vfnmsub213sd',0AFh
+ dw fma_instruction_sd-instruction_handler
+ db 'vfnmsub213ss',0AFh
+ dw fma_instruction_ss-instruction_handler
+ db 'vfnmsub231pd',0BEh
+ dw fma_instruction_pd-instruction_handler
+ db 'vfnmsub231ps',0BEh
+ dw fma_instruction_ps-instruction_handler
+ db 'vfnmsub231sd',0BFh
+ dw fma_instruction_sd-instruction_handler
+ db 'vfnmsub231ss',0BFh
+ dw fma_instruction_ss-instruction_handler
+ db 'vinsertf32x4',18h
+ dw avx512_insert_32x4_instruction-instruction_handler
+ db 'vinsertf32x8',1Ah
+ dw avx512_insert_32x8_instruction-instruction_handler
+ db 'vinsertf64x2',18h
+ dw avx512_insert_64x2_instruction-instruction_handler
+ db 'vinsertf64x4',1Ah
+ dw avx512_insert_64x4_instruction-instruction_handler
+ db 'vinserti32x4',38h
+ dw avx512_insert_32x4_instruction-instruction_handler
+ db 'vinserti32x8',3Ah
+ dw avx512_insert_32x8_instruction-instruction_handler
+ db 'vinserti64x2',38h
+ dw avx512_insert_64x2_instruction-instruction_handler
+ db 'vinserti64x4',3Ah
+ dw avx512_insert_64x4_instruction-instruction_handler
+ db 'vpbroadcastb',78h
+ dw avx_pbroadcastb_instruction-instruction_handler
+ db 'vpbroadcastd',58h
+ dw avx_pbroadcastd_instruction-instruction_handler
+ db 'vpbroadcastq',59h
+ dw avx_pbroadcastq_instruction-instruction_handler
+ db 'vpbroadcastw',79h
+ dw avx_pbroadcastw_instruction-instruction_handler
+ db 'vpclmulhqhdq',10001b
+ dw avx_pclmulqdq_instruction-instruction_handler
+ db 'vpclmullqhdq',10000b
+ dw avx_pclmulqdq_instruction-instruction_handler
+ db 'vpcomfalseub',6
+ dw xop_pcom_ub_instruction-instruction_handler
+ db 'vpcomfalseud',6
+ dw xop_pcom_ud_instruction-instruction_handler
+ db 'vpcomfalseuq',6
+ dw xop_pcom_uq_instruction-instruction_handler
+ db 'vpcomfalseuw',6
+ dw xop_pcom_uw_instruction-instruction_handler
+ db 'vpermilmo2pd',10b
+ dw vpermil_2pd_instruction-instruction_handler
+ db 'vpermilmo2ps',10b
+ dw vpermil_2ps_instruction-instruction_handler
+ db 'vpermilmz2pd',11b
+ dw vpermil_2pd_instruction-instruction_handler
+ db 'vpermilmz2ps',11b
+ dw vpermil_2ps_instruction-instruction_handler
+ db 'vpermiltd2pd',0
+ dw vpermil_2pd_instruction-instruction_handler
+ db 'vpermiltd2ps',0
+ dw vpermil_2ps_instruction-instruction_handler
+instructions_13:
+ db 'vcmptrue_uspd',1Fh
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmptrue_usps',1Fh
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmptrue_ussd',1Fh
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmptrue_usss',1Fh
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vcmpunord_spd',13h
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpunord_sps',13h
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpunord_ssd',13h
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpunord_sss',13h
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vextractf32x4',19h
+ dw avx512_extract_32x4_instruction-instruction_handler
+ db 'vextractf32x8',1Bh
+ dw avx512_extract_32x8_instruction-instruction_handler
+ db 'vextractf64x2',19h
+ dw avx512_extract_64x2_instruction-instruction_handler
+ db 'vextractf64x4',1Bh
+ dw avx512_extract_64x4_instruction-instruction_handler
+ db 'vextracti32x4',39h
+ dw avx512_extract_32x4_instruction-instruction_handler
+ db 'vextracti32x8',3Bh
+ dw avx512_extract_32x8_instruction-instruction_handler
+ db 'vextracti64x2',39h
+ dw avx512_extract_64x2_instruction-instruction_handler
+ db 'vextracti64x4',3Bh
+ dw avx512_extract_64x4_instruction-instruction_handler
+ db 'vgatherpf0dpd',1
+ dw gatherpf_dpd_instruction-instruction_handler
+ db 'vgatherpf0dps',1
+ dw gatherpf_dps_instruction-instruction_handler
+ db 'vgatherpf0qpd',1
+ dw gatherpf_qpd_instruction-instruction_handler
+ db 'vgatherpf0qps',1
+ dw gatherpf_qps_instruction-instruction_handler
+ db 'vgatherpf1dpd',2
+ dw gatherpf_dpd_instruction-instruction_handler
+ db 'vgatherpf1dps',2
+ dw gatherpf_dps_instruction-instruction_handler
+ db 'vgatherpf1qpd',2
+ dw gatherpf_qpd_instruction-instruction_handler
+ db 'vgatherpf1qps',2
+ dw gatherpf_qps_instruction-instruction_handler
+ db 'vpclmulhqlqdq',1
+ dw avx_pclmulqdq_instruction-instruction_handler
+ db 'vpclmullqlqdq',0
+ dw avx_pclmulqdq_instruction-instruction_handler
+instructions_14:
+ db 'vbroadcastf128',1Ah
+ dw avx_broadcast_128_instruction_noevex-instruction_handler
+ db 'vbroadcasti128',5Ah
+ dw avx_broadcast_128_instruction_noevex-instruction_handler
+ db 'vcmpfalse_ospd',1Bh
+ dw avx_cmp_pd_instruction-instruction_handler
+ db 'vcmpfalse_osps',1Bh
+ dw avx_cmp_ps_instruction-instruction_handler
+ db 'vcmpfalse_ossd',1Bh
+ dw avx_cmp_sd_instruction-instruction_handler
+ db 'vcmpfalse_osss',1Bh
+ dw avx_cmp_ss_instruction-instruction_handler
+ db 'vfmaddsub132pd',96h
+ dw fma_instruction_pd-instruction_handler
+ db 'vfmaddsub132ps',96h
+ dw fma_instruction_ps-instruction_handler
+ db 'vfmaddsub213pd',0A6h
+ dw fma_instruction_pd-instruction_handler
+ db 'vfmaddsub213ps',0A6h
+ dw fma_instruction_ps-instruction_handler
+ db 'vfmaddsub231pd',0B6h
+ dw fma_instruction_pd-instruction_handler
+ db 'vfmaddsub231ps',0B6h
+ dw fma_instruction_ps-instruction_handler
+ db 'vfmsubadd132pd',97h
+ dw fma_instruction_pd-instruction_handler
+ db 'vfmsubadd132ps',97h
+ dw fma_instruction_ps-instruction_handler
+ db 'vfmsubadd213pd',0A7h
+ dw fma_instruction_pd-instruction_handler
+ db 'vfmsubadd213ps',0A7h
+ dw fma_instruction_ps-instruction_handler
+ db 'vfmsubadd231pd',0B7h
+ dw fma_instruction_pd-instruction_handler
+ db 'vfmsubadd231ps',0B7h
+ dw fma_instruction_ps-instruction_handler
+ db 'vpmultishiftqb',83h
+ dw avx_q_instruction_38_evex-instruction_handler
+ db 'vscatterpf0dpd',5
+ dw gatherpf_dpd_instruction-instruction_handler
+ db 'vscatterpf0dps',5
+ dw gatherpf_dps_instruction-instruction_handler
+ db 'vscatterpf0qpd',5
+ dw gatherpf_qpd_instruction-instruction_handler
+ db 'vscatterpf0qps',5
+ dw gatherpf_qps_instruction-instruction_handler
+ db 'vscatterpf1dpd',6
+ dw gatherpf_dpd_instruction-instruction_handler
+ db 'vscatterpf1dps',6
+ dw gatherpf_dps_instruction-instruction_handler
+ db 'vscatterpf1qpd',6
+ dw gatherpf_qpd_instruction-instruction_handler
+ db 'vscatterpf1qps',6
+ dw gatherpf_qps_instruction-instruction_handler
+instructions_15:
+ db 'aeskeygenassist',0DFh
+ dw sse4_instruction_66_3a_imm8-instruction_handler
+ db 'vbroadcastf32x2',19h
+ dw avx512_broadcast_32x2_instruction-instruction_handler
+ db 'vbroadcastf32x4',1Ah
+ dw avx512_broadcast_32x4_instruction-instruction_handler
+ db 'vbroadcastf32x8',1Bh
+ dw avx512_broadcast_32x8_instruction-instruction_handler
+ db 'vbroadcastf64x2',1Ah
+ dw avx512_broadcast_64x2_instruction-instruction_handler
+ db 'vbroadcastf64x4',1Bh
+ dw avx512_broadcast_64x4_instruction-instruction_handler
+ db 'vbroadcasti32x2',59h
+ dw avx512_broadcast_32x2_instruction-instruction_handler
+ db 'vbroadcasti32x4',5Ah
+ dw avx512_broadcast_32x4_instruction-instruction_handler
+ db 'vbroadcasti32x8',5Bh
+ dw avx512_broadcast_32x8_instruction-instruction_handler
+ db 'vbroadcasti64x2',5Ah
+ dw avx512_broadcast_64x2_instruction-instruction_handler
+ db 'vbroadcasti64x4',5Bh
+ dw avx512_broadcast_64x4_instruction-instruction_handler
+ db 'vpbroadcastmb2q',2Ah
+ dw avx512_pmov_m2_instruction_w1-instruction_handler
+ db 'vpbroadcastmw2d',3Ah
+ dw avx512_pmov_m2_instruction-instruction_handler
+instructions_16:
+ db 'vaeskeygenassist',0DFh
+ dw avx_single_source_128bit_instruction_3a_imm8_noevex-instruction_handler
+instructions_end:
+
+data_directives:
+ dw data_directives_2-data_directives,(data_directives_3-data_directives_2)/(2+3)
+ dw data_directives_3-data_directives,(data_directives_4-data_directives_3)/(3+3)
+ dw data_directives_4-data_directives,(data_directives_end-data_directives_4)/(4+3)
+
+data_directives_2:
+ db 'db',1
+ dw data_bytes-instruction_handler
+ db 'dd',4
+ dw data_dwords-instruction_handler
+ db 'df',6
+ dw data_pwords-instruction_handler
+ db 'dp',6
+ dw data_pwords-instruction_handler
+ db 'dq',8
+ dw data_qwords-instruction_handler
+ db 'dt',10
+ dw data_twords-instruction_handler
+ db 'du',2
+ dw data_unicode-instruction_handler
+ db 'dw',2
+ dw data_words-instruction_handler
+ db 'rb',1
+ dw reserve_bytes-instruction_handler
+ db 'rd',4
+ dw reserve_dwords-instruction_handler
+ db 'rf',6
+ dw reserve_pwords-instruction_handler
+ db 'rp',6
+ dw reserve_pwords-instruction_handler
+ db 'rq',8
+ dw reserve_qwords-instruction_handler
+ db 'rt',10
+ dw reserve_twords-instruction_handler
+ db 'rw',2
+ dw reserve_words-instruction_handler
+data_directives_3:
+data_directives_4:
+ db 'file',1
+ dw data_file-instruction_handler
+data_directives_end:
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+
+#include "SDocumentationAnchor.h"
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Input/SButton.h"
+#include "EditorStyleSet.h"
+#include "Widgets/SToolTip.h"
+#include "IDocumentation.h"
+
+void SDocumentationAnchor::Construct(const FArguments& InArgs )
+{
+	Link = InArgs._Link;
+	
+	TAttribute<FText> ToolTipText = InArgs._ToolTipText;
+	if ( !ToolTipText.IsBound() && ToolTipText.Get().IsEmpty() )
+	{
+		ToolTipText = NSLOCTEXT("DocumentationAnchor", "DefaultToolTip", "Click to open documentation");
+	}
+
+	Default = FEditorStyle::GetBrush( "HelpIcon" );
+	Hovered = FEditorStyle::GetBrush( "HelpIcon.Hovered" );
+	Pressed = FEditorStyle::GetBrush( "HelpIcon.Pressed" );
+
+	FString PreviewLink = InArgs._PreviewLink;
+	if (!PreviewLink.IsEmpty())
+	{
+		// All in-editor udn documents must live under the Shared/ folder
+		ensure(PreviewLink.StartsWith(TEXT("Shared/")));
+	}
+
+	ChildSlot
+	[
+		SAssignNew( Button, SButton )
+		.ContentPadding( 0 )
+		.ButtonStyle( FEditorStyle::Get(), "HelpButton" )
+		.OnClicked( this, &SDocumentationAnchor::OnClicked )
+		.HAlign( HAlign_Center )
+		.VAlign( VAlign_Center )
+		.ToolTip( IDocumentation::Get()->CreateToolTip( ToolTipText, NULL, PreviewLink, InArgs._PreviewExcerptName ) )
+		[
+			SAssignNew(ButtonImage, SImage)
+			.Image( this, &SDocumentationAnchor::GetButtonImage )
+		]
+	];
+}
+
+const FSlateBrush* SDocumentationAnchor::GetButtonImage() const
+{
+	if ( Button->IsPressed() )
+	{
+		return Pressed;
+	}
+
+	if ( ButtonImage->IsHovered() )
+	{
+		return Hovered;
+	}
+
+	return Default;
+}
+
+FReply SDocumentationAnchor::OnClicked() const
+{
+	IDocumentation::Get()->Open(Link.Get(), FDocumentationSourceInfo(TEXT("doc_anchors")));
+	return FReply::Handled();
+}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Misc/Attribute.h"
+#include "IDocumentationPage.h"
+#include "UDNParser.h"
+
+class FDocumentationPage : public IDocumentationPage
+{
+public:
+
+	/** Returns an instance of class containing content from the link argument */
+	static TSharedRef< IDocumentationPage > Create( const FString& Link, const TSharedRef< FUDNParser >& Parser );
+
+public:
+
+	virtual ~FDocumentationPage();
+	virtual bool HasExcerpt( const FString& ExcerptName ) override;
+	virtual int32 GetNumExcerpts() const override;
+	virtual bool GetExcerpt( const FString& ExcerptName, FExcerpt& Excerpt) override;
+	virtual void GetExcerpts( /*OUT*/ TArray< FExcerpt >& Excerpts ) override;
+	virtual bool GetExcerptContent( FExcerpt& Excerpt ) override;
+
+	virtual FText GetTitle() override;
+
+	virtual void Reload() override;
+
+	virtual void SetTextWrapAt( TAttribute<float> WrapAt ) override;
+
+private:
+
+	FDocumentationPage( const FString& InLink, const TSharedRef< FUDNParser >& InParser );
+
+private:
+
+	/** The string representing the UDN page location */
+	FString Link;
+	/** The UDN parser instance used to create this page */
+	TSharedRef< FUDNParser > Parser;
+
+	/** The excerpts contained in this UDN page */
+	TArray<FExcerpt> StoredExcerpts;
+	/** The UDN meta data contained in this page */
+	FUDNPageMetadata StoredMetadata;
+	/** Signals if the page has been loaded */
+	bool IsLoaded;
+};
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   !<arch>
+/               1541488126              0       7089      `
+   _  8V  :ð  <B  Eö  [ê  [ê  ]~  ]~  ZT  ZT  ["  ["  _  _  ^N  ^N  \¶  \¶  I¢  I¢  K  K  JL  JL  @l  @l  ?Â  ?Â  >~  >~  XÐ  XÐ  Y  Y  F®  F®  Hø  Hø  M  M  C¾  C¾  Bd  Bd  Gn  Gn  H2  H2  C  C  D~  D~  ?,  ?,  AÌ  AÌ  _à  _à  A8  MÄ  MÄ  Rl  Rl  S>  S>  T
+  T
+  TØ  TØ  U¤  U¤  Vv  Vv  WB  WB  Lf  Lf  K¬  K¬  EB  EB  =Ô  =Ô  P¤  P¤  X  X  Q¤  Q¤  Oè  Oè  O(  O(  Nt  Nt__IMPORT_DESCRIPTOR_UE4Editor-LocationServicesBPLibrary __NULL_IMPORT_DESCRIPTOR UE4Editor-LocationServicesBPLibrary_NULL_THUNK_DATA __imp_?ImplInstance@ULocationServices@@0PEAVULocationServicesImpl@@EA ?execGetLocationServicesImpl@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_?execGetLocationServicesImpl@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z ?execIsLocationAccuracyAvailable@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_?execIsLocationAccuracyAvailable@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z ?execAreLocationServicesEnabled@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_?execAreLocationServicesEnabled@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z ?execGetLastKnownLocation@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_?execGetLastKnownLocation@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z ?execStopLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_?execStopLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z ?execStartLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_?execStartLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z ?execInitLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_?execInitLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z ?StaticClass@ULocationServices@@SAPEAVUClass@@XZ __imp_?StaticClass@ULocationServices@@SAPEAVUClass@@XZ ?StaticPackage@ULocationServices@@SAPEB_WXZ __imp_?StaticPackage@ULocationServices@@SAPEB_WXZ ?StaticClassCastFlags@ULocationServices@@SA?AW4EClassCastFlags@@XZ __imp_?StaticClassCastFlags@ULocationServices@@SA?AW4EClassCastFlags@@XZ ??2ULocationServices@@SAPEAX_KW4EInternal@@PEAVUObject@@VFName@@W4EObjectFlags@@@Z __imp_??2ULocationServices@@SAPEAX_KW4EInternal@@PEAVUObject@@VFName@@W4EObjectFlags@@@Z ??2ULocationServices@@SAPEAX_KPEAW4EInternal@@@Z __imp_??2ULocationServices@@SAPEAX_KPEAW4EInternal@@@Z ??0ULocationServices@@QEAA@AEBVFObjectInitializer@@@Z __imp_??0ULocationServices@@QEAA@AEBVFObjectInitializer@@@Z ?__DefaultConstructor@ULocationServices@@SAXAEBVFObjectInitializer@@@Z __imp_?__DefaultConstructor@ULocationServices@@SAXAEBVFObjectInitializer@@@Z ?__VTableCtorCaller@ULocationServices@@SAPEAVUObject@@AEAVFVTableHelper@@@Z __imp_?__VTableCtorCaller@ULocationServices@@SAPEAVUObject@@AEAVFVTableHelper@@@Z ?InitLocationServices@ULocationServices@@SA_NW4ELocationAccuracy@@MM@Z __imp_?InitLocationServices@ULocationServices@@SA_NW4ELocationAccuracy@@MM@Z ?StartLocationServices@ULocationServices@@SA_NXZ __imp_?StartLocationServices@ULocationServices@@SA_NXZ ?StopLocationServices@ULocationServices@@SA_NXZ __imp_?StopLocationServices@ULocationServices@@SA_NXZ ?GetLastKnownLocation@ULocationServices@@SA?AUFLocationServicesData@@XZ __imp_?GetLastKnownLocation@ULocationServices@@SA?AUFLocationServicesData@@XZ ?AreLocationServicesEnabled@ULocationServices@@SA_NXZ __imp_?AreLocationServicesEnabled@ULocationServices@@SA_NXZ ?IsLocationAccuracyAvailable@ULocationServices@@SA_NW4ELocationAccuracy@@@Z __imp_?IsLocationAccuracyAvailable@ULocationServices@@SA_NW4ELocationAccuracy@@@Z ?SetLocationServicesImpl@ULocationServices@@SAXPEAVULocationServicesImpl@@@Z __imp_?SetLocationServicesImpl@ULocationServices@@SAXPEAVULocationServicesImpl@@@Z ?ClearLocationServicesImpl@ULocationServices@@SAXXZ __imp_?ClearLocationServicesImpl@ULocationServices@@SAXXZ ?GetLocationServicesImpl@ULocationServices@@SAPEAVULocationServicesImpl@@XZ __imp_?GetLocationServicesImpl@ULocationServices@@SAPEAVULocationServicesImpl@@XZ ??1ULocationServices@@UEAA@XZ __imp_??1ULocationServices@@UEAA@XZ ??_FULocationServices@@QEAAXXZ __imp_??_FULocationServices@@QEAAXXZ InitializeModule __imp_InitializeModule __imp_??_7ULocationServices@@6B@ ?Z_Construct_UClass_ULocationServices@@YAPEAVUClass@@XZ __imp_?Z_Construct_UClass_ULocationServices@@YAPEAVUClass@@XZ ?Z_Construct_UFunction_ULocationServices_AreLocationServicesEnabled@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UFunction_ULocationServices_AreLocationServicesEnabled@@YAPEAVUFunction@@XZ ?Z_Construct_UFunction_ULocationServices_GetLastKnownLocation@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UFunction_ULocationServices_GetLastKnownLocation@@YAPEAVUFunction@@XZ ?Z_Construct_UFunction_ULocationServices_GetLocationServicesImpl@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UFunction_ULocationServices_GetLocationServicesImpl@@YAPEAVUFunction@@XZ ?Z_Construct_UFunction_ULocationServices_InitLocationServices@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UFunction_ULocationServices_InitLocationServices@@YAPEAVUFunction@@XZ ?Z_Construct_UFunction_ULocationServices_IsLocationAccuracyAvailable@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UFunction_ULocationServices_IsLocationAccuracyAvailable@@YAPEAVUFunction@@XZ ?Z_Construct_UFunction_ULocationServices_StartLocationServices@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UFunction_ULocationServices_StartLocationServices@@YAPEAVUFunction@@XZ ?Z_Construct_UFunction_ULocationServices_StopLocationServices@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UFunction_ULocationServices_StopLocationServices@@YAPEAVUFunction@@XZ ?StaticStruct@FLocationServicesData@@SAPEAVUScriptStruct@@XZ __imp_?StaticStruct@FLocationServicesData@@SAPEAVUScriptStruct@@XZ ?StaticRegisterNativesULocationServices@ULocationServices@@CAXXZ __imp_?StaticRegisterNativesULocationServices@ULocationServices@@CAXXZ ?GetPrivateStaticClass@ULocationServices@@CAPEAVUClass@@XZ __imp_?GetPrivateStaticClass@ULocationServices@@CAPEAVUClass@@XZ ??0ULocationServices@@QEAA@AEAVFVTableHelper@@@Z __imp_??0ULocationServices@@QEAA@AEAVFVTableHelper@@@Z ?Z_Construct_UDelegateFunction_LocationServicesBPLibrary_LocationServicesData_OnLocationChanged__DelegateSignature@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UDelegateFunction_LocationServicesBPLibrary_LocationServicesData_OnLocationChanged__DelegateSignature@@YAPEAVUFunction@@XZ ?Z_Construct_UScriptStruct_FLocationServicesData@@YAPEAVUScriptStruct@@XZ __imp_?Z_Construct_UScriptStruct_FLocationServicesData@@YAPEAVUScriptStruct@@XZ ?Z_Construct_UEnum_LocationServicesBPLibrary_ELocationAccuracy@@YAPEAVUEnum@@XZ __imp_?Z_Construct_UEnum_LocationServicesBPLibrary_ELocationAccuracy@@YAPEAVUEnum@@XZ ?Z_Construct_UClass_ULocationServices_NoRegister@@YAPEAVUClass@@XZ __imp_?Z_Construct_UClass_ULocationServices_NoRegister@@YAPEAVUClass@@XZ ?Z_Construct_UClass_ULocationServicesImpl_NoRegister@@YAPEAVUClass@@XZ __imp_?Z_Construct_UClass_ULocationServicesImpl_NoRegister@@YAPEAVUClass@@XZ ?Z_Construct_UClass_ULocationServicesImpl@@YAPEAVUClass@@XZ __imp_?Z_Construct_UClass_ULocationServicesImpl@@YAPEAVUClass@@XZ 
+/               1541488126              0       7103      `
+2   V8  ð:  B<  öE  ê[  ~]  TZ  "[  _  N^  ¶\  ¢I  K  LJ  l@  Â?  ~>  ÐX  Y  ®F  øH  M  ¾C  dB  nG  2H  C  ~D  ,?  ÌA  à_  8A  ÄM  lR  >S  
+T  ØT  ¤U  vV  BW  fL  ¬K  BE  Ô=  ¤P  X  ¤Q  èO  (O  tN  _   ,          +        * )  ! 2 1 0 - / " # $ % & ' ( .        
+ 	    ,            +         * )  ! 2 1 0 - / " # $ % & ' ( .        
+ 	   ??0ULocationServices@@QEAA@AEAVFVTableHelper@@@Z ??0ULocationServices@@QEAA@AEBVFObjectInitializer@@@Z ??1ULocationServices@@UEAA@XZ ??2ULocationServices@@SAPEAX_KPEAW4EInternal@@@Z ??2ULocationServices@@SAPEAX_KW4EInternal@@PEAVUObject@@VFName@@W4EObjectFlags@@@Z ??_FULocationServices@@QEAAXXZ ?AreLocationServicesEnabled@ULocationServices@@SA_NXZ ?ClearLocationServicesImpl@ULocationServices@@SAXXZ ?GetLastKnownLocation@ULocationServices@@SA?AUFLocationServicesData@@XZ ?GetLocationServicesImpl@ULocationServices@@SAPEAVULocationServicesImpl@@XZ ?GetPrivateStaticClass@ULocationServices@@CAPEAVUClass@@XZ ?InitLocationServices@ULocationServices@@SA_NW4ELocationAccuracy@@MM@Z ?IsLocationAccuracyAvailable@ULocationServices@@SA_NW4ELocationAccuracy@@@Z ?SetLocationServicesImpl@ULocationServices@@SAXPEAVULocationServicesImpl@@@Z ?StartLocationServices@ULocationServices@@SA_NXZ ?StaticClass@ULocationServices@@SAPEAVUClass@@XZ ?StaticClassCastFlags@ULocationServices@@SA?AW4EClassCastFlags@@XZ ?StaticPackage@ULocationServices@@SAPEB_WXZ ?StaticRegisterNativesULocationServices@ULocationServices@@CAXXZ ?StaticStruct@FLocationServicesData@@SAPEAVUScriptStruct@@XZ ?StopLocationServices@ULocationServices@@SA_NXZ ?Z_Construct_UClass_ULocationServices@@YAPEAVUClass@@XZ ?Z_Construct_UClass_ULocationServicesImpl@@YAPEAVUClass@@XZ ?Z_Construct_UClass_ULocationServicesImpl_NoRegister@@YAPEAVUClass@@XZ ?Z_Construct_UClass_ULocationServices_NoRegister@@YAPEAVUClass@@XZ ?Z_Construct_UDelegateFunction_LocationServicesBPLibrary_LocationServicesData_OnLocationChanged__DelegateSignature@@YAPEAVUFunction@@XZ ?Z_Construct_UEnum_LocationServicesBPLibrary_ELocationAccuracy@@YAPEAVUEnum@@XZ ?Z_Construct_UFunction_ULocationServices_AreLocationServicesEnabled@@YAPEAVUFunction@@XZ ?Z_Construct_UFunction_ULocationServices_GetLastKnownLocation@@YAPEAVUFunction@@XZ ?Z_Construct_UFunction_ULocationServices_GetLocationServicesImpl@@YAPEAVUFunction@@XZ ?Z_Construct_UFunction_ULocationServices_InitLocationServices@@YAPEAVUFunction@@XZ ?Z_Construct_UFunction_ULocationServices_IsLocationAccuracyAvailable@@YAPEAVUFunction@@XZ ?Z_Construct_UFunction_ULocationServices_StartLocationServices@@YAPEAVUFunction@@XZ ?Z_Construct_UFunction_ULocationServices_StopLocationServices@@YAPEAVUFunction@@XZ ?Z_Construct_UScriptStruct_FLocationServicesData@@YAPEAVUScriptStruct@@XZ ?__DefaultConstructor@ULocationServices@@SAXAEBVFObjectInitializer@@@Z ?__VTableCtorCaller@ULocationServices@@SAPEAVUObject@@AEAVFVTableHelper@@@Z ?execAreLocationServicesEnabled@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z ?execGetLastKnownLocation@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z ?execGetLocationServicesImpl@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z ?execInitLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z ?execIsLocationAccuracyAvailable@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z ?execStartLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z ?execStopLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z InitializeModule __IMPORT_DESCRIPTOR_UE4Editor-LocationServicesBPLibrary __NULL_IMPORT_DESCRIPTOR __imp_??0ULocationServices@@QEAA@AEAVFVTableHelper@@@Z __imp_??0ULocationServices@@QEAA@AEBVFObjectInitializer@@@Z __imp_??1ULocationServices@@UEAA@XZ __imp_??2ULocationServices@@SAPEAX_KPEAW4EInternal@@@Z __imp_??2ULocationServices@@SAPEAX_KW4EInternal@@PEAVUObject@@VFName@@W4EObjectFlags@@@Z __imp_??_7ULocationServices@@6B@ __imp_??_FULocationServices@@QEAAXXZ __imp_?AreLocationServicesEnabled@ULocationServices@@SA_NXZ __imp_?ClearLocationServicesImpl@ULocationServices@@SAXXZ __imp_?GetLastKnownLocation@ULocationServices@@SA?AUFLocationServicesData@@XZ __imp_?GetLocationServicesImpl@ULocationServices@@SAPEAVULocationServicesImpl@@XZ __imp_?GetPrivateStaticClass@ULocationServices@@CAPEAVUClass@@XZ __imp_?ImplInstance@ULocationServices@@0PEAVULocationServicesImpl@@EA __imp_?InitLocationServices@ULocationServices@@SA_NW4ELocationAccuracy@@MM@Z __imp_?IsLocationAccuracyAvailable@ULocationServices@@SA_NW4ELocationAccuracy@@@Z __imp_?SetLocationServicesImpl@ULocationServices@@SAXPEAVULocationServicesImpl@@@Z __imp_?StartLocationServices@ULocationServices@@SA_NXZ __imp_?StaticClass@ULocationServices@@SAPEAVUClass@@XZ __imp_?StaticClassCastFlags@ULocationServices@@SA?AW4EClassCastFlags@@XZ __imp_?StaticPackage@ULocationServices@@SAPEB_WXZ __imp_?StaticRegisterNativesULocationServices@ULocationServices@@CAXXZ __imp_?StaticStruct@FLocationServicesData@@SAPEAVUScriptStruct@@XZ __imp_?StopLocationServices@ULocationServices@@SA_NXZ __imp_?Z_Construct_UClass_ULocationServices@@YAPEAVUClass@@XZ __imp_?Z_Construct_UClass_ULocationServicesImpl@@YAPEAVUClass@@XZ __imp_?Z_Construct_UClass_ULocationServicesImpl_NoRegister@@YAPEAVUClass@@XZ __imp_?Z_Construct_UClass_ULocationServices_NoRegister@@YAPEAVUClass@@XZ __imp_?Z_Construct_UDelegateFunction_LocationServicesBPLibrary_LocationServicesData_OnLocationChanged__DelegateSignature@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UEnum_LocationServicesBPLibrary_ELocationAccuracy@@YAPEAVUEnum@@XZ __imp_?Z_Construct_UFunction_ULocationServices_AreLocationServicesEnabled@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UFunction_ULocationServices_GetLastKnownLocation@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UFunction_ULocationServices_GetLocationServicesImpl@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UFunction_ULocationServices_InitLocationServices@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UFunction_ULocationServices_IsLocationAccuracyAvailable@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UFunction_ULocationServices_StartLocationServices@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UFunction_ULocationServices_StopLocationServices@@YAPEAVUFunction@@XZ __imp_?Z_Construct_UScriptStruct_FLocationServicesData@@YAPEAVUScriptStruct@@XZ __imp_?__DefaultConstructor@ULocationServices@@SAXAEBVFObjectInitializer@@@Z __imp_?__VTableCtorCaller@ULocationServices@@SAPEAVUObject@@AEAVFVTableHelper@@@Z __imp_?execAreLocationServicesEnabled@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_?execGetLastKnownLocation@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_?execGetLocationServicesImpl@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_?execInitLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_?execIsLocationAccuracyAvailable@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_?execStartLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_?execStopLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z __imp_InitializeModule UE4Editor-LocationServicesBPLibrary_NULL_THUNK_DATA 
+//              1541488126              0       40        `
+UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       605       `
+d† þ=á[C         .debug$S        ]   Œ               @ B.idata$2           é   ý          @ 0À.idata$6        (     ý           @  À   . 	     'UE4Editor-LocationServicesBPLibrary.dll'    Ð         fMicrosoft (R) LINK                                          UE4Editor-LocationServicesBPLibrary.dll @comp.idfÿÿ                  .idata$2@  À   h .idata$6        .idata$4@  À    h .idata$5@  À    h     <                U            Š   __IMPORT_DESCRIPTOR_UE4Editor-LocationServicesBPLibrary __NULL_IMPORT_DESCRIPTOR UE4Editor-LocationServicesBPLibrary_NULL_THUNK_DATA 
+/0              1541488126              0       278       `
+d† þ=á[Õ          .debug$S        ]   d               @ B.idata$3           Á               @ 0À   . 	     'UE4Editor-LocationServicesBPLibrary.dll'    Ð         fMicrosoft (R) LINK                    @comp.idfÿÿ                     __NULL_IMPORT_DESCRIPTOR /0              1541488126              0       342       `
+d† þ=á[ù          .debug$S        ]   Œ               @ B.idata$5           é               @ @À.idata$4           ñ               @ @À   . 	     'UE4Editor-LocationServicesBPLibrary.dll'    Ð         fMicrosoft (R) LINK                @comp.idfÿÿ                  9   UE4Editor-LocationServicesBPLibrary_NULL_THUNK_DATA /0              1541488126              0       109       `
+  ÿÿ  d†þ=á[Y      ??0ULocationServices@@QEAA@AEAVFVTableHelper@@@Z UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       114       `
+  ÿÿ  d†þ=á[^     ??0ULocationServices@@QEAA@AEBVFObjectInitializer@@@Z UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       90        `
+  ÿÿ  d†þ=á[F     ??1ULocationServices@@UEAA@XZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       109       `
+  ÿÿ  d†þ=á[Y     ??2ULocationServices@@SAPEAX_KPEAW4EInternal@@@Z UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       143       `
+  ÿÿ  d†þ=á[{     ??2ULocationServices@@SAPEAX_KW4EInternal@@PEAVUObject@@VFName@@W4EObjectFlags@@@Z UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       87        `
+  ÿÿ  d†þ=á[C     ??_7ULocationServices@@6B@ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       91        `
+  ÿÿ  d†þ=á[G     ??_FULocationServices@@QEAAXXZ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       114       `
+  ÿÿ  d†þ=á[^     ?AreLocationServicesEnabled@ULocationServices@@SA_NXZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       112       `
+  ÿÿ  d†þ=á[\     ?ClearLocationServicesImpl@ULocationServices@@SAXXZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       132       `
+  ÿÿ  d†þ=á[p   	  ?GetLastKnownLocation@ULocationServices@@SA?AUFLocationServicesData@@XZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       136       `
+  ÿÿ  d†þ=á[t   
+  ?GetLocationServicesImpl@ULocationServices@@SAPEAVULocationServicesImpl@@XZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       119       `
+  ÿÿ  d†þ=á[c     ?GetPrivateStaticClass@ULocationServices@@CAPEAVUClass@@XZ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       124       `
+  ÿÿ  d†þ=á[h     ?ImplInstance@ULocationServices@@0PEAVULocationServicesImpl@@EA UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       131       `
+  ÿÿ  d†þ=á[o     ?InitLocationServices@ULocationServices@@SA_NW4ELocationAccuracy@@MM@Z UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       136       `
+  ÿÿ  d†þ=á[t     ?IsLocationAccuracyAvailable@ULocationServices@@SA_NW4ELocationAccuracy@@@Z UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       137       `
+  ÿÿ  d†þ=á[u     ?SetLocationServicesImpl@ULocationServices@@SAXPEAVULocationServicesImpl@@@Z UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       109       `
+  ÿÿ  d†þ=á[Y     ?StartLocationServices@ULocationServices@@SA_NXZ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       109       `
+  ÿÿ  d†þ=á[Y     ?StaticClass@ULocationServices@@SAPEAVUClass@@XZ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       127       `
+  ÿÿ  d†þ=á[k     ?StaticClassCastFlags@ULocationServices@@SA?AW4EClassCastFlags@@XZ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       104       `
+  ÿÿ  d†þ=á[T     ?StaticPackage@ULocationServices@@SAPEB_WXZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       125       `
+  ÿÿ  d†þ=á[i     ?StaticRegisterNativesULocationServices@ULocationServices@@CAXXZ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       121       `
+  ÿÿ  d†þ=á[e     ?StaticStruct@FLocationServicesData@@SAPEAVUScriptStruct@@XZ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       108       `
+  ÿÿ  d†þ=á[X     ?StopLocationServices@ULocationServices@@SA_NXZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       116       `
+  ÿÿ  d†þ=á[`     ?Z_Construct_UClass_ULocationServices@@YAPEAVUClass@@XZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       120       `
+  ÿÿ  d†þ=á[d     ?Z_Construct_UClass_ULocationServicesImpl@@YAPEAVUClass@@XZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       131       `
+  ÿÿ  d†þ=á[o     ?Z_Construct_UClass_ULocationServicesImpl_NoRegister@@YAPEAVUClass@@XZ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       127       `
+  ÿÿ  d†þ=á[k     ?Z_Construct_UClass_ULocationServices_NoRegister@@YAPEAVUClass@@XZ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       196       `
+  ÿÿ  d†þ=á[°     ?Z_Construct_UDelegateFunction_LocationServicesBPLibrary_LocationServicesData_OnLocationChanged__DelegateSignature@@YAPEAVUFunction@@XZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       140       `
+  ÿÿ  d†þ=á[x     ?Z_Construct_UEnum_LocationServicesBPLibrary_ELocationAccuracy@@YAPEAVUEnum@@XZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       149       `
+  ÿÿ  d†þ=á[     ?Z_Construct_UFunction_ULocationServices_AreLocationServicesEnabled@@YAPEAVUFunction@@XZ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       143       `
+  ÿÿ  d†þ=á[{     ?Z_Construct_UFunction_ULocationServices_GetLastKnownLocation@@YAPEAVUFunction@@XZ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       146       `
+  ÿÿ  d†þ=á[~     ?Z_Construct_UFunction_ULocationServices_GetLocationServicesImpl@@YAPEAVUFunction@@XZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       143       `
+  ÿÿ  d†þ=á[{      ?Z_Construct_UFunction_ULocationServices_InitLocationServices@@YAPEAVUFunction@@XZ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       150       `
+  ÿÿ  d†þ=á[‚   !  ?Z_Construct_UFunction_ULocationServices_IsLocationAccuracyAvailable@@YAPEAVUFunction@@XZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       144       `
+  ÿÿ  d†þ=á[|   "  ?Z_Construct_UFunction_ULocationServices_StartLocationServices@@YAPEAVUFunction@@XZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       143       `
+  ÿÿ  d†þ=á[{   #  ?Z_Construct_UFunction_ULocationServices_StopLocationServices@@YAPEAVUFunction@@XZ UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       134       `
+  ÿÿ  d†þ=á[r   $  ?Z_Construct_UScriptStruct_FLocationServicesData@@YAPEAVUScriptStruct@@XZ UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       131       `
+  ÿÿ  d†þ=á[o   %  ?__DefaultConstructor@ULocationServices@@SAXAEBVFObjectInitializer@@@Z UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       136       `
+  ÿÿ  d†þ=á[t   &  ?__VTableCtorCaller@ULocationServices@@SAPEAVUObject@@AEAVFVTableHelper@@@Z UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       146       `
+  ÿÿ  d†þ=á[~   '  ?execAreLocationServicesEnabled@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       140       `
+  ÿÿ  d†þ=á[x   (  ?execGetLastKnownLocation@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       143       `
+  ÿÿ  d†þ=á[{   )  ?execGetLocationServicesImpl@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       140       `
+  ÿÿ  d†þ=á[x   *  ?execInitLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       147       `
+  ÿÿ  d†þ=á[   +  ?execIsLocationAccuracyAvailable@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       141       `
+  ÿÿ  d†þ=á[y   ,  ?execStartLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z UE4Editor-LocationServicesBPLibrary.dll 
+/0              1541488126              0       140       `
+  ÿÿ  d†þ=á[x   -  ?execStopLocationServices@ULocationServices@@SAXPEAVUObject@@AEAUFFrame@@QEAX@Z UE4Editor-LocationServicesBPLibrary.dll /0              1541488126              0       77        `
+  ÿÿ  d†þ=á[9   .  InitializeModule UE4Editor-LocationServicesBPLibrary.dll 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           

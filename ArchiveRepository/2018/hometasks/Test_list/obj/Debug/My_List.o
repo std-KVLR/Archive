@@ -1,0 +1,3266 @@
+->SetResponseString(GetValidTokenResponse("token", 3600));
+  fetcher->delegate()->OnURLFetchComplete(fetcher);
+  EXPECT_EQ(1, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+  EXPECT_EQ("token", consumer_.last_token_);
+
+  request.reset();
+
+  EXPECT_EQ(1, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+  EXPECT_EQ("token", consumer_.last_token_);
+}
+
+TEST_F(OAuth2TokenServiceTest, MultipleRequestsForTheSameScopesWithOneDeleted) {
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      account_id_, "refreshToken");
+
+  std::unique_ptr<OAuth2TokenService::Request> request(
+      oauth2_service_->StartRequest(account_id_, OAuth2TokenService::ScopeSet(),
+                                    &consumer_));
+  base::RunLoop().RunUntilIdle();
+  std::unique_ptr<OAuth2TokenService::Request> request2(
+      oauth2_service_->StartRequest(account_id_, OAuth2TokenService::ScopeSet(),
+                                    &consumer_));
+  base::RunLoop().RunUntilIdle();
+
+  request.reset();
+
+  net::TestURLFetcher* fetcher = factory_.GetFetcherByID(0);
+  ASSERT_TRUE(fetcher);
+  fetcher->set_response_code(net::HTTP_OK);
+  fetcher->SetResponseString(GetValidTokenResponse("token", 3600));
+  fetcher->delegate()->OnURLFetchComplete(fetcher);
+  EXPECT_EQ(1, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+}
+
+TEST_F(OAuth2TokenServiceTest, ClearedRefreshTokenFailsSubsequentRequests) {
+  // We have a valid refresh token; the first request is successful.
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      account_id_, "refreshToken");
+  std::unique_ptr<OAuth2TokenService::Request> request(
+      oauth2_service_->StartRequest(account_id_, OAuth2TokenService::ScopeSet(),
+                                    &consumer_));
+  base::RunLoop().RunUntilIdle();
+  net::TestURLFetcher* fetcher = factory_.GetFetcherByID(0);
+  ASSERT_TRUE(fetcher);
+  fetcher->set_response_code(net::HTTP_OK);
+  fetcher->SetResponseString(GetValidTokenResponse("token", 3600));
+  fetcher->delegate()->OnURLFetchComplete(fetcher);
+  EXPECT_EQ(1, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+  EXPECT_EQ("token", consumer_.last_token_);
+
+  // The refresh token is no longer available; subsequent requests fail.
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      account_id_, "");
+  request = oauth2_service_->StartRequest(account_id_,
+      OAuth2TokenService::ScopeSet(), &consumer_);
+  base::RunLoop().RunUntilIdle();
+  EXPECT_EQ(1, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(1, consumer_.number_of_errors_);
+}
+
+TEST_F(OAuth2TokenServiceTest,
+       ChangedRefreshTokenDoesNotAffectInFlightRequests) {
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      account_id_, "first refreshToken");
+  OAuth2TokenService::ScopeSet scopes;
+  scopes.insert("s1");
+  scopes.insert("s2");
+  OAuth2TokenService::ScopeSet scopes1;
+  scopes.insert("s3");
+  scopes.insert("s4");
+
+  std::unique_ptr<OAuth2TokenService::Request> request(
+      oauth2_service_->StartRequest(account_id_, scopes, &consumer_));
+  base::RunLoop().RunUntilIdle();
+  net::TestURLFetcher* fetcher1 = factory_.GetFetcherByID(0);
+  ASSERT_TRUE(fetcher1);
+
+  // Note |request| is still pending when the refresh token changes.
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      account_id_, "second refreshToken");
+
+  // A 2nd request (using the new refresh token) that occurs and completes
+  // while the 1st request is in flight is successful.
+  TestingOAuth2TokenServiceConsumer consumer2;
+  std::unique_ptr<OAuth2TokenService::Request> request2(
+      oauth2_service_->StartRequest(account_id_, scopes1, &consumer2));
+  base::RunLoop().RunUntilIdle();
+
+  net::TestURLFetcher* fetcher2 = factory_.GetFetcherByID(0);
+  fetcher2->set_response_code(net::HTTP_OK);
+  fetcher2->SetResponseString(GetValidTokenResponse("second token", 3600));
+  fetcher2->delegate()->OnURLFetchComplete(fetcher2);
+  EXPECT_EQ(1, consumer2.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer2.number_of_errors_);
+  EXPECT_EQ("second token", consumer2.last_token_);
+
+  fetcher1->set_response_code(net::HTTP_OK);
+  fetcher1->SetResponseString(GetValidTokenResponse("first token", 3600));
+  fetcher1->delegate()->OnURLFetchComplete(fetcher1);
+  EXPECT_EQ(1, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+  EXPECT_EQ("first token", consumer_.last_token_);
+}
+
+TEST_F(OAuth2TokenServiceTest, ServiceShutDownBeforeFetchComplete) {
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      account_id_, "refreshToken");
+  std::unique_ptr<OAuth2TokenService::Request> request(
+      oauth2_service_->StartRequest(account_id_, OAuth2TokenService::ScopeSet(),
+                                    &consumer_));
+  base::RunLoop().RunUntilIdle();
+  EXPECT_EQ(0, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+
+  // The destructor should cancel all in-flight fetchers.
+  oauth2_service_.reset(NULL);
+
+  EXPECT_EQ(0, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(1, consumer_.number_of_errors_);
+}
+
+TEST_F(OAuth2TokenServiceTest, RetryingConsumer) {
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      account_id_, "refreshToken");
+  RetryingTestingOAuth2TokenServiceConsumer consumer(oauth2_service_.get(),
+      account_id_);
+  std::unique_ptr<OAuth2TokenService::Request> request(
+      oauth2_service_->StartRequest(account_id_, OAuth2TokenService::ScopeSet(),
+                                    &consumer));
+  base::RunLoop().RunUntilIdle();
+  EXPECT_EQ(0, consumer.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer.number_of_errors_);
+
+  net::TestURLFetcher* fetcher = factory_.GetFetcherByID(0);
+  ASSERT_TRUE(fetcher);
+  fetcher->set_response_code(net::HTTP_UNAUTHORIZED);
+  fetcher->SetResponseString(std::string());
+  fetcher->delegate()->OnURLFetchComplete(fetcher);
+  EXPECT_EQ(0, consumer.number_of_successful_tokens_);
+  EXPECT_EQ(1, consumer.number_of_errors_);
+
+  fetcher = factory_.GetFetcherByID(0);
+  ASSERT_TRUE(fetcher);
+  fetcher->set_response_code(net::HTTP_UNAUTHORIZED);
+  fetcher->SetResponseString(std::string());
+  fetcher->delegate()->OnURLFetchComplete(fetcher);
+  EXPECT_EQ(0, consumer.number_of_successful_tokens_);
+  EXPECT_EQ(2, consumer.number_of_errors_);
+}
+
+TEST_F(OAuth2TokenServiceTest, InvalidateToken) {
+  OAuth2TokenService::ScopeSet scopes;
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      account_id_, "refreshToken");
+
+  // First request.
+  std::unique_ptr<OAuth2TokenService::Request> request(
+      oauth2_service_->StartRequest(account_id_, scopes, &consumer_));
+  base::RunLoop().RunUntilIdle();
+
+  EXPECT_EQ(0, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+  net::TestURLFetcher* fetcher = factory_.GetFetcherByID(0);
+  ASSERT_TRUE(fetcher);
+  fetcher->set_response_code(net::HTTP_OK);
+  fetcher->SetResponseString(GetValidTokenResponse("token", 3600));
+  fetcher->delegate()->OnURLFetchComplete(fetcher);
+  EXPECT_EQ(1, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+  EXPECT_EQ("token", consumer_.last_token_);
+
+  // Second request, should return the same token without needing a network
+  // request.
+  std::unique_ptr<OAuth2TokenService::Request> request2(
+      oauth2_service_->StartRequest(account_id_, scopes, &consumer_));
+  base::RunLoop().RunUntilIdle();
+
+  // No new network fetcher.
+  EXPECT_EQ(2, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+  EXPECT_EQ("token", consumer_.last_token_);
+
+  // Invalidating the token should return a new token on the next request.
+  oauth2_service_->InvalidateAccessToken(account_id_, scopes,
+                                         consumer_.last_token_);
+  std::unique_ptr<OAuth2TokenService::Request> request3(
+      oauth2_service_->StartRequest(account_id_, scopes, &consumer_));
+  base::RunLoop().RunUntilIdle();
+  EXPECT_EQ(2, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+  fetcher = factory_.GetFetcherByID(0);
+  ASSERT_TRUE(fetcher);
+  fetcher->set_response_code(net::HTTP_OK);
+  fetcher->SetResponseString(GetValidTokenResponse("token2", 3600));
+  fetcher->delegate()->OnURLFetchComplete(fetcher);
+  EXPECT_EQ(3, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+  EXPECT_EQ("token2", consumer_.last_token_);
+}
+
+TEST_F(OAuth2TokenServiceTest, CancelAllRequests) {
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      account_id_, "refreshToken");
+  std::unique_ptr<OAuth2TokenService::Request> request(
+      oauth2_service_->StartRequest(account_id_, OAuth2TokenService::ScopeSet(),
+                                    &consumer_));
+
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      "account_id_2", "refreshToken2");
+  std::unique_ptr<OAuth2TokenService::Request> request2(
+      oauth2_service_->StartRequest(account_id_, OAuth2TokenService::ScopeSet(),
+                                    &consumer_));
+
+  base::RunLoop().RunUntilIdle();
+  EXPECT_EQ(0, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+
+  oauth2_service_->CancelAllRequestsForTest();
+
+  EXPECT_EQ(0, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(2, consumer_.number_of_errors_);
+}
+
+TEST_F(OAuth2TokenServiceTest, CancelRequestsForAccount) {
+  OAuth2TokenService::ScopeSet scope_set_1;
+  scope_set_1.insert("scope1");
+  scope_set_1.insert("scope2");
+  OAuth2TokenService::ScopeSet scope_set_2(scope_set_1.begin(),
+                                           scope_set_1.end());
+  scope_set_2.insert("scope3");
+
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      account_id_, "refreshToken");
+  std::unique_ptr<OAuth2TokenService::Request> request1(
+      oauth2_service_->StartRequest(account_id_, scope_set_1, &consumer_));
+  std::unique_ptr<OAuth2TokenService::Request> request2(
+      oauth2_service_->StartRequest(account_id_, scope_set_2, &consumer_));
+
+  std::string account_id_2("account_id_2");
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      account_id_2, "refreshToken2");
+  std::unique_ptr<OAuth2TokenService::Request> request3(
+      oauth2_service_->StartRequest(account_id_2, scope_set_1, &consumer_));
+
+  base::RunLoop().RunUntilIdle();
+  EXPECT_EQ(0, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+
+  oauth2_service_->CancelRequestsForAccountForTest(account_id_);
+
+  EXPECT_EQ(0, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(2, consumer_.number_of_errors_);
+
+  oauth2_service_->CancelRequestsForAccountForTest(account_id_2);
+
+  EXPECT_EQ(0, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(3, consumer_.number_of_errors_);
+}
+
+TEST_F(OAuth2TokenServiceTest, SameScopesRequestedForDifferentClients) {
+  std::string client_id_1("client1");
+  std::string client_secret_1("secret1");
+  std::string client_id_2("client2");
+  std::string client_secret_2("secret2");
+  std::set<std::string> scope_set;
+  scope_set.insert("scope1");
+  scope_set.insert("scope2");
+
+  std::string refresh_token("refreshToken");
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      account_id_, refresh_token);
+
+  std::unique_ptr<OAuth2TokenService::Request> request1(
+      oauth2_service_->StartRequestForClient(
+          account_id_, client_id_1, client_secret_1, scope_set, &consumer_));
+  std::unique_ptr<OAuth2TokenService::Request> request2(
+      oauth2_service_->StartRequestForClient(
+          account_id_, client_id_2, client_secret_2, scope_set, &consumer_));
+  // Start a request that should be duplicate of |request1|.
+  std::unique_ptr<OAuth2TokenService::Request> request3(
+      oauth2_service_->StartRequestForClient(
+          account_id_, client_id_1, client_secret_1, scope_set, &consumer_));
+  base::RunLoop().RunUntilIdle();
+
+  ASSERT_EQ(2U,
+            oauth2_service_->GetNumPendingRequestsForTesting(
+                client_id_1,
+                account_id_,
+                scope_set));
+   ASSERT_EQ(1U,
+             oauth2_service_->GetNumPendingRequestsForTesting(
+                client_id_2,
+                account_id_,
+                scope_set));
+}
+
+TEST_F(OAuth2TokenServiceTest, RequestParametersOrderTest) {
+  OAuth2TokenService::ScopeSet set_0;
+  OAuth2TokenService::ScopeSet set_1;
+  set_1.insert("1");
+
+  OAuth2TokenService::RequestParameters params[] = {
+      OAuth2TokenService::RequestParameters("0", "0", set_0),
+      OAuth2TokenService::RequestParameters("0", "0", set_1),
+      OAuth2TokenService::RequestParameters("0", "1", set_0),
+      OAuth2TokenService::RequestParameters("0", "1", set_1),
+      OAuth2TokenService::RequestParameters("1", "0", set_0),
+      OAuth2TokenService::RequestParameters("1", "0", set_1),
+      OAuth2TokenService::RequestParameters("1", "1", set_0),
+      OAuth2TokenService::RequestParameters("1", "1", set_1),
+  };
+
+  for (size_t i = 0; i < arraysize(params); i++) {
+    for (size_t j = 0; j < arraysize(params); j++) {
+      if (i == j) {
+        EXPECT_FALSE(params[i] < params[j]) << " i=" << i << ", j=" << j;
+        EXPECT_FALSE(params[j] < params[i]) << " i=" << i << ", j=" << j;
+      } else if (i < j) {
+        EXPECT_TRUE(params[i] < params[j]) << " i=" << i << ", j=" << j;
+        EXPECT_FALSE(params[j] < params[i]) << " i=" << i << ", j=" << j;
+      } else {
+        EXPECT_TRUE(params[j] < params[i]) << " i=" << i << ", j=" << j;
+        EXPECT_FALSE(params[i] < params[j]) << " i=" << i << ", j=" << j;
+      }
+    }
+  }
+}
+
+TEST_F(OAuth2TokenServiceTest, UpdateClearsCache) {
+  std::string kEmail = "test@gmail.com";
+  std::set<std::string> scope_list;
+  scope_list.insert("scope");
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      kEmail, "refreshToken");
+  std::unique_ptr<OAuth2TokenService::Request> request(
+      oauth2_service_->StartRequest(kEmail, scope_list, &consumer_));
+  base::RunLoop().RunUntilIdle();
+  net::TestURLFetcher* fetcher = factory_.GetFetcherByID(0);
+  ASSERT_TRUE(fetcher);
+  fetcher->set_response_code(net::HTTP_OK);
+  fetcher->SetResponseString(GetValidTokenResponse("token", 3600));
+  fetcher->delegate()->OnURLFetchComplete(fetcher);
+  EXPECT_EQ(1, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+  EXPECT_EQ("token", consumer_.last_token_);
+  EXPECT_EQ(1, (int)oauth2_service_->token_cache_.size());
+
+  // Signs out and signs in
+  oauth2_service_->RevokeAllCredentials();
+
+  EXPECT_EQ(0, (int)oauth2_service_->token_cache_.size());
+  oauth2_service_->GetFakeOAuth2TokenServiceDelegate()->UpdateCredentials(
+      kEmail, "refreshToken");
+  request = oauth2_service_->StartRequest(kEmail, scope_list, &consumer_);
+  base::RunLoop().RunUntilIdle();
+  fetcher = factory_.GetFetcherByID(0);
+  // ASSERT_TRUE(fetcher);
+  fetcher->set_response_code(net::HTTP_OK);
+  fetcher->SetResponseString(GetValidTokenResponse("another token", 3600));
+  fetcher->delegate()->OnURLFetchComplete(fetcher);
+  EXPECT_EQ(2, consumer_.number_of_successful_tokens_);
+  EXPECT_EQ(0, consumer_.number_of_errors_);
+  EXPECT_EQ("another token", consumer_.last_token_);
+  EXPECT_EQ(1, (int)oauth2_service_->token_cache_.size());
+}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   // Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "google_apis/gaia/oauth2_token_service_request.h"
+
+#include <memory>
+
+#include "base/bind.h"
+#include "base/location.h"
+#include "base/macros.h"
+#include "base/memory/ref_counted.h"
+#include "base/single_thread_task_runner.h"
+#include "base/threading/thread_task_runner_handle.h"
+#include "google_apis/gaia/google_service_auth_error.h"
+#include "google_apis/gaia/oauth2_access_token_consumer.h"
+
+OAuth2TokenServiceRequest::TokenServiceProvider::TokenServiceProvider() {
+}
+
+OAuth2TokenServiceRequest::TokenServiceProvider::~TokenServiceProvider() {
+}
+
+// Core serves as the base class for OAuth2TokenService operations.  Each
+// operation should be modeled as a derived type.
+//
+// Core is used like this:
+//
+// 1. Constructed on owner thread.
+//
+// 2. Start() is called on owner thread, which calls StartOnTokenServiceThread()
+// on token service thread.
+//
+// 3. Request is executed.
+//
+// 4. Stop() is called on owner thread, which calls StopOnTokenServiceThread()
+// on token service thread.
+//
+// 5. Core is destroyed on owner thread.
+class OAuth2TokenServiceRequest::Core
+    : public base::RefCountedThreadSafe<OAuth2TokenServiceRequest::Core> {
+ public:
+  // Note the thread where an instance of Core is constructed is referred to as
+  // the "owner thread" here.
+  Core(OAuth2TokenServiceRequest* owner,
+       const scoped_refptr<TokenServiceProvider>& provider);
+
+  // Starts the core.  Must be called on the owner thread.
+  void Start();
+
+  // Stops the core.  Must be called on the owner thread.
+  void Stop();
+
+  // Returns true if this object has been stopped.  Must be called on the owner
+  // thread.
+  bool IsStopped() const;
+
+ protected:
+  // Core must be destroyed on the owner thread.  If data members must be
+  // cleaned up or destroyed on the token service thread, do so in the
+  // StopOnTokenServiceThread method.
+  virtual ~Core();
+
+  // Called on the token service thread.
+  virtual void StartOnTokenServiceThread() = 0;
+
+  // Called on the token service thread.
+  virtual void StopOnTokenServiceThread() = 0;
+
+  base::SingleThreadTaskRunner* token_service_task_runner();
+  OAuth2TokenService* token_service();
+  OAuth2TokenServiceRequest* owner();
+
+  SEQUENCE_CHECKER(sequence_checker_);
+
+ private:
+  friend class base::RefCountedThreadSafe<OAuth2TokenServiceRequest::Core>;
+
+  void DoNothing();
+
+  scoped_refptr<base::SingleThreadTaskRunner> token_service_task_runner_;
+  OAuth2TokenServiceRequest* owner_;
+
+  // Clear on owner thread.  OAuth2TokenServiceRequest promises to clear its
+  // last reference to TokenServiceProvider on the owner thread so the caller
+  // can ensure it is destroyed on the owner thread if desired.
+  scoped_refptr<TokenServiceProvider> provider_;
+
+  DISALLOW_COPY_AND_ASSIGN(Core);
+};
+
+OAuth2TokenServiceRequest::Core::Core(
+    OAuth2TokenServiceRequest* owner,
+    const scoped_refptr<TokenServiceProvider>& provider)
+    : owner_(owner), provider_(provider) {
+  DCHECK(owner_);
+  DCHECK(provider_.get());
+  token_service_task_runner_ = provider_->GetTokenServiceTaskRunner();
+  DCHECK(token_service_task_runner_.get());
+}
+
+OAuth2TokenServiceRequest::Core::~Core() {
+}
+
+void OAuth2TokenServiceRequest::Core::Start() {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  token_service_task_runner_->PostTask(
+      FROM_HERE,
+      base::Bind(&OAuth2TokenServiceRequest::Core::StartOnTokenServiceThread,
+                 this));
+}
+
+void OAuth2TokenServiceRequest::Core::Stop() {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  DCHECK(!IsStopped());
+
+  // Detaches |owner_| from this instance so |owner_| will be called back only
+  // if |Stop()| has never been called.
+  owner_ = NULL;
+
+  // We are stopping and will likely be destroyed soon.  Use a reply closure
+  // (DoNothing) to retain "this" and ensure we are destroyed in the owner
+  // thread, not the task runner thread.  PostTaskAndReply guarantees that the
+  // reply closure will execute after StopOnTokenServiceThread has completed.
+  token_service_task_runner_->PostTaskAndReply(
+      FROM_HERE,
+      base::Bind(&OAuth2TokenServiceRequest::Core::StopOnTokenServiceThread,
+                 this),
+      base::Bind(&OAuth2TokenServiceRequest::Core::DoNothing, this));
+}
+
+bool OAuth2TokenServiceRequest::Core::IsStopped() const {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  return owner_ == NULL;
+}
+
+base::SingleThreadTaskRunner*
+OAuth2TokenServiceRequest::Core::token_service_task_runner() {
+  return token_service_task_runner_.get();
+}
+
+OAuth2TokenService* OAuth2TokenServiceRequest::Core::token_service() {
+  DCHECK(token_service_task_runner_->BelongsToCurrentThread());
+  return provider_->GetTokenService();
+}
+
+OAuth2TokenServiceRequest* OAuth2TokenServiceRequest::Core::owner() {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  return owner_;
+}
+
+void OAuth2TokenServiceRequest::Core::DoNothing() {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+}
+
+namespace {
+
+// An implementation of Core for getting an access token.
+class RequestCore : public OAuth2TokenServiceRequest::Core,
+                    public OAuth2TokenService::Consumer {
+ public:
+  RequestCore(OAuth2TokenServiceRequest* owner,
+              const scoped_refptr<
+                  OAuth2TokenServiceRequest::TokenServiceProvider>& provider,
+              OAuth2TokenService::Consumer* consumer,
+              const std::string& account_id,
+              const OAuth2TokenService::ScopeSet& scopes);
+
+  // OAuth2TokenService::Consumer.  Must be called on the token service thread.
+  void OnGetTokenSuccess(const OAuth2TokenService::Request* request,
+                         const std::string& access_token,
+                         const base::Time& expiration_time) override;
+  void OnGetTokenFailure(const OAuth2TokenService::Request* request,
+                         const GoogleServiceAuthError& error) override;
+
+ private:
+  friend class base::RefCountedThreadSafe<RequestCore>;
+
+  // Must be destroyed on the owner thread.
+  ~RequestCore() override;
+
+  // Core implementation.
+  void StartOnTokenServiceThread() override;
+  void StopOnTokenServiceThread() override;
+
+  void InformOwnerOnGetTokenSuccess(std::string access_token,
+                                    base::Time expiration_time);
+  void InformOwnerOnGetTokenFailure(GoogleServiceAuthError error);
+
+  scoped_refptr<base::SingleThreadTaskRunner> owner_task_runner_;
+  OAuth2TokenService::Consumer* const consumer_;
+  std::string account_id_;
+  OAuth2TokenService::ScopeSet scopes_;
+
+  // OAuth2TokenService request for fetching OAuth2 access token; it should be
+  // created, reset and accessed only on the token service thread.
+  std::unique_ptr<OAuth2TokenService::Request> request_;
+
+  DISALLOW_COPY_AND_ASSIGN(RequestCore);
+};
+
+RequestCore::RequestCore(
+    OAuth2TokenServiceRequest* owner,
+    const scoped_refptr<OAuth2TokenServiceRequest::TokenServiceProvider>&
+        provider,
+    OAuth2TokenService::Consumer* consumer,
+    const std::string& account_id,
+    const OAuth2TokenService::ScopeSet& scopes)
+    : OAuth2TokenServiceRequest::Core(owner, provider),
+      OAuth2TokenService::Consumer("oauth2_token_service"),
+      owner_task_runner_(base::ThreadTaskRunnerHandle::Get()),
+      consumer_(consumer),
+      account_id_(account_id),
+      scopes_(scopes) {
+  DCHECK(consumer_);
+  DCHECK(!account_id_.empty());
+  DCHECK(!scopes_.empty());
+}
+
+RequestCore::~RequestCore() {
+}
+
+void RequestCore::StartOnTokenServiceThread() {
+  DCHECK(token_service_task_runner()->BelongsToCurrentThread());
+  request_ = token_service()->StartRequest(account_id_, scopes_, this);
+}
+
+void RequestCore::StopOnTokenServiceThread() {
+  DCHECK(token_service_task_runner()->BelongsToCurrentThread());
+  request_.reset();
+}
+
+void RequestCore::OnGetTokenSuccess(const OAuth2TokenService::Request* request,
+                                    const std::string& access_token,
+                                    const base::Time& expiration_time) {
+  DCHECK(token_service_task_runner()->BelongsToCurrentThread());
+  DCHECK_EQ(request_.get(), request);
+  owner_task_runner_->PostTask(
+      FROM_HERE,
+      base::Bind(&RequestCore::InformOwnerOnGetTokenSuccess,
+                 this,
+                 access_token,
+                 expiration_time));
+  request_.reset();
+}
+
+void RequestCore::OnGetTokenFailure(const OAuth2TokenService::Request* request,
+                                    const GoogleServiceAuthError& error) {
+  DCHECK(token_service_task_runner()->BelongsToCurrentThread());
+  DCHECK_EQ(request_.get(), request);
+  owner_task_runner_->PostTask(
+      FROM_HERE,
+      base::Bind(&RequestCore::InformOwnerOnGetTokenFailure, this, error));
+  request_.reset();
+}
+
+void RequestCore::InformOwnerOnGetTokenSuccess(std::string access_token,
+                                               base::Time expiration_time) {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  if (!IsStopped()) {
+    consumer_->OnGetTokenSuccess(owner(), access_token, expiration_time);
+  }
+}
+
+void RequestCore::InformOwnerOnGetTokenFailure(GoogleServiceAuthError error) {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  if (!IsStopped()) {
+    consumer_->OnGetTokenFailure(owner(), error);
+  }
+}
+
+// An implementation of Core for invalidating an access token.
+class InvalidateCore : public OAuth2TokenServiceRequest::Core {
+ public:
+  InvalidateCore(OAuth2TokenServiceRequest* owner,
+                 const scoped_refptr<
+                     OAuth2TokenServiceRequest::TokenServiceProvider>& provider,
+                 const std::string& access_token,
+                 const std::string& account_id,
+                 const OAuth2TokenService::ScopeSet& scopes);
+
+ private:
+  friend class base::RefCountedThreadSafe<InvalidateCore>;
+
+  // Must be destroyed on the owner thread.
+  ~InvalidateCore() override;
+
+  // Core implementation.
+  void StartOnTokenServiceThread() override;
+  void StopOnTokenServiceThread() override;
+
+  std::string access_token_;
+  std::string account_id_;
+  OAuth2TokenService::ScopeSet scopes_;
+
+  DISALLOW_COPY_AND_ASSIGN(InvalidateCore);
+};
+
+InvalidateCore::InvalidateCore(
+    OAuth2TokenServiceRequest* owner,
+    const scoped_refptr<OAuth2TokenServiceRequest::TokenServiceProvider>&
+        provider,
+    const std::string& access_token,
+    const std::string& account_id,
+    const OAuth2TokenService::ScopeSet& scopes)
+    : OAuth2TokenServiceRequest::Core(owner, provider),
+      access_token_(access_token),
+      account_id_(account_id),
+      scopes_(scopes) {
+  DCHECK(!access_token_.empty());
+  DCHECK(!account_id_.empty());
+  DCHECK(!scopes.empty());
+}
+
+InvalidateCore::~InvalidateCore() {
+}
+
+void InvalidateCore::StartOnTokenServiceThread() {
+  DCHECK(token_service_task_runner()->BelongsToCurrentThread());
+  token_service()->InvalidateAccessToken(account_id_, scopes_, access_token_);
+}
+
+void InvalidateCore::StopOnTokenServiceThread() {
+  DCHECK(token_service_task_runner()->BelongsToCurrentThread());
+  // Nothing to do.
+}
+
+}  // namespace
+
+// static
+std::unique_ptr<OAuth2TokenServiceRequest>
+OAuth2TokenServiceRequest::CreateAndStart(
+    const scoped_refptr<TokenServiceProvider>& provider,
+    const std::string& account_id,
+    const OAuth2TokenService::ScopeSet& scopes,
+    OAuth2TokenService::Consumer* consumer) {
+  std::unique_ptr<OAuth2TokenServiceRequest> request(
+      new OAuth2TokenServiceRequest(account_id));
+  scoped_refptr<Core> core(
+      new RequestCore(request.get(), provider, consumer, account_id, scopes));
+  request->StartWithCore(core);
+  return request;
+}
+
+// static
+void OAuth2TokenServiceRequest::InvalidateToken(
+    const scoped_refptr<TokenServiceProvider>& provider,
+    const std::string& account_id,
+    const OAuth2TokenService::ScopeSet& scopes,
+    const std::string& access_token) {
+  std::unique_ptr<OAuth2TokenServiceRequest> request(
+      new OAuth2TokenServiceRequest(account_id));
+  scoped_refptr<Core> core(new InvalidateCore(
+      request.get(), provider, access_token, account_id, scopes));
+  request->StartWithCore(core);
+}
+
+OAuth2TokenServiceRequest::~OAuth2TokenServiceRequest() {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  core_->Stop();
+}
+
+std::string OAuth2TokenServiceRequest::GetAccountId() const {
+  return account_id_;
+}
+
+OAuth2TokenServiceRequest::OAuth2TokenServiceRequest(
+    const std::string& account_id)
+    : account_id_(account_id) {
+  DCHECK(!account_id_.empty());
+}
+
+void OAuth2TokenServiceRequest::StartWithCore(const scoped_refptr<Core>& core) {
+  DCHECK(core.get());
+  core_ = core;
+  core_->Start();
+}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              // Copyright 2013 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef GOOGLE_APIS_GAIA_OAUTH2_TOKEN_SERVICE_H_
+#define GOOGLE_APIS_GAIA_OAUTH2_TOKEN_SERVICE_H_
+
+#include <stddef.h>
+
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+
+#include "base/gtest_prod_util.h"
+#include "base/macros.h"
+#include "base/memory/weak_ptr.h"
+#include "base/observer_list.h"
+#include "base/sequence_checker.h"
+#include "base/time/time.h"
+#include "google_apis/gaia/google_service_auth_error.h"
+#include "google_apis/gaia/oauth2_access_token_consumer.h"
+#include "google_apis/gaia/oauth2_access_token_fetcher.h"
+
+namespace net {
+class URLRequestContextGetter;
+}
+
+class GoogleServiceAuthError;
+class OAuth2AccessTokenFetcher;
+class OAuth2TokenServiceDelegate;
+
+// Abstract base class for a service that fetches and caches OAuth2 access
+// tokens. Concrete subclasses should implement GetRefreshToken to return
+// the appropriate refresh token. Derived services might maintain refresh tokens
+// for multiple accounts.
+//
+// All calls are expected from the UI thread.
+//
+// To use this service, call StartRequest() with a given set of scopes and a
+// consumer of the request results. The consumer is required to outlive the
+// request. The request can be deleted. The consumer may be called back
+// asynchronously with the fetch results.
+//
+// - If the consumer is not called back before the request is deleted, it will
+//   never be called back.
+//   Note in this case, the actual network requests are not canceled and the
+//   cache will be populated with the fetched results; it is just the consumer
+//   callback that is aborted.
+//
+// - Otherwise the consumer will be called back with the request and the fetch
+//   results.
+//
+// The caller of StartRequest() owns the returned request and is responsible to
+// delete the request even once the callback has been invoked.
+class OAuth2TokenService {
+ public:
+  // A set of scopes in OAuth2 authentication.
+  typedef std::set<std::string> ScopeSet;
+
+  // Class representing a request that fetches an OAuth2 access token.
+  class Request {
+   public:
+    virtual ~Request();
+    virtual std::string GetAccountId() const = 0;
+   protected:
+    Request();
+  };
+
+  // Class representing the consumer of a Request passed to |StartRequest|,
+  // which will be called back when the request completes.
+  class Consumer {
+   public:
+    explicit Consumer(const std::string& id);
+    virtual ~Consumer();
+
+    std::string id() const { return id_; }
+
+    // |request| is a Request that is started by this consumer and has
+    // completed.
+    virtual void OnGetTokenSuccess(const Request* request,
+                                   const std::string& access_token,
+                                   const base::Time& expiration_time) = 0;
+    virtual void OnGetTokenFailure(const Request* request,
+                                   const GoogleServiceAuthError& error) = 0;
+   private:
+    std::string id_;
+  };
+
+  // Classes that want to listen for refresh token availability should
+  // implement this interface and register with the AddObserver() call.
+  class Observer {
+   public:
+    // Called whenever a new login-scoped refresh token is available for
+    // account |account_id|. Once available, access tokens can be retrieved for
+    // this account. This is called during initial startup for each token
+    // loaded (and any time later when, e.g., credentials change). When called,
+    // any pending token request is cancelled and needs to be retried. Such a
+    // pending request can easily occur on Android, where refresh tokens are
+    // held by the OS and are thus often available on startup even before
+    // OnRefreshTokenAvailable() is called.
+    virtual void OnRefreshTokenAvailable(const std::string& account_id) {}
+    // Called whenever the login-scoped refresh token becomes unavailable for
+    // account |account_id|.
+    virtual void OnRefreshTokenRevoked(const std::string& account_id) {}
+    // Called after all refresh tokens are loaded during OAuth2TokenService
+    // startup.
+    virtual void OnRefreshTokensLoaded() {}
+    // Sent before starting a batch of refresh token changes.
+    virtual void OnStartBatchChanges() {}
+    // Sent after a batch of refresh token changes is done.
+    virtual void OnEndBatchChanges() {}
+
+   protected:
+    virtual ~Observer() {}
+  };
+
+  // Classes that want to monitor status of access token and access token
+  // request should implement this interface and register with the
+  // AddDiagnosticsObserver() call.
+  class DiagnosticsObserver {
+   public:
+    // Called when receiving request for access token.
+    virtual void OnAccessTokenRequested(const std::string& account_id,
+                                        const std::string& consumer_id,
+                                        const ScopeSet& scopes) = 0;
+    // Called when access token fetching finished successfully or
+    // unsuccessfully. |expiration_time| are only valid with
+    // successful completion.
+    virtual void OnFetchAccessTokenComplete(const std::string& account_id,
+                                            const std::string& consumer_id,
+                                            const ScopeSet& scopes,
+                                            GoogleServiceAuthError error,
+                                            base::Time expiration_time) = 0;
+    virtual void OnTokenRemoved(const std::string& account_id,
+                                const ScopeSet& scopes) = 0;
+  };
+
+  explicit OAuth2TokenService(
+      std::unique_ptr<OAuth2TokenServiceDelegate> delegate);
+  virtual ~OAuth2TokenService();
+
+  // Add or remove observers of this token service.
+  void AddObserver(Observer* observer);
+  void RemoveObserver(Observer* observer);
+
+  // Add or remove observers of this token service.
+  void AddDiagnosticsObserver(DiagnosticsObserver* observer);
+  void RemoveDiagnosticsObserver(DiagnosticsObserver* observer);
+
+  // Checks in the cache for a valid access token for a specified |account_id|
+  // and |scopes|, and if not found starts a request for an OAuth2 access token
+  // using the OAuth2 refresh token maintained by this instance for that
+  // |account_id|. The caller owns the returned Request.
+  // |scopes| is the set of scopes to get an access token for, |consumer| is
+  // the object that will be called back with results if the returned request
+  // is not deleted. Virtual for mocking.
+  virtual std::unique_ptr<Request> StartRequest(const std::string& account_id,
+                                                const ScopeSet& scopes,
+                                                Consumer* consumer);
+
+  // This method does the same as |StartRequest| except it uses |client_id| and
+  // |client_secret| to identify OAuth client app instead of using
+  // Chrome's default values.
+  std::unique_ptr<Request> StartRequestForClient(
+      const std::string& account_id,
+      const std::string& client_id,
+      const std::string& client_secret,
+      const ScopeSet& scopes,
+      Consumer* consumer);
+
+  // This method does the same as |StartRequest| except it uses the request
+  // context given by |getter| instead of using the one returned by
+  // |GetRequestContext| implemented by derived classes.
+  std::unique_ptr<Request> StartRequestWithContext(
+      const std::string& account_id,
+      net::URLRequestContextGetter* getter,
+      const ScopeSet& scopes,
+      Consumer* consumer);
+
+  // Lists account IDs of all accounts with a refresh token maintained by this
+  // instance.
+  std::vector<std::string> GetAccounts() const;
+
+  // Returns true if a refresh token exists for |account_id|. If false, calls to
+  // |StartRequest| will result in a Consumer::OnGetTokenFailure callback.
+  bool RefreshTokenIsAvailable(const std::string& account_id) const;
+
+  // This method cancels all token requests, revoke all refresh tokens and
+  // cached access tokens.
+  void RevokeAllCredentials();
+
+  // Mark an OAuth2 |access_token| issued for |account_id| and |scopes| as
+  // invalid. This should be done if the token was received from this class,
+  // but was not accepted by the server (e.g., the server returned
+  // 401 Unauthorized). The token will be removed from the cache for the given
+  // scopes.
+  void InvalidateAccessToken(const std::string& account_id,
+                             const ScopeSet& scopes,
+                             const std::string& access_token);
+
+  // Like |InvalidateToken| except is uses |client_id| to identity OAuth2 client
+  // app that issued the request instead of Chrome's default values.
+  void InvalidateAccessTokenForClient(const std::string& account_id,
+                                      const std::string& client_id,
+                                      const ScopeSet& scopes,
+                                      const std::string& access_token);
+
+  void set_max_authorization_token_fetch_retries_for_testing(int max_retries);
+  // Returns the current number of pending fetchers matching given params.
+  size_t GetNumPendingRequestsForTesting(
+      const std::string& client_id,
+      const std::string& account_id,
+      const ScopeSet& scopes) const;
+
+  OAuth2TokenServiceDelegate* GetDelegate();
+  const OAuth2TokenServiceDelegate* GetDelegate() const;
+
+ protected:
+  // Implements a cancelable |OAuth2TokenService::Request|, which should be
+  // operated on the UI thread.
+  // TODO(davidroche): move this out of header file.
+  class RequestImpl : public base::SupportsWeakPtr<RequestImpl>,
+                      public Request {
+   public:
+    // |consumer| is required to outlive this.
+    RequestImpl(const std::string& account_id, Consumer* consumer);
+    ~RequestImpl() override;
+
+    // Overridden from Request:
+    std::string GetAccountId() const override;
+
+    std::string GetConsumerId() const;
+
+    // Informs |consumer_| that this request is completed.
+    void InformConsumer(const GoogleServiceAuthError& error,
+                        const std::string& access_token,
+                        const base::Time& expiration_date);
+
+   private:
+    // |consumer_| to call back when this request completes.
+    const std::string account_id_;
+    Consumer* const consumer_;
+
+    SEQUENCE_CHECKER(sequence_checker_);
+  };
+
+  // Implement it in delegates if they want to report errors to the user.
+  void UpdateAuthError(const std::string& account_id,
+                       const GoogleServiceAuthError& error);
+
+  // Add a new entry to the cache.
+  // Subclasses can override if there are implementation-specific reasons
+  // that an access token should ever not be cached.
+  virtual void RegisterCacheEntry(const std::string& client_id,
+                                  const std::string& account_id,
+                                  const ScopeSet& scopes,
+                                  const std::string& access_token,
+                                  const base::Time& expiration_date);
+
+  // Clears the internal token cache.
+  void ClearCache();
+
+  // Clears all of the tokens belonging to |account_id| from the internal token
+  // cache. It does not matter what other parameters, like |client_id| were
+  // used to request the tokens.
+  void ClearCacheForAccount(const std::string& account_id);
+
+  // Cancels all requests that are currently in progress.
+  void CancelAllRequests();
+
+  // Cancels all requests related to a given |account_id|.
+  void CancelRequestsForAccount(const std::string& account_id);
+
+  // Fetches an OAuth token for the specified client/scopes. Virtual so it can
+  // be overridden for tests and for platform-specific behavior.
+  virtual void FetchOAuth2Token(RequestImpl* request,
+                                const std::string& account_id,
+                                net::URLRequestContextGetter* getter,
+                                const std::string& client_id,
+                                const std::string& client_secret,
+                                const ScopeSet& scopes);
+
+  // Create an access token fetcher for the given account id.
+  OAuth2AccessTokenFetcher* CreateAccessTokenFetcher(
+      const std::string& account_id,
+      net::URLRequestContextGetter* getter,
+      OAuth2AccessTokenConsumer* consumer);
+
+  // Invalidates the |access_token| issued for |account_id|, |client_id| and
+  // |scopes|. Virtual so it can be overriden for tests and for platform-
+  // specifc behavior.
+  virtual void InvalidateAccessTokenImpl(const std::string& account_id,
+                                         const std::string& client_id,
+                                         const ScopeSet& scopes,
+                                         const std::string& access_token);
+
+ private:
+  class Fetcher;
+  friend class Fetcher;
+  friend class OAuth2TokenServiceDelegate;
+
+  // The parameters used to fetch an OAuth2 access token.
+  struct RequestParameters {
+    RequestParameters(const std::string& client_id,
+                      const std::string& account_id,
+                      const ScopeSet& scopes);
+    RequestParameters(const RequestParameters& other);
+    ~RequestParameters();
+    bool operator<(const RequestParameters& params) const;
+
+    // OAuth2 client id.
+    std::string client_id;
+    // Account id for which the request is made.
+    std::string account_id;
+    // URL scopes for the requested access token.
+    ScopeSet scopes;
+  };
+
+  // Provide a request context used for fetching access tokens with the
+  // |StartRequest| method.
+  net::URLRequestContextGetter* GetRequestContext() const;
+
+  // Struct that contains the information of an OAuth2 access token.
+  struct CacheEntry {
+    std::string access_token;
+    base::Time expiration_date;
+  };
+
+  // This method does the same as |StartRequestWithContext| except it
+  // uses |client_id| and |client_secret| to identify OAuth
+  // client app instead of using Chrome's default values.
+  std::unique_ptr<Request> StartRequestForClientWithContext(
+      const std::string& account_id,
+      net::URLRequestContextGetter* getter,
+      const std::string& client_id,
+      const std::string& client_secret,
+      const ScopeSet& scopes,
+      Consumer* consumer);
+
+  // Returns true if GetCacheEntry would return a valid cache entry for the
+  // given scopes.
+  bool HasCacheEntry(const RequestParameters& client_scopes);
+
+  // Posts a task to fire the Consumer callback with the cached token.  Must
+  // Must only be called if HasCacheEntry() returns true.
+  void StartCacheLookupRequest(RequestImpl* request,
+                               const RequestParameters& client_scopes,
+                               Consumer* consumer);
+
+  // Returns a currently valid OAuth2 access token for the given set of scopes,
+  // or NULL if none have been cached. Note the user of this method should
+  // ensure no entry with the same |client_scopes| is added before the usage of
+  // the returned entry is done.
+  const CacheEntry* GetCacheEntry(const RequestParameters& client_scopes);
+
+  // Removes an access token for the given set of scopes from the cache.
+  // Returns true if the entry was removed, otherwise false.
+  bool RemoveCacheEntry(const RequestParameters& client_scopes,
+                        const std::string& token_to_remove);
+
+  // Called when |fetcher| finishes fetching.
+  void OnFetchComplete(Fetcher* fetcher);
+
+  // Called when a number of fetchers need to be canceled.
+  void CancelFetchers(std::vector<Fetcher*> fetchers_to_cancel);
+
+  // The cache of currently valid tokens.
+  typedef std::map<RequestParameters, CacheEntry> TokenCache;
+  TokenCache token_cache_;
+
+  std::unique_ptr<OAuth2TokenServiceDelegate> delegate_;
+
+  // A map from fetch parameters to a fetcher that is fetching an OAuth2 access
+  // token using these parameters.
+  std::map<RequestParameters, std::unique_ptr<Fetcher>> pending_fetchers_;
+
+  // List of observers to notify when access token status changes.
+  base::ObserverList<DiagnosticsObserver, true> diagnostics_observer_list_;
+
+  // The depth of batch changes.
+  int batch_change_depth_;
+
+  // Maximum number of retries in fetching an OAuth2 access token.
+  static int max_fetch_retry_num_;
+
+  FRIEND_TEST_ALL_PREFIXES(OAuth2TokenServiceTest, RequestParametersOrderTest);
+  FRIEND_TEST_ALL_PREFIXES(OAuth2TokenServiceTest,
+                           SameScopesRequestedForDifferentClients);
+  FRIEND_TEST_ALL_PREFIXES(OAuth2TokenServiceTest, UpdateClearsCache);
+
+  SEQUENCE_CHECKER(sequence_checker_);
+
+  DISALLOW_COPY_AND_ASSIGN(OAuth2TokenService);
+};
+
+#endif  // GOOGLE_APIS_GAIA_OAUTH2_TOKEN_SERVICE_H_
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+//
+// A complete set of unit tests for OAuth2MintTokenFlow.
+
+#include "google_apis/gaia/oauth2_mint_token_flow.h"
+
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "base/json/json_reader.h"
+#include "base/strings/utf_string_conversions.h"
+#include "base/values.h"
+#include "google_apis/gaia/google_service_auth_error.h"
+#include "google_apis/gaia/oauth2_access_token_fetcher.h"
+#include "net/base/net_errors.h"
+#include "net/url_request/test_url_fetcher_factory.h"
+#include "net/url_request/url_request_status.h"
+#include "testing/gmock/include/gmock/gmock.h"
+#include "testing/gtest/include/gtest/gtest.h"
+
+using net::TestURLFetcher;
+using net::URLFetcher;
+using net::URLRequestStatus;
+using testing::_;
+using testing::StrictMock;
+
+namespace {
+
+static const char kValidTokenResponse[] =
+    "{"
+    "  \"token\": \"at1\","
+    "  \"issueAdvice\": \"Auto\","
+    "  \"expiresIn\": \"3600\""
+    "}";
+static const char kTokenResponseNoAccessToken[] =
+    "{"
+    "  \"issueAdvice\": \"Auto\""
+    "}";
+
+static const char kValidIssueAdviceResponse[] =
+    "{"
+    "  \"issueAdvice\": \"consent\","
+    "  \"consent\": {"
+    "    \"oauthClient\": {"
+    "      \"name\": \"Test app\","
+    "      \"iconUri\": \"\","
+    "      \"developerEmail\": \"munjal@chromium.org\""
+    "    },"
+    "    \"scopes\": ["
+    "      {"
+    "        \"description\": \"Manage your calendars\","
+    "        \"detail\": \"\nView and manage your calendars\n\""
+    "      },"
+    "      {"
+    "        \"description\": \"Manage your documents\","
+    "        \"detail\": \"\nView your documents\nUpload new documents\n\""
+    "      }"
+    "    ]"
+    "  }"
+    "}";
+
+static const char kIssueAdviceResponseNoDescription[] =
+    "{"
+    "  \"issueAdvice\": \"consent\","
+    "  \"consent\": {"
+    "    \"oauthClient\": {"
+    "      \"name\": \"Test app\","
+    "      \"iconUri\": \"\","
+    "      \"developerEmail\": \"munjal@chromium.org\""
+    "    },"
+    "    \"scopes\": ["
+    "      {"
+    "        \"description\": \"Manage your calendars\","
+    "        \"detail\": \"\nView and manage your calendars\n\""
+    "      },"
+    "      {"
+    "        \"detail\": \"\nView your documents\nUpload new documents\n\""
+    "      }"
+    "    ]"
+    "  }"
+    "}";
+
+static const char kIssueAdviceResponseNoDetail[] =
+    "{"
+    "  \"issueAdvice\": \"consent\","
+    "  \"consent\": {"
+    "    \"oauthClient\": {"
+    "      \"name\": \"Test app\","
+    "      \"iconUri\": \"\","
+    "      \"developerEmail\": \"munjal@chromium.org\""
+    "    },"
+    "    \"scopes\": ["
+    "      {"
+    "        \"description\": \"Manage your calendars\","
+    "        \"detail\": \"\nView and manage your calendars\n\""
+    "      },"
+    "      {"
+    "        \"description\": \"Manage your documents\""
+    "      }"
+    "    ]"
+    "  }"
+    "}";
+
+std::vector<std::string> CreateTestScopes() {
+  std::vector<std::string> scopes;
+  scopes.push_back("http://scope1");
+  scopes.push_back("http://scope2");
+  return scopes;
+}
+
+static IssueAdviceInfo CreateIssueAdvice() {
+  IssueAdviceInfo ia;
+  IssueAdviceInfoEntry e1;
+  e1.description = base::ASCIIToUTF16("Manage your calendars");
+  e1.details.push_back(base::ASCIIToUTF16("View and manage your calendars"));
+  ia.push_back(e1);
+  IssueAdviceInfoEntry e2;
+  e2.description = base::ASCIIToUTF16("Manage your documents");
+  e2.details.push_back(base::ASCIIToUTF16("View your documents"));
+  e2.details.push_back(base::ASCIIToUTF16("Upload new documents"));
+  ia.push_back(e2);
+  return ia;
+}
+
+class MockDelegate : public OAuth2MintTokenFlow::Delegate {
+ public:
+  MockDelegate() {}
+  ~MockDelegate() {}
+
+  MOCK_METHOD2(OnMintTokenSuccess, void(const std::string& access_token,
+                                        int time_to_live));
+  MOCK_METHOD1(OnIssueAdviceSuccess,
+               void (const IssueAdviceInfo& issue_advice));
+  MOCK_METHOD1(OnMintTokenFailure,
+               void(const GoogleServiceAuthError& error));
+};
+
+class MockMintTokenFlow : public OAuth2MintTokenFlow {
+ public:
+  explicit MockMintTokenFlow(MockDelegate* delegate,
+                             const OAuth2MintTokenFlow::Parameters& parameters)
+      : OAuth2MintTokenFlow(delegate, parameters) {}
+  ~MockMintTokenFlow() {}
+
+  MOCK_METHOD0(CreateAccessTokenFetcher, OAuth2AccessTokenFetcher*());
+};
+
+}  // namespace
+
+class OAuth2MintTokenFlowTest : public testing::Test {
+ public:
+  OAuth2MintTokenFlowTest() {}
+  virtual ~OAuth2MintTokenFlowTest() { }
+
+ protected:
+  void CreateFlow(OAuth2MintTokenFlow::Mode mode) {
+    return CreateFlow(&delegate_, mode, "");
+  }
+
+  void CreateFlowWithDeviceId(const std::string& device_id) {
+    return CreateFlow(&delegate_, OAuth2MintTokenFlow::MODE_ISSUE_ADVICE,
+                      device_id);
+  }
+
+  void CreateFlow(MockDelegate* delegate,
+                  OAuth2MintTokenFlow::Mode mode,
+                  const std::string& device_id) {
+    std::string ext_id = "ext1";
+    std::string client_id = "client1";
+    std::vector<std::string> scopes(CreateTestScopes());
+    flow_.reset(new MockMintTokenFlow(
+        delegate, OAuth2MintTokenFlow::Parameters(ext_id, client_id, scopes,
+                                                  device_id, mode)));
+  }
+
+  // Helper to parse the given string to DictionaryValue.
+  static base::DictionaryValue* ParseJson(const std::string& str) {
+    std::unique_ptr<base::Value> value = base::JSONReader::Read(str);
+    EXPECT_TRUE(value.get());
+    EXPECT_EQ(base::Value::Type::DICTIONARY, value->GetType());
+    return static_cast<base::DictionaryValue*>(value.release());
+  }
+
+  std::unique_ptr<MockMintTokenFlow> flow_;
+  StrictMock<MockDelegate> delegate_;
+};
+
+TEST_F(OAuth2MintTokenFlowTest, CreateApiCallBody) {
+  {  // Issue advice mode.
+    CreateFlow(OAuth2MintTokenFlow::MODE_ISSUE_ADVICE);
+    std::string body = flow_->CreateApiCallBody();
+    std::string expected_body(
+        "force=false"
+        "&response_type=none"
+        "&scope=http://scope1+http://scope2"
+        "&client_id=client1"
+        "&origin=ext1");
+    EXPECT_EQ(expected_body, body);
+  }
+  {  // Record grant mode.
+    CreateFlow(OAuth2MintTokenFlow::MODE_RECORD_GRANT);
+    std::string body = flow_->CreateApiCallBody();
+    std::string expected_body(
+        "force=true"
+        "&response_type=none"
+        "&scope=http://scope1+http://scope2"
+        "&client_id=client1"
+        "&origin=ext1");
+    EXPECT_EQ(expected_body, body);
+  }
+  {  // Mint token no force mode.
+    CreateFlow(OAuth2MintTokenFlow::MODE_MINT_TOKEN_NO_FORCE);
+    std::string body = flow_->CreateApiCallBody();
+    std::string expected_body(
+        "force=false"
+        "&response_type=token"
+        "&scope=http://scope1+http://scope2"
+        "&client_id=client1"
+        "&origin=ext1");
+    EXPECT_EQ(expected_body, body);
+  }
+  {  // Mint token force mode.
+    CreateFlow(OAuth2MintTokenFlow::MODE_MINT_TOKEN_FORCE);
+    std::string body = flow_->CreateApiCallBody();
+    std::string expected_body(
+        "force=true"
+        "&response_type=token"
+        "&scope=http://scope1+http://scope2"
+        "&client_id=client1"
+        "&origin=ext1");
+    EXPECT_EQ(expected_body, body);
+  }
+  {  // Mint token with device_id.
+    CreateFlowWithDeviceId("device_id1");
+    std::string body = flow_->CreateApiCallBody();
+    std::string expected_body(
+        "force=false"
+        "&response_type=none"
+        "&scope=http://scope1+http://scope2"
+        "&client_id=client1"
+        "&origin=ext1"
+        "&device_id=device_id1"
+        "&device_type=chrome"
+        "&lib_ver=extension");
+    EXPECT_EQ(expected_body, body);
+  }
+}
+
+TEST_F(OAuth2MintTokenFlowTest, ParseMintTokenResponse) {
+  {  // Access token missing.
+    std::unique_ptr<base::DictionaryValue> json(
+        ParseJson(kTokenResponseNoAccessToken));
+    std::string at;
+    int ttl;
+    EXPECT_FALSE(OAuth2MintTokenFlow::ParseMintTokenResponse(json.get(), &at,
+                                                             &ttl));
+    EXPECT_TRUE(at.empty());
+  }
+  {  // All good.
+    std::unique_ptr<base::DictionaryValue> json(ParseJson(kValidTokenResponse));
+    std::string at;
+    int ttl;
+    EXPECT_TRUE(OAuth2MintTokenFlow::ParseMintTokenResponse(json.get(), &at,
+                                                            &ttl));
+    EXPECT_EQ("at1", at);
+    EXPECT_EQ(3600, ttl);
+  }
+}
+
+TEST_F(OAuth2MintTokenFlowTest, ParseIssueAdviceResponse) {
+  {  // Description missing.
+    std::unique_ptr<base::DictionaryValue> json(
+        ParseJson(kIssueAdviceResponseNoDescription));
+    IssueAdviceInfo ia;
+    EXPECT_FALSE(OAuth2MintTokenFlow::ParseIssueAdviceResponse(
+        json.get(), &ia));
+    EXPECT_TRUE(ia.empty());
+  }
+  {  // Detail missing.
+    std::unique_ptr<base::DictionaryValue> json(
+        ParseJson(kIssueAdviceResponseNoDetail));
+    IssueAdviceInfo ia;
+    EXPECT_FALSE(OAuth2MintTokenFlow::ParseIssueAdviceResponse(
+        json.get(), &ia));
+    EXPECT_TRUE(ia.empty());
+  }
+  {  // All good.
+    std::unique_ptr<base::DictionaryValue> json(
+        ParseJson(kValidIssueAdviceResponse));
+    IssueAdviceInfo ia;
+    EXPECT_TRUE(OAuth2MintTokenFlow::ParseIssueAdviceResponse(
+        json.get(), &ia));
+    IssueAdviceInfo ia_expected(CreateIssueAdvice());
+    EXPECT_EQ(ia_expected, ia);
+  }
+}
+
+TEST_F(OAuth2MintTokenFlowTest, ProcessApiCallSuccess) {
+  {  // No body.
+    TestURLFetcher url_fetcher(1, GURL("http://www.google.com"), NULL);
+    url_fetcher.SetResponseString(std::string());
+    CreateFlow(OAuth2MintTokenFlow::MODE_MINT_TOKEN_NO_FORCE);
+    EXPECT_CALL(delegate_, OnMintTokenFailure(_));
+    flow_->ProcessApiCallSuccess(&url_fetcher);
+  }
+  {  // Bad json.
+    TestURLFetcher url_fetcher(1, GURL("http://www.google.com"), NULL);
+    url_fetcher.SetResponseString("foo");
+    CreateFlow(OAuth2MintTokenFlow::MODE_MINT_TOKEN_NO_FORCE);
+    EXPECT_CALL(delegate_, OnMintTokenFailure(_));
+    flow_->ProcessApiCallSuccess(&url_fetcher);
+  }
+  {  // Valid json: no access token.
+    TestURLFetcher url_fetcher(1, GURL("http://www.google.com"), NULL);
+    url_fetcher.SetResponseString(kTokenResponseNoAccessToken);
+    CreateFlow(OAuth2MintTokenFlow::MODE_MINT_TOKEN_NO_FORCE);
+    EXPECT_CALL(delegate_, OnMintTokenFailure(_));
+    flow_->ProcessApiCallSuccess(&url_fetcher);
+  }
+  {  // Valid json: good token response.
+    TestURLFetcher url_fetcher(1, GURL("http://www.google.com"), NULL);
+    url_fetcher.SetResponseString(kValidTokenResponse);
+    CreateFlow(OAuth2MintTokenFlow::MODE_MINT_TOKEN_NO_FORCE);
+    EXPECT_CALL(delegate_, OnMintTokenSuccess("at1", 3600));
+    flow_->ProcessApiCallSuccess(&url_fetcher);
+  }
+  {  // Valid json: no description.
+    TestURLFetcher url_fetcher(1, GURL("http://www.google.com"), NULL);
+    url_fetcher.SetResponseString(kIssueAdviceResponseNoDescription);
+    CreateFlow(OAuth2MintTokenFlow::MODE_ISSUE_ADVICE);
+    EXPECT_CALL(delegate_, OnMintTokenFailure(_));
+    flow_->ProcessApiCallSuccess(&url_fetcher);
+  }
+  {  // Valid json: no detail.
+    TestURLFetcher url_fetcher(1, GURL("http://www.google.com"), NULL);
+    url_fetcher.SetResponseString(kIssueAdviceResponseNoDetail);
+    CreateFlow(OAuth2MintTokenFlow::MODE_ISSUE_ADVICE);
+    EXPECT_CALL(delegate_, OnMintTokenFailure(_));
+    flow_->ProcessApiCallSuccess(&url_fetcher);
+  }
+  {  // Valid json: good issue advice response.
+    TestURLFetcher url_fetcher(1, GURL("http://www.google.com"), NULL);
+    url_fetcher.SetResponseString(kValidIssueAdviceResponse);
+    CreateFlow(OAuth2MintTokenFlow::MODE_ISSUE_ADVICE);
+    IssueAdviceInfo ia(CreateIssueAdvice());
+    EXPECT_CALL(delegate_, OnIssueAdviceSuccess(ia));
+    flow_->ProcessApiCallSuccess(&url_fetcher);
+  }
+}
+
+TEST_F(OAuth2MintTokenFlowTest, ProcessApiCallFailure) {
+  {  // Null delegate should work fine.
+    TestURLFetcher url_fetcher(1, GURL("http://www.google.com"), NULL);
+    url_fetcher.set_status(URLRequestStatus::FromError(net::ERR_FAILED));
+    CreateFlow(NULL, OAuth2MintTokenFlow::MODE_MINT_TOKEN_NO_FORCE, "");
+    flow_->ProcessApiCallFailure(&url_fetcher);
+  }
+
+  {  // Non-null delegate.
+    TestURLFetcher url_fetcher(1, GURL("http://www.google.com"), NULL);
+    url_fetcher.set_status(URLRequestStatus::FromError(net::ERR_FAILED));
+    CreateFlow(OAuth2MintTokenFlow::MODE_MINT_TOKEN_NO_FORCE);
+    EXPECT_CALL(delegate_, OnMintTokenFailure(_));
+    flow_->ProcessApiCallFailure(&url_fetcher);
+  }
+}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  âPNG
+
+   IHDR       ö-N   	pHYs  ƒ  ƒï+    IDATx⁄Ì][rÎ:d\‹–›ˇﬁí˘C ç∆É≤R5˛ …qlâ¬≥4æ˛˘ÁüqÔÎÁÁ'ÒŒ˜œ___°}◊ı·Ã_]Ô±.ÈÁÁgª˛ØØØØØØıó___ﬂﬂﬂâ”pœ°¯zΩ^ÔØÿéb˚ﬁ˜M≠wjùÙ¡Òí˛A~˛ı˚ÌùÍkqy^-jsyæõÿπÔƒÔWˇã‘U™‹ø≠ú[ÀsT/¯í-˛∏‰€,££ûï¸sı{Waê
+,È¨üóz?ÎÔØÔ=‘˜õ]…ìä—¯‘UÀßÍ¸v◊Î'3á L>ñ$ﬁ4ﬁush™e¡
+√ﬂé¸LU‹/CD‘Ù~	q˘Y^ÎaÒèçë"è,$§À^c ,
+ñˆ&≤ı)$l'∏$Îø∂áﬁÚN˘ΩÆ±êè@/’kHzÉKüÄ—µbì0¸	õ˘˛˛é*7HLP‰™ ˚¨£ÁPq≥Æˇ¡vq{¸ÎïªÆœı$X‘ J^âzI¯x∑VçG6W	ÓÓÁÁg6ö‰äX®q˘Îıí*~•zUñÀé&∏÷«Ç¿¶® ñ(`˚"ìTú‰lü	3ë∑¨ﬂÎ:2JdÆGFÊ2@
+»Bñµ1KSÁz–*D‡F¥Ó”"°ßzf≤âÏvkn*M2ymZƒ˚Xìﬂòq- H’¸Ñ†N˛≤é¢+™≈xmKåÄîö‡⁄òbxMä_©y∞™ Vµ}N"Ô⁄9ô—Æ÷"E“¥mÙ<d»sóµa¿dÏ¡DAi5∂\‘ì‡øR5ﬂΩS5Í≈.ÑFå¢ZÿÖ&|i=æ‚˝À#j–>YßSƒF˘O„≥y““3?Ûéˇ◊f≠COƒÖ2’‰[Eá–Ç9Äë
+T˙‰µù*üÂÙaıπ≤ÊzB;MàI/§ß~wÆ"I°ëÚ GßRU$∂¡ÀÜ%¡|¢~V–¯ıı5±aäÖ—ËòÑ`ñöê∏/´∏uF¯@›çÅ¸£Å2P'Î=Íi®rÃ$T|}êå#Ä5ƒZMz0ÂÅîƒCRS≤Ï@Í§k™ÅÜoÆ≥πI$ØZÃ;A+A&V/LMéy§à	Ä`‘/§‰ù)≤U√Á£Ωh«U.ÎPS1+øLfQ¡Ä/Éüb®*tûQ˝·=ïzõR6BÕtŒπU‹œüå|c+µNÚ¡ªòC{¨0ü‹ÉgCÊóÚ<yµºB«Òª´´«z„€;%Â∫Êqcs∫ts≤°˛!IfE§‰.=◊DuBm'`EkÚ"…ê:`Äbàl=p√°t"ÑÔexkıÚB©)Æcú`Ê‰>ùD™˙ÍˆêÂÊ4~ ã/CdsÅÂ.‘ﬂØ~ tµ™]5¿Ò˙º˙+5∞~âB∑NÍûÃöxL>Ïªp7Àa8Ex;‰(‘dëÅÒÔs}8 qK‘???Ø◊9òÚ"R‹?îö• #’Ã£ ÃkÜ\·˙∞[b˙UL+é⁄[ë„ﬂt¿ÚäÃ≠}∏õ	îa*≠rÎÙ@‡∑]–ÅëÍ8bl1êÆÌz&§ÉW?MòÛ¢hªâ-á∆&ö4∑Q77-‚i†71ù™VËt m˛‹¿◊Œ‘oú8JK¯óä®&ÌêËè‘Dòjá‹ﬁ234∆Â™XSd∑îÈ∫‹≈∏~⁄™≠1õLîãØZUXS,)˙€˜˛)¢ ì∂¥>$Ú⁄ƒdpB%∞&$*¶.‹$˜Æ¶˛R;¨éwûN˛\≠Tij›ˆiÊ[©ùı6U~yÔœïZÇ~≤e∫¯…°¡†¡MZb<çÒÉ(GFØ™	V¶û}W!ì
+Äk°6
+{ƒBØß»Qkó„ª¬*w∫
+ã`˙2»í≥[?V˝Äj8∫9&n∂l|NÄô∑ƒ›äJ∆+rD€»/¿TE”FËD√ä[1…uºÚ…É[ª£˙.ÇûÉ§’M∆e%,Öº©XO‘ß“5= T©ä‹ı‰¨2µiÄãÙ!q°È2®iÇ≠ÑôØp/Xä;P –	k9#’¶
+¸åòVéûwa9N6Ì≠áõÓ
+ÂL•¢:ß5A≈g\LúAH•|ªN $∏`ëÏ[¡ Îüº∫–\U…*y≈&=L¡Aò¢»tV≠pπ(…∑aåò¡ƒB∑9¥~!U\∆ERU∂/b–Öüﬂ/3EnD**ﬁ†2˙h’ÉBÉK œUy-˝õ€#Ø√bñÌg⁄"“2”&dΩ;Wã‹∞s{¶ìô≠.våv%Ÿ—¬•ç‡ÿ˙ﬂ,‘Eﬂ@
+=É3Û_8#ï” è≠X=A•Üs˝å$'&YÀ8Å#aˆ2<iêhÇpü…q€∑Ñ≤ˆIµö?†NeY◊¶[7µ^√, Ë÷EXi7™{ﬁ≥ˆ—ÆiF∂6úæ$ekç!·¶Òwí2}Ï]µÃ‹÷	¯’o¿`Á“ﬁ≤ÊÕ¥°'Ä%riœ9ˇÕ£ f-´∂iƒñ)n®QæÎ¸’ﬂœJ0ŒÔõ`™<ΩïäÑÑR4`Dé¶∫9Vu÷JX”›Ä{TçãÜWÒp[ò~yóÆ˘Ñ√_óHŒ»@.-∏n*ÂJ s∏¡' ∫‹Ü‡.ÊêÔwõö*ym¬¥©y≈ØfäÙj•Ô(ƒ˝F≤0ãƒâÚE~À¨JNµF} ãèkµFG£ `¸Ø -Ú£\:í_ﬁ‡S¿E:Ÿ
+j¸yYÂ7DÓ⁄–·"Kç1n±¥eÍXπE‘†äÅ5ÎÇC#‹w*ı_‡≠-$›÷üìËxÇöÔôŸÍ£‰òïõîÉÓµÚzΩÔ]O¥8~p},©T*[¶•ì∫Â¢^!i/¿«™˘vû€Q»KBﬁ¿BmO7œY∆R](V	~»N’t€¨˙9ñp´n-ß∫è9 «¢öj™î?]òHò≠vo›ác\ÿΩI˜›˝eÌ	+#Lõ°â∆H$Bˆ°ÑLIt◊`ËâÛè¿ç†¨¯ô-ük√≈Ã·m˘yû=Ö‹ÇÕ}èà«1ı7Ä}∂yΩ^dò
+ê"+∞Ü°›{L#)Ë[˙ßå‰á\¡∂ê∑ﬂuL6«tƒW^¡◊Ö6'   7©ª˜“Éj(q™…;v+Ωvô?›∞p{√ãyï°ÿÿŸÙ≈Ü3LÁü@†±πEüF:&ú§ÚMÈçÒ˜®ït¢2∆¿HÃ@¶Œì)>∑‰Æ+¿≠ÖçvtíSﬁ√⁄ƒä}±‰%BàFLvD˙·ã….~hâ—º!bnæ≤j%!@ Mw’É«¯Íç˚º]Ò)˛ﬁCÔa∞öKÖ•	“≤0—æ6›≠Z1œ|‘—æ˛®Eüô¨∫ò’0qK1 ≤‡KúpÉ¢lﬂ¨h¬˚ï…Ç∂{ú*ä‘8I<Ë¶E…)pÉ÷ÒY∏L◊»—J>´ëa[›j¶ï¡ıÿ	mTI\rÎ<\˛S∆|\˚*fKÆ˚ã›lT%ΩT_åou´˜√Ê*n˛>Pø˜>Øó∏™• {ç®Íx*√Ê]t˚ˇ´¥7*W§ˆÙ¶◊¥N2RÎN”G	a≠nôCΩ®Q:◊¢/m9ŒUHá0àñuƒZ˜q∞:s∫.¿osÆ°$‡'J∞[;ÍâÆl9Eàä::˘3˘t@≈P‚uíí¶è*ÇÜ¢©zÜ‡ÆæÂA{∑√˙¢m≥øU^ ì¶utπYM:ÉÁYïp∏;Kçà›-™Ç£∏ Ó´®¢ª",Ì«ÓÚé·m|≤»7•¥WÙãÓŒÌ° ÆE√!˜vT˙6U∂wbw&V;‰ä=ÓÈr£a∑†ß[òax‹#æ˙7ÌB’2Ÿö#øŸ‡≤—¥lÿ’Ü	B∑ú‚w∞Òb⁄hÌx9À‘©Y/ˇEºDJ\OZ⁄©±&X≠uòé†“Ω¬åí≈Yk–tZÿ[
+“Àn≠ûÚ®u`!zÖ¿;Òj`/jÂ˘´.h°>õmqÛor»∆æ˚Ã%Et√F±kÌ‹é◊iŒπÃ≠MáA4tøãØÀçÀ¨éÙJ˜vWœøÍ?ß≠Dy∏*ÿŒ°'ßÚ¨Íû§ ŸﬁzΩ\
+ó‚!Á0ÂËâ¥`ﬂÔÔÔKv≠&¬‹1ôŒ‚Ü¬
+É>vÉó†©…YÀïYQq#:Üc"±<‰ãáQÙ¡ï8ó®qe£úuOòÈHÔn$â˛CﬂªoªièC◊◊ﬁKGN”Û√@ÍÊ˜’Öê`E…¿ÆVR◊ñn∂èú „Y¿ú(ÅE´cÓŒäªﬁ# &}O£´;◊∆å¥Z´H’?\cﬂP∑=û^wÖ)/ÅÙ…"æWøI$3íœåRÑ‡çê-òâ’eﬂŒπÖê–ﬂ*c=<˜vd. ı‡-ºØ“MI›ÚÔì∑!/]î«V(…ÄÅgKÛSÑH«Æ;öQëU[Ç}—JòF+˘„ù‘âJó–ìπq^HºéÑ&•<ÖÇ%ãpR-<IqWuÄ◊µÜÙôYr•ì7&í⁄‹\ˇ	¯i©9c%mˇ˚Ò_¥Ãb/>ô≥~∞‹ö€pEÒ±`YºπjÙB/ÜãŒù¡©»˛Ã¢¿µl∞Îπå∆Kÿ`H}`z—6\5ß@d¡¶â=,XF∑˙¥º`ÃÊ¢zB+nö &ú∞{t√KÀÔÕ\æ/„Ô”cKµ∏ìYÃ\∏ØÇ™	g†åk{Eh):ÓR·π¶ô·‡mÁ`5Ñ$Ìcò‹-€bŸuPkÖm$f4™¿ugª¯h’]‹‡ÑƒΩ%1"¥Â	$ä9`@	„´√yk∏⁄·´*πU7îµ–§£oª±*¨™Ö∏ÍàÍ6+∑E—’Åv*8¶|Vlöåõe,:FÅ’¿FÖﬁ›°ÁÈ¶˘ÏE-~mÒïö›∫Ñ”™{±jm
+3éG≠p‚“`NÂ£/fØGΩ]Íª%*2]eÃ«Ü≤jôhÇ˘ò(¸ b›îS$ÃhEzÄD•»j5§»X»á.ÿ $¸¶«âñ¥pù$1ÒÏnöë¿<è`h8iP5àHÃ‘’ÛD ∞	√¥ú∏T◊ßñ‹ ÄR¯ˆá_Ü¿‡qV)óo’ªsH™kãx∞¸°ıç2™f&è…†N}U,®Àç‡¸m\k>»˝bdÉæ:H”UG˝˘/í[!§•\?=ì4¿R∂klV.ä{z$…)sÔÓ!®V@~Àˆ z„®∑¯˛˛ñÏ/≥Æd™≠JXÓbÛ`"∫ïè\ç˛UYyBnp¬Ei¨““˙ûµy)’êâ{¥˘g®◊œ[€EtRQZ&≥jí)◊·wÚláΩqWtã¶‘ûÊvxn©*ü?mr–›‡	z]…F&]ÃÅ¨∆eE…VY\•´AN⁄¢qÓŸ‹ö⁄”‡z¬¬πœﬁ≈⁄∞¡∂`–Ù¢ÊëVÚ&a–!ÿ’œ¢-±x	ÍÂa.≠<§Ç…¡æÊ_)2´åcÉÛ#E{ö‹ÎsÓk'¶˚ƒÙ>…»˘6} ihfª}⁄T…2ëÖ¡’kµ4∆À…,
+n/˙ãp£õ=	∑ØD£¶P)◊Eæ≠ñfêì¨⁄TâªP]{máv{:xDÿU∑¡ŒQÉﬁ÷≤`∆L+¬∂˙±1</˚Êc∏Å1∫jÜÄÛTpÀÓV¬öPBÅFéêF≠†Ø˜;±∞™€K…µ|‰ ∆±‚ö[]ﬁ+†	÷R ¡-ˇSYóﬂqµr/∫"…⁄og—Ä@b;…»ßí¬Y+æÔ$ùXi\∑û”µ§B]∂ Ä	/«lsbåﬁ8ƒ¨'êÿ,è'c\åÖ™è>ìx˙hZQ%;ãg‘êßGi-”é…æ@V$lcj¿‰◊N∆Ê^Û∂Ë0ÉÛØøà˜Wá(v»≈?| h¥	De¬„¸2íi·\à.5‚c<ûæb’dn√7´2íÕ¥£ûàã\π*n◊t+”ÊH~eiv˝≤¯ﬁ˜b∞Hñ√»£Õ·ZPi⁄è•;ﬁî8á‚Ç≥ä⁄ıàÒ¸ö2ÑÈÍ ‰∂ùû~π¸ª	Õﬂû•T°d‡TMFA<“uÓ∂ç‰|Ö’∞ÁÆå`Õ8JZsCçíá∂È,HeZ¸’˝Á÷,o=•I(ïK5êÿ•w»!‰≤)ó√Ù_Ã·èn^ê,ÉP˙‚+ ÔŒ¯∑ÔYƒ´Ö≠NçD*›—}TN\Ó¯ƒ•˛ÎÆâ v¸AÔ?¥—€ãyÖÍ¥xfç‰äåÏ¶}—πZA.L`Ñﬁ")√5O,\™3‹7öÃ-æ*“«c˙ó»:∫CÍåe¡<Á∏ùÄ˙1∑ﬂ‡∏Qf]LC¸ò|°dî)¡N±b‘dÒã‡ªê≈FZó=a2• ¯ÅÚÏL.¡ <'˜ï$ª»C¡ÛπWÆúY˝7ΩßêÊ∫œ´æ∑Ê#ä±y?@õêìÿIF2ßëæ˙™ku˚(Ô‡…’RÓ&º‡,ó”3y09ì˝YÁ‡‚u2FrI]≠Oû≈äL◊∞Xó®"íÑ‹¨âø#w#ÿ™Ω—aÆßÅ⁄ÒˇÛO:4∑%–ûÍuŸsèç)R—EÉ≠*≈ÂÖ‰Êcû®x≥[`woH"ÂàYH∂ QÈcı°¯pıû"ïgoπ…µ\Lüs8≤ù; lìH	¨r9VfÅ˝dMzÉˇìGiÖÀÁní∂¨Ã$©§Ø?VgãY¡¯=¬RÖÜ«¡\*ﬁæ√ß¬ÓË=ò˙ø_˛$˚úÙ¿í˚tÓ∫ÖÇ3ö¬∂≥«Téòóxﬁ	¥ÏÆ#ãﬂπV˛’04JV◊q#:˜)∑¿8C–b}›Ú‰≈41gXÁÍ©G~π^@fOfEOÄ1≥8h%P(ª$⁄~÷3Û2≠«va;˘…»b‚—¶O0l_ﬂx-ò·c!&Ï!u¿ı'ònƒ6ËñÏÑ„∑Eµ‰é¿H%ô ˇ)éÑuò3·∏xÉY{T∆°–≤ú_R-ﬂä|“q
+ÿç`9ñŸ(«!Ñ¥Dm){‚pB<‚ùÁÆ±B∞R	F˚%´ÄZéu±‘ø¢	ÿ	Xƒg£»a⁄®?i	Vm?¿`ƒìLpÏ·rî„TOÂ∂¿Å/ÿêÂpÖœ◊©	j˝”Ì)≤u:	IM,‡ı ]ÓÕN"Í∞å¥ª'Á©ÄÜˇ˝Û∂[HÕ±(Ñ?¸”Éˆ'î°ì√¥®•WÇìÔó∆¸Åyk∑f¨™bzÅß≈ÃÉE[º¢ﬂﬂﬂ€fbUD»¥Ñ'} ~ösh˝AQz ∞#i§LìoÓ›anÖFVÄ›∫ä´≠Ã⁄Ã'¶'∞ iï∫∆«ÔÕæ√#s'{1†◊D^Çπ>∑Õ∫6kâ’é1Ï•5ÆÉu-.WÊ˝ÿ$ﬂâ∞˛ÛΩYƒ“Æt9"‰X\!& ¯,¬%Ë%1"º·F]gê7ó–Jﬁ˛ﬂJö+”Z‰å»¡⁄t ìäx$Óêå[¯zBhªï–ÉÔeF„±¬0ÒænW˘’Ë‚˘IBZW√Cò$G/ˇiÆï%1l\∫"ßd•ñO-,√¨nbå’áJÓ)€æ†Ã!”∑RÖƒuŒD⁄JÊ¶x2ö±Fâ'!¡~\f€ç{*Qñ¥÷Qäë≠ ÎËæ©øÚ™`¶≥«$œt@ÄÏpµmÍSÁÉ*µbÎ›®≈÷0^H>`u¬B“ÂÏÖ>Ò\â∏≥ä≥KHN+≤|9>!2@RìE=Ûfÿ£HdÉ‹º$ªòpöÅï·	öPÃïqZ•®HR£6¸nO•ª[	_0?1‘∆∫fp ∑H‹•5ò≠ëÁRXKl!—ˇÏ+Õ¶aM´…^√IjUHÄT;ÍÊóÍ•IÂàÅ•«˜¬WpcÌb≥Û∂C2Hõò2ó”ÎÎ]$;L7aÜ]»ä,yØy;¬ÊaYı™‘‡áWÄAãÒ\πÍ“ûÈûôq'û˝ı√9,¿Ï6≤w=öÈjŒ›ñ]>i¸'‡Òhı
+ÒV+Ï§®ıfUå‘v5(™S†∫ΩíÃ_πäÒLïÿòÙ-^ÎÎ7=ÛL»*l1^∏¬˙V Ó™‚Iá&K÷,éI≠˝ ñê∑W∏c∞.ˆ„1ﬁﬂ•nÜﬁ^ØÙÅ∏Ω¬%µeÏ˝qaL=—œÁ“&_"˛.á´ ºÖO G∫>gı!8è«d$i2ªs3iz?5⁄f’"◊F`\’ù!©wt=˛|´J‡ØÑ¬*2U¿â~4∆ã¶¬V~<∏Ó/ÜŒ¨AëÌõÿ¨ßÜù‡f="êÿã∑”ÎE´ÿ¢ÎFúSœ»\yKòŒÛï∏»ÑòIR’ç8¸"´b˝¿<XùˆVç÷Ñ∆sB∫éÎª[(Öó¸…7XÔﬂÊ ]È∫ÀœnîÖ™Ò∏Û‡—¯˜\l⁄é„±GU§“ F∑ëgÇ#.ébZÁËVÂ$ne9`P0Õ›móê±äåÎ‰Ã5/ÌÈØÏ±⁄"qˆ≤1”~;<⁄áóÂ>F|jƒıõÒ∆7†Ç_íùJuA°≈º%ñ—÷€¨Z\À?¨ã∂òAk≠∫ÖuÚlVZU’'ú„)ƒ°›ˆJXY6Vü—k3Ãitôº–À◊◊◊Îı⁄.›˙Ø¿uΩMé-Cµ6¸gï0æ¨´éõÒF—≤√†yt´~ΩöÄçî$<ñc@πE¢´nPπœm‘ï¥g$I¿∂˝âªˇTççÂr5≤LÖUM&"Ï˝-EmH[‰>ñI‹E8j|æ©∫zèÓòëÍãf.Ë'õàÜ◊‚ÜçAz˚Ôàw€[k¸64¸≠Ç≈Ï∞Ÿ¶ÏáQBn\,õÿj±›ììly0◊∫˛ôK%Õ34„öX’≥ìˆ{=ªwÿù≥Ó ˘ÚjYSÎ‹ô§ı~´›Zº'&
+’Å5A≠≠Ç^∆Ì9N¶$ëÀE‹yp2yM3cÁJT±ngäbÕ2Ç∫öI1*ÕW«·<ÄäRnY‡πË(
+?Zªû‰·¨Õπ???≥Öã≈Z¡≠Æg√[èÄ}‚ãq“èáÓ¬-L2>‰ùﬂ[œÃçîÜAEîäúRpÖﬁ»©ÖπDfV=a˚€wGf3á)3¸&•ME¶¡˚-ˇ$ﬁZ1∆4z»,m_ã ¯^H;Géå·Ä
+áÚ†ï<ŸñD9ó|[áOp≥‚
+ò¶&Îb˙¿∑±˛f’∞mm>u3-–‰X÷±E¿¯©´®"ÅËH˙á¢&ÄEuÓæ)í‹⁄ƒÆûﬁk‘Vr$*,ÜHnºÖÇPîÀRÉ4P»ì%¬ı7Ô2àº≤Ò” å≠∏Öo+"ALæ≤î˚¢ËäôUæ-"Ly¯ÔsI«|ÄÇÅôlí≤¢*â*så”w˚/@88ïNÙK{mü˘˛Cl‹éÆÙêef©Ω÷R’â‘“Zèl∑¸ª!EΩ<ˇÃ°+†›z„#<íÌ@…–PçU∞Îån4TÁò.dñ±¶ñçHdL*Ãd¿—E‚åóÊìFﬁÛ´hµe&pAPıG®ÉZÌ0sπG›¿ö¡d #¥jÁ§¯™ç€ß…‡¯J™˜z<y˜¬Ò–z/íÎø˙§\>÷\†4A]\Î~Óùn,ò∆ÊÅæ‚≥NGÆVΩÇ‰Ò¥~i≈÷÷P6Á†c|¿B_Néé"Im‚È óKb}ïXÀ≈[¿4WNŒ˘÷êâROx0¿ce!˜íEK’Uâ‰'	“ +^⁄¸√v#‹ƒù π∆`˙Ä	s…ˆÃÈ≥ ûq>Åf¯˛s€+∏ƒ0h¬TÀ‚ígW˛ºx–DàEŸÌ†˛»¿ †ûè˙Y¸ë¨<d’OÕ1b¶8ßÕÌ‹±ÿ‰◊ã!Ú§¨Ñ0%∫˙ ªÎxâµ…D´≈Í14-+71^Ìˇ[ﬂ0”"ãgÀJ;kãﬂŒ“&ìzuMä]R+3iêá…/]Âû|N‰¯5WêÂˆ∫Cv´—°4€óD„ÃuYÖñﬁ§äBÊ∆}ò º∫AÉú{∂í“¸G	≥“Ú$…≠HXÇd÷à¬”°odBØ5`¥MΩ–AKÓt∫∂n∫ëÂ:©MoñÉvÅQU‹nÍ4@IF∂”Cvp$ ´<1Ï~ÉhØ”ª“∏e¸íAá,hƒ?æTÔëkµ€ûIÀ%Wäö†wØ¥!•˘i™Kü∞µHl¸∂&}Iwë÷
+†G”ãûlç:n˝Œ™0“-üU<F"Ù6•û¶ßµΩÂˆabSÌÊî]–µõ™™x¢™-Æﬁs.´
+	DàúJK‡-`›$Âl®™¡?öu>≈wõêkÄ!< ◊‚’Vg√\/„ú∏Ω<ñö#3ÁGÃ∂!7H»`Ã¢Tı£fÓ¯¯‡¡Ω√µíÊy«ªû»”gF±pú•xº¯Ægíﬁç…Kïöø“çhEæuGµµ+ñÛN€†^Ω`{O6A·oa ^÷5[2*˘º÷OãjF§†ñk∞}©Ì†6üç®ëÌzò<}('È…O‰–≤çs‹ªu-∫™¢v§íÕD∆Yoù'Ã?Ôæ,&mó§@p§Yúç!{»Æ‡uzd÷Åù@ˆÕ!”ÍÉ‰ó1¶Æ1™ñôÃ	íFïæ;ÅaJÚ-9ôáåø6ƒn§Í∫Æ‘ñâ·q∞hµ8·=B(”!¢R	ùëÿö:® ¶ñãòç@lH◊+S≠xŒf‘ä‹Ín"≈«—i˛aEpá^È-Üot=OqiE7¥m~¿+…àê#En´ΩT˛!”Üçû®hIóá  ÑIDAT¶´∞rP,.ÒQ™aœ*©˝Wπ`Ov¨0¡Óª.oÚƒÖV©5˝§Ò(wè#óÒ%Âå€àu»`ìé#Eínôg0Sûp˚÷∂ªDwÈ&àgBTÔ2 P?ìoÆí"ïò%˚sB≠8§o¡´È(‘.Õ∞˘àãÈ  Ë¶ÚCV⁄ñ‡v¥Zo˛:,bÅVew€`ÂÜpÈ≈]—sNµ⁄u ·IHkm≈aEzb¶í^R{ëãr√ ÷§À≈Ö∏mFh}‘∂"∑K…AGâıº€ªÉz	úß$ MƒÆcq?ø1õﬂhSé®c‹&ıgÄ±Z-Õ€ƒ#I{ DÛÚ^¿hËF^B†ñ<4r∑Ú»ÜM“Í˘>!Ù.5Uƒ≥Î
+¨â¡Í˚]¢$∆‘u¡bjóŒ∞õãB‹rnà¯¿Î1Æ`™ÈlBêŒÌﬁd>j™7ﬂ€X‚Rmﬁy√n˛j´!>6¿p	°öå:*˜°,N
+=sh$>Ó})U‰£0ÌØ «∫ã9,ﬂ"WEDÛ`K˙ãÊ	∆¸ôÄh01ß÷Ç◊UN‡5˛ÊtSë{∞ÂˇZ£∆ñ◊&gƒ eo›~ü»‹Äø≈«sœBêÆEù˘FkÜ™≠˜ëêãD›Jª≈ÁjŸ9˛éäE¿®®¥_	x¡òâ˛äÓK¢$AÜÂ g(-ÍÏK£≠‚ï‘Ï∞$ÏYIâZÇ°$óçórà˛≤ÓÜ¯ç≠<çC @O—÷ˇÕ$Íbíz†.´„)Sá∑ö‰Ùñ¿YﬁÎ -c__TH˘ô§ü_í¬7¿·6˚‹ioπ›gåÒ≥jI|<0-Lˆ~Èvw3˝X˜g>å[H€Nw∂÷¢/∞ T,©$0≈w™ybiæ2≤Xôpe>“aH˚ÇqTﬂï‹˛‘vT@›◊ñ≈ì%)…,òg,xW_@(Œ∞ﬁÄúì¿Ò8LíF•ãd´ŸBú≤`œÓ0à†KÄµ2îH'¨)˛(Nä9IÔ±2øˆÑ¯™‹”·ø,úlT ◊¢c¿˚ÜGÇÛK7	âÊZu§Œä¯ÄÌS\Û÷ïL2„aö‰rºç“ØÜ=8¬	Æ|¥ΩO∆–ΩúÑ≈\"™	ºàÛ€}¿~fã¡À≠Óië{Ä2QÉîØëI;"4∆Æ¢!o‘[¸¨’µÌ	ùŸy∫¿ªqgra“∏s±†åVÛÚËÇ)k¥Ú˛bmÀù ∏‘œƒõQs~…]Íg¡•›gx«p{‰CÓ–ñu,˝ÍœÎb‹£QI¨KMÏúº3«öJ*gònUíıªô”y¨åMÑ¶È¡zÀ2·c	~ÄÙ√ °ßJ≤û†pk—¿∞rH=¢¬Ê ¶§p9ä’ä:œÍ¶œT@ùÈOÆ'πr\Z™Á˜êØ®˛;qœú3LÓ>˛‘Ôﬁ¶ÏL”è∫≥8ÚpO Y ∑|≈©ògj¸˛„˚Ú≠0ó⁄= ˇ˘SÕq©|–˚=˘πx¶ΩlDv˜íÄ °]K±^'¶›¥™∞π©ÉO˘ÑasJÉàË#Q•$üÓ÷™ D' áCñÍ¿∆ew‹ô\Êöˆhnc9á–¢1“ıª¨ØG˝¿∫\˝úZÇ0xTvüπìÄ%AÕÿïPöŒ∑HÄ}Ó≈[ ≤ËNÛ0>ñTø:I53@"/ÿ]ı◊®ì.˘UÙ[ÊH5Ò˛b<
+F⁄i:≥uhcöì´Üíú˜Wyı*‡í´ÿ÷ñ∑'tI`ƒ‹œ÷N¬2.ﬁí.ÿY;≈\pw◊gô≠Ãªc»¥CÊÉ[|SnTCˇEØƒG´ÂÜÖüK*.≠üˆéëÌRi1íŸ»6;˚≥ºp¢¬_ﬁ!ÆA~V·!=s·‹ÄåÍ6ô’√q.ã?xﬁP◊ÙFC≤OÛg¬gu	≈ìE=pÕıbY‘•∏´G˘O8Ñ	¢a~áú&Î⁄1é/íió‡mõ:‡Çy\p»éW∫=NÆ˛[ªÕCö\ﬂ˙Ö€äûËäm.–Ø†9˜ùk
+"=É≈J∆P˝XSãÓ∂Ø≠ñ≤eMïbvﬁxîƒ3a2å´7ra¶e∆ßìÛÊÃÅ™ó°rµ3k∆’Çy ¢aî&–àÕ÷¯‹ÃjZ&‚ÿ‡ú`≥⁄HÍ?àı¿ñ‡G~Ú+T	∆ç	kPÖûŒu[<°°à—ÑÎ:{÷ÉWL©ı“Œëº˛πç´nßì
+F”∏9
+líA` Õ¿Úòo‹ˇªö å⁄Î„…'Øπpˇız•#]¸∑X¨˜0msπ%C‡z~~~ﬁ=ÚìOó¶ì±CW‚ÊiØ˙GÑÆû<ÙÑ2Hi{ÀÒ	ΩUø±GÚÌ±õo±Z«UÓT<®ÙÒ◊—?«V2¢ k=—µ÷—Â⁄?¡˝¥ìar`‘C–úTãº„ú&¥”Yü∏í}fwwtM‡∞XQnó≥˙á§Õø€ÄX\ÙƒúÚ±ﬁ„r£KΩ≥rÿÓÃÒÈ¶ô^)Ì®i±fZ®s-¨7Ñ´Ö¶ß]mO
+yÈ˚3Ê”tøŒÓ3–¨kï€ëÅµ]®—Œ¬ê^OÜˇ+AÀæ9I¿È˜˜˜˚Tﬂ´¬GCpE>€öÍ¨? 7ÒW∞\#:R¢√n™,—a3¬ˇJø™	›∆Dø÷	0∑ÃãÿíÍæb#˘-f Zz√£Fü“
+´X°ÍAYªŸÒ˜c|åÃÚ\@ÍúhÅiò–kv…z{w*§…wARlÛ“[∏˘8Seîi\TØ*ÅÌA∏A8Â∂M≥Ó±E¯˘µ‹¶*~î˚D´_"ruãnÆ|„Ç@;f≤"x‰â…›û÷fX&ΩÃ˚Æ–˙eùT4∂Âz1ÑÔx ÖÙ	ÚøøøãÏŸ—K‡òF@ ≠ë°;6ÑØúÔçèZŸeÿﬁkM
+UOP¥Mä∏Á⁄ÀºçıF'è• Â8 ¨ÕÑ%i≠B°W∫ôÀY#h˝oàÿÅ˘R˜¥I®sÔø+ ü
+\Â¡,.ˇB‚ôπ|Ë.∫r4ä„WxªwáG7Xá+»˘õâ©)≈DìT ≤œßz`Kßı$‘!òb<
+*h√#4hájárµ˘√Æ∫ûVóÄﬁøk>Z,q›W®|»âkP|0B√`ªAº∫∆ùC.Dk≈òõŸ¨~ÓTÒ≈ˆ˚+¡ò+§˝Ÿq~|1§`¸0¯mÑ.·_Ór™b-zd÷ôa¢™-†mπlT¬ı‚ﬂuCys<upÆ≈Ì®¥ßOPÚ˛[‹Çâœ¿ï$ä	*…ÏvÀ!&î.CÄÖ|>Jj®∑F,¸ŸÂ $∞ÿ¸Ùñ]ôÙ‘ëÕÇX\;‰∫À-˙èrÖû∏ªì\ægû»ä≤‚∂≈~ÍÇOÏˇìÜ3Õ8îª<@ˆ»té∏Û˛Üñ∫_2ˆÃÍ†◊t`5Ó8À˚=ı©¶"€≤ßŸ∫SWéOt—∏ªHóêÜ–†bh·*^…πS\Ús˛©Æ
+ohÕAI„˛∏ë›ä÷®è‘§S¢ânıML…Ö¢vÀ'®ó÷◊üÃGÖCL¢≥°ÏÎ 7<u?0‘Es4[àE`è†%v†”!ãÉa}…Põ’XîÃ*øk>çH#
+xÛFÀ"≤∂æCÎâ nh9`€ÄÙ`∏,¥ç<g⁄1:∑ ø˘5û4ì€+√DXπEôxO‘ùÛÕ8∫ïÿGpcC1€ÊõÑ…÷ZH»’˙::Åz4ô[çAv.T*zLgs◊oä!≤¿oY+ª È¿\œ∫í^ p‹ìµ%oØOE*˝HÓ”ñ( $!•ı”r|´ëáË#∞.âDÆÒE~7í1c˝À]ßÙJÿπﬁ¿‡6PÇA0O‘+òulR¬‰‘©	c!ÆSe∏«76≠™+ÛÏ.∂º∆X“Ã»uè!´t+yccÑÕ‰F!∑nÌBV◊„ˆo‘UÔƒ\Iõ©*œÜ…0õsåd˙nôE◊âÅ◊ºπÂ¶eòÅÅG…dÄ4œmhX≠[ÒIÃªKﬂò§‹]A=¬ãFïYaÍ›∂[ËCØP#öı"mè[Èl9ÆäÈÈí*Yîeú$πe›Úf#2€⁄>ë>’◊Z{: '‹(=Í!Ü‰òI
+≠$>1Ç¸q!ÀÍjÖmv\’xe4a˚ÍÁh¬D_‘uÄﬂ≥¬ŒNﬂ?,‡.R´¶0Ò#®1[k‡ò±2f%Æö∫‘=to›7˙#g≠8jâI>˙’YùËHÂS@+U%+!|›√›ó–ﬁË†9Â&æb∫Ÿ˝ß
+Ær™ùOLOr—ˆ2º`nƒ◊∑s›ÁÎ˛√,hπÖúõµv…©¢ÎZ•ô«""<@ºf™√œ¨À™ÄI≈à0ô:XDÇ’c¸ÓäKìÈÇçx÷@Ö
+sÂ&+ÆØ∏XYC“PÉ^ﬂBïåa
+–Ç¶äÊ—è◊ÑıA ∆˙®†ìÈrã&Hæoï#Ü6ãì#˜∆)Û·wîœòÒQbÖ
+L_˛Õ‚LÈjµ’¬Ì0F—˘G˜/™\ë-£N 1◊ÁéJ?∞«]>!ÅùX	UÖ„C‰v¨◊(®Ô—ŸÒƒZâÑ=Æ2t;}vOƒ‡ÿ]XÊdÁŒ„˝:Ü¶≠RrÆøÊ!ôAÍﬂœ⁄„ˆ4 «yì&æ2Ωï¨Gsb>Ü$®ƒŸÛ=OyF≈∑+÷,÷Ä∆_x…—ÿsã€rÏGóÖÜú∞è´Üº;∑Cd†n–{(.+ÂgŸÇ?•	˜ı†≤\:Ò∆€''∞±	èïZ+∂‰Êàó0¯Ã¯PS∆m,—ºK≥≈9®‰«çsÓ4∞N‚*çÂRT‚‰É)r{8ÑΩÅ;m¸A\øPT¨+ŸóU]9ÉNr^ò+‰EnìñyB\n¶9yN‡Ñ ◊ﬁÜÏãç&†® J»¿Ω˛ñ&>¸9πƒm+Èôê£BTQQ»˙∞ˇv§?Ÿ¶v∑øöÌvËÅHNª«Àq%1rŸïò· Í˛‰∫Ö¥sà>_µ˝Ï/yÉ‚'◊;Á‘ƒ-é,EE»ˆÉ•O–À-∏#„çê¯ÁGí»è ;]k›¨·˝õß–∞‘s\¥‰ã«ÉGjÁüJ.Ô¢@ÎûBÂ{èáiTø⁄√ú+∞äÕ'™4Á|ÇÍªpk‹
+(y2Øø.Ÿ	Ñ‰ËW‹Û˘¸åò]lß≠/ﬁÊ/πq¢uÚìﬁ¿Õl⁄ÎMΩW^ÏÁKÉ}¸æ¿€RÛs8ŒUDûªÙ)hªG˜‹cf
+ÆxcËGÑdõiV}x[äl∆¶m{Óao6ﬂ\é®6uü+ã›K"∞Vï∫[6zóÃ>$j¬D°[[ﬂ3Æˆ≥~œ∂ﬁ∂∑¯∂‚+~@º	˚+féGBåIé7H¥v‡Õp∑π⁄€æ.⁄÷÷´ıQ¨?≠ !9L/Qü‰+&iì$√7Ù}?°	ÍF£Ñ¨?ß≥tZY∫Ø ƒ{¡\õ§¨w>â˚·éàlô)e/r⁄Îo%~#“Ä»π3˘˜û‰êY^ïŸçû·	pGe““∫xô˛Ç[€zˇüì˛ƒ-Ü¶øÇ¢-™©«†GÂRˆ˝‘√∆Ïü-è¨ê$“„|7xÜ‚«æ,vË(¥'ÅKïÖ¶KÚÓ°‡~BZøG’œˇâY÷€(•'`ÿ≥vqoIâµWÊ.ΩÊÛô€3E¡¬˛®ó®?≤ÌÆß:ßÃo∏ê …:(Ê˝ø‰îê[	}◊fÚÁƒHÈÁ5Ay}Â[p∑≥4í±l˝ÿ7«FÙ|7 ùœ“=<M‹Õ#Ãbp“3|–ÅXD´V ba	Ú˜/˘&Ä≤ÛØÜû“…˜´>øymø¶I5O∏ÙÈ>Ë"mcr®ûåe‹òÃ˜mëetÈHØ√˝˙Å∑≠‹Fëb!˛2‘'´∂¶Y Gn?»—{Ø¯pø√ÙM8∆ôãÙØ§h!¶Éˆª#i@˘eSÍ”îh, ¶oÓ≥¬±x”¯∂√Íe∫Ï"Ç~¬Ûÿ‹nK)&z1X‹Â¨aNHH®˙≥ÿ´‰ÜK»’ƒœÈû≤ƒ.†èõ¢¿ruQ	Á\ÜÌAœ˝∏ù≠r}ŒÜ§7v«ˆÕâ—V'&ÔP›Y˝qL#≠•QzCw£#1fîGa—€ú‡9ı∫uÎZÒ~Æb‘Ùêº"GD’Úf©ê˜HÍ=ÈLÌ∞ú¯6N§€„9‘*˜Ÿ¥·Q$™ ›
+y⁄ ì€ºnŒ†¸´‹	≥ñ∂V    IENDÆB`Ç                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "google_apis/gaia/oauth2_access_token_fetcher_impl.h"
+
+#include <algorithm>
+#include <string>
+#include <vector>
+
+#include "base/json/json_reader.h"
+#include "base/metrics/histogram.h"
+#include "base/metrics/histogram_macros.h"
+#include "base/strings/string_util.h"
+#include "base/strings/stringprintf.h"
+#include "base/time/time.h"
+#include "base/values.h"
+#include "google_apis/gaia/gaia_auth_util.h"
+#include "google_apis/gaia/gaia_urls.h"
+#include "google_apis/gaia/google_service_auth_error.h"
+#include "net/base/escape.h"
+#include "net/base/load_flags.h"
+#include "net/http/http_status_code.h"
+#include "net/traffic_annotation/network_traffic_annotation.h"
+#include "net/url_request/url_fetcher.h"
+#include "net/url_request/url_request_context_getter.h"
+#include "net/url_request/url_request_status.h"
+
+using net::URLFetcher;
+using net::URLFetcherDelegate;
+using net::URLRequestContextGetter;
+using net::URLRequestStatus;
+
+namespace {
+static const char kGetAccessTokenBodyFormat[] =
+    "client_id=%s&"
+    "client_secret=%s&"
+    "grant_type=refresh_token&"
+    "refresh_token=%s";
+
+static const char kGetAccessTokenBodyWithScopeFormat[] =
+    "client_id=%s&"
+    "client_secret=%s&"
+    "grant_type=refresh_token&"
+    "refresh_token=%s&"
+    "scope=%s";
+
+static const char kAccessTokenKey[] = "access_token";
+static const char kExpiresInKey[] = "expires_in";
+static const char kErrorKey[] = "error";
+
+// Enumerated constants for logging server responses on 400 errors, matching
+// RFC 6749.
+enum OAuth2ErrorCodesForHistogram {
+  OAUTH2_ACCESS_ERROR_INVALID_REQUEST = 0,
+  OAUTH2_ACCESS_ERROR_INVALID_CLIENT,
+  OAUTH2_ACCESS_ERROR_INVALID_GRANT,
+  OAUTH2_ACCESS_ERROR_UNAUTHORIZED_CLIENT,
+  OAUTH2_ACCESS_ERROR_UNSUPPORTED_GRANT_TYPE,
+  OAUTH2_ACCESS_ERROR_INVALID_SCOPE,
+  OAUTH2_ACCESS_ERROR_UNKNOWN,
+  OAUTH2_ACCESS_ERROR_COUNT
+};
+
+OAuth2ErrorCodesForHistogram OAuth2ErrorToHistogramValue(
+    const std::string& error) {
+  if (error == "invalid_request")
+    return OAUTH2_ACCESS_ERROR_INVALID_REQUEST;
+  else if (error == "invalid_client")
+    return OAUTH2_ACCESS_ERROR_INVALID_CLIENT;
+  else if (error == "invalid_grant")
+    return OAUTH2_ACCESS_ERROR_INVALID_GRANT;
+  else if (error == "unauthorized_client")
+    return OAUTH2_ACCESS_ERROR_UNAUTHORIZED_CLIENT;
+  else if (error == "unsupported_grant_type")
+    return OAUTH2_ACCESS_ERROR_UNSUPPORTED_GRANT_TYPE;
+  else if (error == "invalid_scope")
+    return OAUTH2_ACCESS_ERROR_INVALID_SCOPE;
+
+  return OAUTH2_ACCESS_ERROR_UNKNOWN;
+}
+
+static GoogleServiceAuthError CreateAuthError(URLRequestStatus status) {
+  CHECK(!status.is_success());
+  if (status.status() == URLRequestStatus::CANCELED) {
+    return GoogleServiceAuthError(GoogleServiceAuthError::REQUEST_CANCELED);
+  } else {
+    DLOG(WARNING) << "Could not reach Google Accounts servers: errno "
+                  << status.error();
+    return GoogleServiceAuthError::FromConnectionError(status.error());
+  }
+}
+
+static std::unique_ptr<URLFetcher> CreateFetcher(
+    URLRequestContextGetter* getter,
+    const GURL& url,
+    const std::string& body,
+    URLFetcherDelegate* delegate) {
+  bool empty_body = body.empty();
+  net::NetworkTrafficAnnotationTag traffic_annotation =
+      net::DefineNetworkTrafficAnnotation("oauth2_access_token_fetcher", R"(
+        semantics {
+          sender: "OAuth 2.0 Access Token Fetcher"
+          description:
+            "This request is used by the Token Service to fetch an OAuth 2.0 "
+            "access token for a known Google account."
+          trigger:
+            "This request can be triggered at any moment when any service "
+            "requests an OAuth 2.0 access token from the Token Service."
+          data:
+            "Chrome OAuth 2.0 client id and secret, the set of OAuth 2.0 "
+            "scopes and the OAuth 2.0 refresh token."
+          destination: GOOGLE_OWNED_SERVICE
+        }
+        policy {
+          cookies_allowed: false
+          setting:
+            "This feature cannot be disabled in settings, but if user signs "
+            "out of Chrome, this request would not be made."
+          chrome_policy {
+            SigninAllowed {
+              policy_options {mode: MANDATORY}
+              SigninAllowed: false
+            }
+          }
+        })");
+  std::unique_ptr<URLFetcher> result = net::URLFetcher::Create(
+      0, url, empty_body ? URLFetcher::GET : URLFetcher::POST, delegate,
+      traffic_annotation);
+
+  gaia::MarkURLFetcherAsGaia(result.get());
+  result->SetRequestContext(getter);
+  result->SetLoadFlags(net::LOAD_DO_NOT_SEND_COOKIES |
+                       net::LOAD_DO_NOT_SAVE_COOKIES);
+  // Fetchers are sometimes cancelled because a network change was detected,
+  // especially at startup and after sign-in on ChromeOS. Retrying once should
+  // be enough in those cases; let the fetcher retry up to 3 times just in case.
+  // http://crbug.com/163710
+  result->SetAutomaticallyRetryOnNetworkChanges(3);
+
+  if (!empty_body)
+    result->SetUploadData("application/x-www-form-urlencoded", body);
+
+  return result;
+}
+
+std::unique_ptr<base::DictionaryValue> ParseGetAccessTokenResponse(
+    const net::URLFetcher* source) {
+  CHECK(source);
+
+  std::string data;
+  source->GetResponseAsString(&data);
+  std::unique_ptr<base::Value> value = base::JSONReader::Read(data);
+  if (!value.get() || value->GetType() != base::Value::Type::DICTIONARY)
+    value.reset();
+
+  return std::unique_ptr<base::DictionaryValue>(
+      static_cast<base::DictionaryValue*>(value.release()));
+}
+
+}  // namespace
+
+OAuth2AccessTokenFetcherImpl::OAuth2AccessTokenFetcherImpl(
+    OAuth2AccessTokenConsumer* consumer,
+    net::URLRequestContextGetter* getter,
+    const std::string& refresh_token)
+    : OAuth2AccessTokenFetcher(consumer),
+      getter_(getter),
+      refresh_token_(refresh_token),
+      state_(INITIAL) {}
+
+OAuth2AccessTokenFetcherImpl::~OAuth2AccessTokenFetcherImpl() {}
+
+void OAuth2AccessTokenFetcherImpl::CancelRequest() { fetcher_.reset(); }
+
+void OAuth2AccessTokenFetcherImpl::Start(
+    const std::string& client_id,
+    const std::string& client_secret,
+    const std::vector<std::string>& scopes) {
+  client_id_ = client_id;
+  client_secret_ = client_secret;
+  scopes_ = scopes;
+  StartGetAccessToken();
+}
+
+void OAuth2AccessTokenFetcherImpl::StartGetAccessToken() {
+  CHECK_EQ(INITIAL, state_);
+  state_ = GET_ACCESS_TOKEN_STARTED;
+  fetcher_ = CreateFetcher(getter_, MakeGetAccessTokenUrl(),
+                           MakeGetAccessTokenBody(client_id_, client_secret_,
+                                                  refresh_token_, scopes_),
+                           this);
+  fetcher_->Start();  // OnURLFetchComplete will be called.
+}
+
+void OAuth2AccessTokenFetcherImpl::EndGetAccessToken(
+    const net::URLFetcher* source) {
+  CHECK_EQ(GET_ACCESS_TOKEN_STARTED, state_);
+  state_ = GET_ACCESS_TOKEN_DONE;
+
+  URLRequestStatus status = source->GetStatus();
+  int histogram_value =
+      status.is_success() ? source->GetResponseCode() : status.error();
+  UMA_HISTOGRAM_SPARSE_SLOWLY("Gaia.ResponseCodesForOAuth2AccessToken",
+                              histogram_value);
+  if (!status.is_success()) {
+    OnGetTokenFailure(CreateAuthError(status));
+    return;
+  }
+
+  switch (source->GetResponseCode()) {
+    case net::HTTP_OK:
+      break;
+    case net::HTTP_FORBIDDEN:
+      // HTTP_FORBIDDEN (403) is treated as temporary error, because it may be
+      // '403 Rate Limit Exeeded.'
+      OnGetTokenFailure(
+          GoogleServiceAuthError(GoogleServiceAuthError::SERVICE_UNAVAILABLE));
+      return;
+    case net::HTTP_BAD_REQUEST: {
+      // HTTP_BAD_REQUEST (400) usually contains error as per
+      // http://tools.ietf.org/html/rfc6749#section-5.2.
+      std::string gaia_error;
+      if (!ParseGetAccessTokenFailureResponse(source, &gaia_error)) {
+        OnGetTokenFailure(
+            GoogleServiceAuthError(GoogleServiceAuthError::SERVICE_ERROR));
+        return;
+      }
+
+      OAuth2ErrorCodesForHistogram access_error(
+          OAuth2ErrorToHistogramValue(gaia_error));
+      UMA_HISTOGRAM_ENUMERATION("Gaia.BadRequestTypeForOAuth2AccessToken",
+                                access_error,
+                                OAUTH2_ACCESS_ERROR_COUNT);
+
+      OnGetTokenFailure(
+          access_error == OAUTH2_ACCESS_ERROR_INVALID_GRANT
+              ? GoogleServiceAuthError(
+                    GoogleServiceAuthError::INVALID_GAIA_CREDENTIALS)
+              : GoogleServiceAuthError(GoogleServiceAuthError::SERVICE_ERROR));
+      return;
+    }
+    default: {
+      if (source->GetResponseCode() >= net::HTTP_INTERNAL_SERVER_ERROR) {
+        // 5xx is always treated as transient.
+        OnGetTokenFailure(GoogleServiceAuthError(
+            GoogleServiceAuthError::SERVICE_UNAVAILABLE));
+      } else {
+        // The other errors are treated as permanent error.
+        DLOG(ERROR) << "Unexpected persistent error: http_status="
+                    << source->GetResponseCode();
+        OnGetTokenFailure(GoogleServiceAuthError(
+            GoogleServiceAuthError::INVALID_GAIA_CREDENTIALS));
+      }
+      return;
+    }
+  }
+
+  // The request was successfully fetched and it returned OK.
+  // Parse out the access token and the expiration time.
+  std::string access_token;
+  int expires_in;
+  if (!ParseGetAccessTokenSuccessResponse(source, &access_token, &expires_in)) {
+    DLOG(WARNING) << "Response doesn't match expected format";
+    OnGetTokenFailure(
+        GoogleServiceAuthError(GoogleServiceAuthError::SERVICE_UNAVAILABLE));
+    return;
+  }
+  // The token will expire in |expires_in| seconds. Take a 10% error margin to
+  // prevent reusing a token too close to its expiration date.
+  OnGetTokenSuccess(
+      access_token,
+      base::Time::Now() + base::TimeDelta::FromSeconds(9 * expires_in / 10));
+}
+
+void OAuth2AccessTokenFetcherImpl::OnGetTokenSuccess(
+    const std::string& access_token,
+    const base::Time& expiration_time) {
+  FireOnGetTokenSuccess(access_token, expiration_time);
+}
+
+void OAuth2AccessTokenFetcherImpl::OnGetTokenFailure(
+    const GoogleServiceAuthError& error) {
+  state_ = ERROR_STATE;
+  FireOnGetTokenFailure(error);
+}
+
+void OAuth2AccessTokenFetcherImpl::OnURLFetchComplete(
+    const net::URLFetcher* source) {
+  CHECK(source);
+  CHECK(state_ == GET_ACCESS_TOKEN_STARTED);
+  EndGetAccessToken(source);
+}
+
+// static
+GURL OAuth2AccessTokenFetcherImpl::MakeGetAccessTokenUrl() {
+  return GaiaUrls::GetInstance()->oauth2_token_url();
+}
+
+// static
+std::string OAuth2AccessTokenFetcherImpl::MakeGetAccessTokenBody(
+    const std::string& client_id,
+    const std::string& client_secret,
+    const std::string& refresh_token,
+    const std::vector<std::string>& scopes) {
+  std::string enc_client_id = net::EscapeUrlEncodedData(client_id, true);
+  std::string enc_client_secret =
+      net::EscapeUrlEncodedData(client_secret, true);
+  std::string enc_refresh_token =
+      net::EscapeUrlEncodedData(refresh_token, true);
+  if (scopes.empty()) {
+    return base::StringPrintf(kGetAccessTokenBodyFormat,
+                              enc_client_id.c_str(),
+                              enc_client_secret.c_str(),
+                              enc_refresh_token.c_str());
+  } else {
+    std::string scopes_string = base::JoinString(scopes, " ");
+    return base::StringPrintf(
+        kGetAccessTokenBodyWithScopeFormat,
+        enc_client_id.c_str(),
+        enc_client_secret.c_str(),
+        enc_refresh_token.c_str(),
+        net::EscapeUrlEncodedData(scopes_string, true).c_str());
+  }
+}
+
+// static
+bool OAuth2AccessTokenFetcherImpl::ParseGetAccessTokenSuccessResponse(
+    const net::URLFetcher* source,
+    std::string* access_token,
+    int* expires_in) {
+  CHECK(access_token);
+  std::unique_ptr<base::DictionaryValue> value =
+      ParseGetAccessTokenResponse(source);
+  if (value.get() == NULL)
+    return false;
+
+  return value->GetString(kAccessTokenKey, access_token) &&
+         value->GetInteger(kExpiresInKey, expires_in);
+}
+
+// static
+bool OAuth2AccessTokenFetcherImpl::ParseGetAccessTokenFailureResponse(
+    const net::URLFetcher* source,
+    std::string* error) {
+  CHECK(error);
+  std::unique_ptr<base::DictionaryValue> value =
+      ParseGetAccessTokenResponse(source);
+  if (value.get() == NULL)
+    return false;
+  return value->GetString(kErrorKey, error);
+}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             // Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "google_apis/gaia/gaia_oauth_client.h"
+
+#include <memory>
+#include <utility>
+
+#include "base/json/json_reader.h"
+#include "base/logging.h"
+#include "base/strings/string_util.h"
+#include "base/values.h"
+#include "google_apis/gaia/gaia_auth_util.h"
+#include "google_apis/gaia/gaia_urls.h"
+#include "net/base/escape.h"
+#include "net/base/load_flags.h"
+#include "net/http/http_status_code.h"
+#include "net/traffic_annotation/network_traffic_annotation.h"
+#include "net/url_request/url_fetcher.h"
+#include "net/url_request/url_fetcher_delegate.h"
+#include "net/url_request/url_request_context_getter.h"
+#include "url/gurl.h"
+
+namespace {
+const char kAccessTokenValue[] = "access_token";
+const char kRefreshTokenValue[] = "refresh_token";
+const char kExpiresInValue[] = "expires_in";
+}
+
+namespace gaia {
+
+// Use a non-zero number, so unit tests can differentiate the URLFetcher used by
+// this class from other fetchers (most other code just hardcodes the ID to 0).
+const int GaiaOAuthClient::kUrlFetcherId = 17109006;
+
+class GaiaOAuthClient::Core
+    : public base::RefCountedThreadSafe<GaiaOAuthClient::Core>,
+      public net::URLFetcherDelegate {
+ public:
+  Core(net::URLRequestContextGetter* request_context_getter)
+      : num_retries_(0),
+        request_context_getter_(request_context_getter),
+        delegate_(NULL),
+        request_type_(NO_PENDING_REQUEST) {
+  }
+
+  void GetTokensFromAuthCode(const OAuthClientInfo& oauth_client_info,
+                             const std::string& auth_code,
+                             int max_retries,
+                             GaiaOAuthClient::Delegate* delegate);
+  void RefreshToken(const OAuthClientInfo& oauth_client_info,
+                    const std::string& refresh_token,
+                    const std::vector<std::string>& scopes,
+                    int max_retries,
+                    GaiaOAuthClient::Delegate* delegate);
+  void GetUserEmail(const std::string& oauth_access_token,
+                    int max_retries,
+                    Delegate* delegate);
+  void GetUserId(const std::string& oauth_access_token,
+                 int max_retries,
+                 Delegate* delegate);
+  void GetUserInfo(const std::string& oauth_access_token,
+                   int max_retries,
+                   Delegate* delegate);
+  void GetTokenInfo(const std::string& qualifier,
+                    const std::string& query,
+                    int max_retries,
+                    Delegate* delegate);
+
+  // net::URLFetcherDelegate implementation.
+  void OnURLFetchComplete(const net::URLFetcher* source) override;
+
+ private:
+  friend class base::RefCountedThreadSafe<Core>;
+
+  enum RequestType {
+    NO_PENDING_REQUEST,
+    TOKENS_FROM_AUTH_CODE,
+    REFRESH_TOKEN,
+    TOKEN_INFO,
+    USER_EMAIL,
+    USER_ID,
+    USER_INFO,
+  };
+
+  ~Core() override {}
+
+  void GetUserInfoImpl(RequestType type,
+                       const std::string& oauth_access_token,
+                       int max_retries,
+                       Delegate* delegate);
+  void MakeGaiaRequest(
+      const GURL& url,
+      const std::string& post_body,
+      int max_retries,
+      GaiaOAuthClient::Delegate* delegate,
+      const net::NetworkTrafficAnnotationTag& traffic_annotation);
+  void HandleResponse(const net::URLFetcher* source,
+                      bool* should_retry_request);
+
+  int num_retries_;
+  scoped_refptr<net::URLRequestContextGetter> request_context_getter_;
+  GaiaOAuthClient::Delegate* delegate_;
+  std::unique_ptr<net::URLFetcher> request_;
+  RequestType request_type_;
+};
+
+void GaiaOAuthClient::Core::GetTokensFromAuthCode(
+    const OAuthClientInfo& oauth_client_info,
+    const std::string& auth_code,
+    int max_retries,
+    GaiaOAuthClient::Delegate* delegate) {
+  DCHECK_EQ(request_type_, NO_PENDING_REQUEST);
+  request_type_ = TOKENS_FROM_AUTH_CODE;
+  std::string post_body =
+      "code=" + net::EscapeUrlEncodedData(auth_code, true) +
+      "&client_id=" + net::EscapeUrlEncodedData(oauth_client_info.client_id,
+                                                true) +
+      "&client_secret=" +
+      net::EscapeUrlEncodedData(oauth_client_info.client_secret, true) +
+      "&redirect_uri=" +
+      net::EscapeUrlEncodedData(oauth_client_info.redirect_uri, true) +
+      "&grant_type=authorization_code";
+  net::NetworkTrafficAnnotationTag traffic_annotation =
+      net::DefineNetworkTrafficAnnotation("gaia_oauth_client_get_tokens", R"(
+        semantics {
+          sender: "OAuth 2.0 calls"
+          description:
+            "This request exchanges an authorization code for an OAuth 2.0 "
+            "refresh token and an OAuth 2.0 access token."
+          trigger:
+            "This request is triggered when a Chrome service requires an "
+            "access token and a refresh token (e.g. Cloud Print, Chrome Remote "
+            "Desktop etc.) See https://developers.google.com/identity/protocols"
+            "/OAuth2 for more information about the Google implementation of "
+            "the OAuth 2.0 protocol."
+          data:
+            "The Google console client ID and client secret of the caller, the "
+            "OAuth authorization code and the redirect URI."
+          destination: GOOGLE_OWNED_SERVICE
+        }
+        policy {
+          cookies_allowed: false
+          setting:
+            "This feature cannot be disabled in settings, but if the user "
+            "signs out of Chrome, this request would not be made."
+          chrome_policy {
+            SigninAllowed {
+              policy_options {mode: MANDATORY}
+              SigninAllowed: false
+            }
+          }
+        })");
+  MakeGaiaRequest(GURL(GaiaUrls::GetInstance()->oauth2_token_url()), post_body,
+                  max_retries, delegate, traffic_annotation);
+}
+
+void GaiaOAuthClient::Core::RefreshToken(
+    const OAuthClientInfo& oauth_client_info,
+    const std::string& refresh_token,
+    const std::vector<std::string>& scopes,
+    int max_retries,
+    GaiaOAuthClient::Delegate* delegate) {
+  DCHECK_EQ(request_type_, NO_PENDING_REQUEST);
+  request_type_ = REFRESH_TOKEN;
+  std::string post_body =
+      "refresh_token=" + net::EscapeUrlEncodedData(refresh_token, true) +
+      "&client_id=" + net::EscapeUrlEncodedData(oauth_client_info.client_id,
+                                                true) +
+      "&client_secret=" +
+      net::EscapeUrlEncodedData(oauth_client_info.client_secret, true) +
+      "&grant_type=refresh_token";
+
+  if (!scopes.empty()) {
+    std::string scopes_string = base::JoinString(scopes, " ");
+    post_body += "&scope=" + net::EscapeUrlEncodedData(scopes_string, true);
+  }
+
+  net::NetworkTrafficAnnotationTag traffic_annotation =
+      net::DefineNetworkTrafficAnnotation("gaia_oauth_client_refresh_token", R"(
+        semantics {
+          sender: "OAuth 2.0 calls"
+          description:
+            "This request fetches a fresh access token that can be used to "
+            "authenticate an API call to a Google web endpoint."
+          trigger:
+            "This is called whenever the caller needs a fresh OAuth 2.0 access "
+            "token."
+          data:
+            "The OAuth 2.0 refresh token, the Google console client ID and "
+            "client secret of the caller, and optionally the scopes of the API "
+            "for which the access token should be authorized."
+          destination: GOOGLE_OWNED_SERVICE
+        }
+        policy {
+          cookies_allowed: false
+          setting:
+            "This feature cannot be disabled in settings, but if the user "
+            "signs out of Chrome, this request would not be made."
+          chrome_policy {
+            SigninAllowed {
+              policy_options {mode: MANDATORY}
+              SigninAllowed: false
+            }
+          }
+        })");
+  MakeGaiaRequest(GURL(GaiaUrls::GetInstance()->oauth2_token_url()), post_body,
+                  max_retries, delegate, traffic_annotation);
+}
+
+void GaiaOAuthClient::Core::GetUserEmail(const std::string& oauth_access_token,
+                                         int max_retries,
+                                         Delegate* delegate) {
+  GetUserInfoImpl(USER_EMAIL, oauth_access_token, max_retries, delegate);
+}
+
+void GaiaOAuthClient::Core::GetUserId(const std::string& oauth_access_token,
+                                      int max_retries,
+                                      Delegate* delegate) {
+  GetUserInfoImpl(USER_ID, oauth_access_token, max_retries, delegate);
+}
+
+void GaiaOAuthClient::Core::GetUserInfo(const std::string& oauth_access_token,
+                                      int max_retries,
+                                      Delegate* delegate) {
+  GetUserInfoImpl(USER_INFO, oauth_access_token, max_retries, delegate);
+}
+
+void GaiaOAuthClient::Core::GetUserInfoImpl(
+    RequestType type,
+    const std::string& oauth_access_token,
+    int max_retries,
+    Delegate* delegate) {
+  DCHECK_EQ(request_type_, NO_PENDING_REQUEST);
+  DCHECK(!request_.get());
+  request_type_ = type;
+  delegate_ = delegate;
+  num_retries_ = 0;
+  net::NetworkTrafficAnnotationTag traffic_annotation =
+      net::DefineNetworkTrafficAnnotation("gaia_oauth_client_get_user_info", R"(
+        semantics {
+          sender: "OAuth 2.0 calls"
+          description:
+            "This request is used to fetch profile information about the user, "
+            "like the email, the ID of the account, the full name, and the "
+            "profile picture."
+          trigger:
+            "The main trigger for this request is in the AccountTrackerService "
+            "that fetches the user info soon after the user signs in."
+          data:
+            "The OAuth 2.0 access token of the account."
+          destination: GOOGLE_OWNED_SERVICE
+        }
+        policy {
+          cookies_allowed: false
+          setting:
+            "This feature cannot be disabled in settings, but if the user "
+            "signs out of Chrome, this request would not be made."
+          chrome_policy {
+            SigninAllowed {
+              policy_options {mode: MANDATORY}
+              SigninAllowed: false
+            }
+          }
+        })");
+  request_ = net::URLFetcher::Create(
+      kUrlFetcherId, GURL(GaiaUrls::GetInstance()->oauth_user_info_url()),
+      net::URLFetcher::GET, this, traffic_annotation);
+  request_->SetRequestContext(request_context_getter_.get());
+  request_->AddExtraRequestHeader("Authorization: OAuth " + oauth_access_token);
+  request_->SetMaxRetriesOn5xx(max_retries);
+  request_->SetLoadFlags(net::LOAD_DO_NOT_SEND_COOKIES |
+                         net::LOAD_DO_NOT_SAVE_COOKIES);
+  MarkURLFetcherAsGaia(request_.get());
+
+  // Fetchers are sometimes cancelled because a network change was detected,
+  // especially at startup and after sign-in on ChromeOS. Retrying once should
+  // be enough in those cases; let the fetcher retry up to 3 times just in case.
+  // http://crbug.com/163710
+  request_->SetAutomaticallyRetryOnNetworkChanges(3);
+  request_->Start();
+}
+
+void GaiaOAuthClient::Core::GetTokenInfo(const std::string& qualifier,
+                                         const std::string& query,
+                                         int max_retries,
+                                         Delegate* delegate) {
+  DCHECK_EQ(request_type_, NO_PENDING_REQUEST);
+  DCHECK(!request_.get());
+  request_type_ = TOKEN_INFO;
+  std::string post_body =
+      qualifier + "=" + net::EscapeUrlEncodedData(query, true);
+  net::NetworkTrafficAnnotationTag traffic_annotation =
+      net::DefineNetworkTrafficAnnotation("gaia_oauth_client_get_token_info",
+                                          R"(
+        semantics {
+          sender: "OAuth 2.0 calls"
+          description:
+            "This request fetches information about an OAuth 2.0 access token. "
+            "The response is a dictionary of response values. The provided "
+            "access token may have any scope, and basic results will be "
+            "returned: issued_to, audience, scope, expires_in, access_type. In "
+            "addition, if the https://www.googleapis.com/auth/userinfo.email "
+            "scope is present, the email and verified_email fields will be "
+            "returned. If the https://www.googleapis.com/auth/userinfo.profile "
+            "scope is present, the user_id field will be returned."
+          trigger:
+            "This is triggered after a Google account is added to the browser. "
+            "It it also triggered after each successful fetch of an OAuth 2.0 "
+            "access token."
+          data: "The OAuth 2.0 access token."
+          destination: GOOGLE_OWNED_SERVICE
+        }
+        policy {
+          cookies_allowed: false
+          setting:
+            "This feature cannot be disabled in settings, but if the user "
+            "signs out of Chrome, this request would not be made."
+          chrome_policy {
+            SigninAllowed {
+              policy_options {mode: MANDATORY}
+              SigninAllowed: false
+            }
+          }
+        })");
+  MakeGaiaRequest(GURL(GaiaUrls::GetInstance()->oauth2_token_info_url()),
+                  post_body, max_retries, delegate, traffic_annotation);
+}
+
+void GaiaOAuthClient::Core::MakeGaiaRequest(
+    const GURL& url,
+    const std::string& post_body,
+    int max_retries,
+    GaiaOAuthClient::Delegate* delegate,
+    const net::NetworkTrafficAnnotationTag& traffic_annotation) {
+  DCHECK(!request_.get()) << "Tried to fetch two things at once!";
+  delegate_ = delegate;
+  num_retries_ = 0;
+  request_ = net::URLFetcher::Create(kUrlFetcherId, url, net::URLFetcher::POST,
+                                     this, traffic_annotation);
+  request_->SetRequestContext(request_context_getter_.get());
+  request_->SetUploadData("application/x-www-form-urlencoded", post_body);
+  request_->SetMaxRetriesOn5xx(max_retries);
+  request_->SetLoadFlags(net::LOAD_DO_NOT_SEND_COOKIES |
+                         net::LOAD_DO_NOT_SAVE_COOKIES);
+  MarkURLFetcherAsGaia(request_.get());
+  // See comment on SetAutomaticallyRetryOnNetworkChanges() above.
+  request_->SetAutomaticallyRetryOnNetworkChanges(3);
+  request_->Start();
+}
+
+// URLFetcher::Delegate implementation.
+void GaiaOAuthClient::Core::OnURLFetchComplete(
+    const net::URLFetcher* source) {
+  bool should_retry = false;
+  HandleResponse(source, &should_retry);
+  if (should_retry) {
+    // Explicitly call ReceivedContentWasMalformed() to ensure the current
+    // request gets counted as a failure for calculation of the back-off
+    // period.  If it was already a failure by status code, this call will
+    // be ignored.
+    request_->ReceivedContentWasMalformed();
+    num_retries_++;
+    // We must set our request_context_getter_ again because
+    // URLFetcher::Core::RetryOrCompleteUrlFetch resets it to NULL...
+    request_->SetRequestContext(request_context_getter_.get());
+    request_->Start();
+  }
+}
+
+void GaiaOAuthClient::Core::HandleResponse(
+    const net::URLFetcher* source,
+    bool* should_retry_request) {
+  // Move ownership of the request fetcher into a local scoped_ptr which
+  // will be nuked when we're done handling the request, unless we need
+  // to retry, in which case ownership will be returned to request_.
+  std::unique_ptr<net::URLFetcher> old_request = std::move(request_);
+  DCHECK_EQ(source, old_request.get());
+
+  // HTTP_BAD_REQUEST means the arguments are invalid.  HTTP_UNAUTHORIZED means
+  // the access or refresh token is invalid. No point retrying. We are
+  // done here.
+  int response_code = source->GetResponseCode();
+  if (response_code == net::HTTP_BAD_REQUEST ||
+      response_code == net::HTTP_UNAUTHORIZED) {
+    delegate_->OnOAuthError();
+    return;
+  }
+
+  std::unique_ptr<base::DictionaryValue> response_dict;
+  if (source->GetResponseCode() == net::HTTP_OK) {
+    std::string data;
+    source->GetResponseAsString(&data);
+    std::unique_ptr<base::Value> message_value = base::JSONReader::Read(data);
+    if (message_value.get() &&
+        message_value->IsType(base::Value::Type::DICTIONARY)) {
+      response_dict.reset(
+          static_cast<base::DictionaryValue*>(message_value.release()));
+    }
+  }
+
+  if (!response_dict.get()) {
+    // If we don't have an access token yet and the the error was not
+    // RC_BAD_REQUEST, we may need to retry.
+    if ((source->GetMaxRetriesOn5xx() != -1) &&
+        (num_retries_ >= source->GetMaxRetriesOn5xx())) {
+      // Retry limit reached. Give up.
+      request_type_ = NO_PENDING_REQUEST;
+      delegate_->OnNetworkError(source->GetResponseCode());
+    } else {
+      request_ = std::move(old_request);
+      *should_retry_request = true;
+    }
+    return;
+  }
+
+  RequestType type = request_type_;
+  request_type_ = NO_PENDING_REQUEST;
+
+  switch (type) {
+    case USER_EMAIL: {
+      std::string email;
+      response_dict->GetString("email", &email);
+      delegate_->OnGetUserEmailResponse(email);
+      break;
+    }
+
+    case USER_ID: {
+      std::string id;
+      response_dict->GetString("id", &id);
+      delegate_->OnGetUserIdResponse(id);
+      break;
+    }
+
+    case USER_INFO: {
+      delegate_->OnGetUserInfoResponse(std::move(response_dict));
+      break;
+    }
+
+    case TOKEN_INFO: {
+      delegate_->OnGetTokenInfoResponse(std::move(response_dict));
+      break;
+    }
+
+    case TOKENS_FROM_AUTH_CODE:
+    case REFRESH_TOKEN: {
+      std::string access_token;
+      std::string refresh_token;
+      int expires_in_seconds = 0;
+      response_dict->GetString(kAccessTokenValue, &access_token);
+      response_dict->GetString(kRefreshTokenValue, &refresh_token);
+      response_dict->GetInteger(kExpiresInValue, &expires_in_seconds);
+
+      if (access_token.empty()) {
+        delegate_->OnOAuthError();
+        return;
+      }
+
+      if (type == REFRESH_TOKEN) {
+        delegate_->OnRefreshTokenResponse(access_token, expires_in_seconds);
+      } else {
+        delegate_->OnGetTokensResponse(refresh_token,
+                                       access_token,
+                                       expires_in_seconds);
+      }
+      break;
+    }
+
+    default:
+      NOTREACHED();
+  }
+}
+
+GaiaOAuthClient::GaiaOAuthClient(net::URLRequestContextGetter* context_getter) {
+  core_ = new Core(context_getter);
+}
+
+GaiaOAuthClient::~GaiaOAuthClient() {
+}
+
+void GaiaOAuthClient::GetTokensFromAuthCode(
+    const OAuthClientInfo& oauth_client_info,
+    const std::string& auth_code,
+    int max_retries,
+    Delegate* delegate) {
+  return core_->GetTokensFromAuthCode(oauth_client_info,
+                                      auth_code,
+                                      max_retries,
+                                      delegate);
+}
+
+void GaiaOAuthClient::RefreshToken(
+    const OAuthClientInfo& oauth_client_info,
+    const std::string& refresh_token,
+    const std::vector<std::string>& scopes,
+    int max_retries,
+    Delegate* delegate) {
+  return core_->RefreshToken(oauth_client_info,
+                             refresh_token,
+                             scopes,
+                             max_retries,
+                             delegate);
+}
+
+void GaiaOAuthClient::GetUserEmail(const std::string& access_token,
+                                  int max_retries,
+                                  Delegate* delegate) {
+  return core_->GetUserEmail(access_token, max_retries, delegate);
+}
+
+void GaiaOAuthClient::GetUserId(const std::string& access_token,
+                                int max_retries,
+                                Delegate* delegate) {
+  return core_->GetUserId(access_token, max_retries, delegate);
+}
+
+void GaiaOAuthClient::GetUserInfo(const std::string& access_token,
+                                  int max_retries,
+                                  Delegate* delegate) {
+  return core_->GetUserInfo(access_token, max_retries, delegate);
+}
+
+void GaiaOAuthClient::GetTokenInfo(const std::string& access_token,
+                                   int max_retries,
+                                   Delegate* delegate) {
+  return core_->GetTokenInfo("access_token", access_token, max_retries,
+                             delegate);
+}
+
+void GaiaOAuthClient::GetTokenHandleInfo(const std::string& token_handle,
+                                         int max_retries,
+                                         Delegate* delegate) {
+  return core_->GetTokenInfo("token_handle", token_handle, max_retries,
+                             delegate);
+}
+
+}  // namespace gaia
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          // Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+//
+// A complete set of unit tests for GaiaAuthFetcher.
+// Originally ported from GoogleAuthenticator tests.
+
+#include <string>
+
+#include "base/json/json_reader.h"
+#include "base/memory/ref_counted.h"
+#include "base/message_loop/message_loop.h"
+#include "base/strings/stringprintf.h"
+#include "base/values.h"
+#include "build/build_config.h"
+#include "google_apis/gaia/gaia_auth_consumer.h"
+#include "google_apis/gaia/gaia_auth_fetcher.h"
+#include "google_apis/gaia/gaia_urls.h"
+#include "google_apis/gaia/google_service_auth_error.h"
+#include "google_apis/gaia/mock_url_fetcher_factory.h"
+#include "google_apis/google_api_keys.h"
+#include "net/base/load_flags.h"
+#include "net/base/net_errors.h"
+#include "net/http/http_response_headers.h"
+#include "net/http/http_status_code.h"
+#include "net/url_request/test_url_fetcher_factory.h"
+#include "net/url_request/url_fetcher_delegate.h"
+#include "net/url_request/url_request_status.h"
+#include "net/url_request/url_request_test_util.h"
+#include "testing/gmock/include/gmock/gmock.h"
+#include "testing/gtest/include/gtest/gtest.h"
+#include "url/gurl.h"
+
+using ::testing::Invoke;
+using ::testing::_;
+
+namespace {
+
+const char kGetAuthCodeValidCookie[] =
+    "oauth_code=test-code; Path=/test; Secure; HttpOnly";
+const char kGetAuthCodeCookieNoSecure[] =
+    "oauth_code=test-code; Path=/test; HttpOnly";
+const char kGetAuthCodeCookieNoHttpOnly[] =
+    "oauth_code=test-code; Path=/test; Secure";
+const char kGetAuthCodeCookieNoOAuthCode[] =
+    "Path=/test; Secure; HttpOnly";
+const char kGetTokenPairValidResponse[] =
+    "{"
+    "  \"refresh_token\": \"rt1\","
+    "  \"access_token\": \"at1\","
+    "  \"expires_in\": 3600,"
+    "  \"token_type\": \"Bearer\""
+    "}";
+
+}  // namespace
+
+MockFetcher::MockFetcher(bool success,
+                         const GURL& url,
+                         const std::string& results,
+                         net::URLFetcher::RequestType request_type,
+                         net::URLFetcherDelegate* d)
+    : TestURLFetcher(0, url, d) {
+  set_url(url);
+  net::Error error;
+
+  if (success) {
+    error = net::OK;
+    set_response_code(net::HTTP_OK);
+  } else {
+    error = net::ERR_FAILED;
+  }
+
+  set_status(net::URLRequestStatus::FromError(error));
+  SetResponseString(results);
+}
+
+MockFetcher::MockFetcher(const GURL& url,
+                         const net::URLRequestStatus& status,
+                         int response_code,
+                         const std::string& results,
+                         net::URLFetcher::RequestType request_type,
+                         net::URLFetcherDelegate* d)
+    : TestURLFetcher(0, url, d) {
+  set_url(url);
+  set_status(status);
+  set_response_code(response_code);
+  SetResponseString(results);
+}
+
+MockFetcher::~MockFetcher() {}
+
+void MockFetcher::Start() {
+  delegate()->OnURLFetchComplete(this);
+}
+
+class GaiaAuthFetcherTest : public testing::Test {
+ protected:
+  GaiaAuthFetcherTest()
+      : issue_auth_token_source_(GaiaUrls::GetInstance()
+                                     ->issue_auth_token_url()),
+        client_login_to_oauth2_source_(GaiaUrls::GetInstance()
+                                           ->client_login_to_oauth2_url()),
+        oauth2_token_source_(GaiaUrls::GetInstance()->oauth2_token_url()),
+        token_auth_source_(GaiaUrls::GetInstance()->token_auth_url()),
+        merge_session_source_(GaiaUrls::GetInstance()->merge_session_url()),
+        uberauth_token_source_(GaiaUrls::GetInstance()
+                                   ->oauth1_login_url()
+                                   .Resolve("?source=&issueuberauth=1")),
+        oauth_login_gurl_(GaiaUrls::GetInstance()->oauth1_login_url()) {}
+
+  void RunParsingTest(const std::string& data,
+                      const std::string& sid,
+                      const std::string& lsid,
+                      const std::string& token) {
+    std::string out_sid;
+    std::string out_lsid;
+    std::string out_token;
+
+    GaiaAuthFetcher::ParseClientLoginResponse(data,
+                                              &out_sid,
+                                              &out_lsid,
+                                              &out_token);
+    EXPECT_EQ(lsid, out_lsid);
+    EXPECT_EQ(sid, out_sid);
+    EXPECT_EQ(token, out_token);
+  }
+
+  void RunErrorParsingTest(const std::string& data,
+                           const std::string& error,
+                           const std::string& error_url,
+                           const std::string& captcha_url,
+                           const std::string& captcha_token) {
+    std::string out_error;
+    std::string out_error_url;
+    std::string out_captcha_url;
+    std::string out_captcha_token;
+
+    GaiaAuthFetcher::ParseClientLoginFailure(data,
+                                             &out_error,
+                                             &out_error_url,
+                                             &out_captcha_url,
+                                             &out_captcha_token);
+    EXPECT_EQ(error, out_error);
+    EXPECT_EQ(error_url, out_error_url);
+    EXPECT_EQ(captcha_url, out_captcha_url);
+    EXPECT_EQ(captcha_token, out_captcha_token);
+  }
+
+  GURL issue_auth_token_source_;
+  GURL client_login_to_oauth2_source_;
+  GURL oauth2_token_source_;
+  GURL token_auth_source_;
+  GURL merge_session_source_;
+  GURL uberauth_token_source_;
+  GURL oauth_login_gurl_;
+
+ protected:
+  net::TestURLRequestContextGetter* GetRequestContext() {
+    if (!request_context_getter_.get()) {
+      request_context_getter_ = new net::TestURLRequestContextGetter(
+          message_loop_.task_runner());
+    }
+    return request_context_getter_.get();
+  }
+
+  base::MessageLoop message_loop_;
+  scoped_refptr<net::TestURLRequestContextGetter> request_context_getter_;
+};
+
+class MockGaiaConsumer : public GaiaAuthConsumer {
+ public:
+  MockGaiaConsumer() {}
+  ~MockGaiaConsumer() {}
+
+  MOCK_METHOD1(OnClientLoginSuccess, void(const ClientLoginResult& result));
+  MOCK_METHOD2(OnIssueAuthTokenSuccess, void(const std::string& service,
+      const std::string& token));
+  MOCK_METHOD1(OnClientOAuthCode, void(const std::string& data));
+  MOCK_METHOD1(OnClientOAuthSuccess,
+               void(const GaiaAuthConsumer::ClientOAuthResult& result));
+  MOCK_METHOD1(OnMergeSessionSuccess, void(const std::string& data));
+  MOCK_METHOD1(OnUberAuthTokenSuccess, void(const std::string& data));
+  MOCK_METHOD1(OnClientLoginFailure,
+      void(const GoogleServiceAuthError& error));
+  MOCK_METHOD2(OnIssueAuthTokenFailure, void(const std::string& service,
+      const GoogleServiceAuthError& error));
+  MOCK_METHOD1(OnClientOAuthFailure,
+      void(const GoogleServiceAuthError& error));
+  MOCK_METHOD1(OnMergeSessionFailure, void(
+      const GoogleServiceAuthError& error));
+  MOCK_METHOD1(OnUberAuthTokenFailure, void(
+      const GoogleServiceAuthError& error));
+  MOCK_METHOD1(OnListAccountsSuccess, void(const std::string& data));
+  MOCK_METHOD0(OnLogOutSuccess, void());
+  MOCK_METHOD1(OnLogOutFailure, void(const GoogleServiceAuthError& error));
+  MOCK_METHOD1(OnGetCheckConnectionInfoSuccess, void(const std::string& data));
+  MOCK_METHOD1(OnListIdpSessionsSuccess, void(const std::string& data));
+  MOCK_METHOD1(OnGetTokenResponseSuccess,
+               void(const GaiaAuthConsumer::ClientOAuthResult& result));
+};
+
+#if defined(OS_WIN)
+#define MAYBE_ErrorComparator DISABLED_ErrorComparator
+#else
+#define MAYBE_ErrorComparator ErrorComparator
+#endif
+
+TEST_F(GaiaAuthFetcherTest, MAYBE_ErrorComparator) {
+  GoogleServiceAuthError expected_error =
+      GoogleServiceAuthError::FromConnectionError(-101);
+
+  GoogleServiceAuthError matching_error =
+      GoogleServiceAuthError::FromConnectionError(-101);
+
+  EXPECT_TRUE(expected_error == matching_error);
+
+  expected_error = GoogleServiceAuthError::FromConnectionError(6);
+
+  EXPECT_FALSE(expected_error == matching_error);
+
+  expected_error = GoogleServiceAuthError(GoogleServiceAuthError::NONE);
+
+  EXPECT_FALSE(expected_error == matching_error);
+
+  matching_error = GoogleServiceAuthError(GoogleServiceAuthError::NONE);
+
+  EXPECT_TRUE(expected_error == matching_error);
+}
+
+TEST_F(GaiaAuthFetcherTest, TokenNetFailure) {
+  int error_no = net::ERR_CONNECTION_RESET;
+  net::URLRequestStatus status(net::URLRequestStatus::FAILED, error_no);
+
+  GoogleServiceAuthError expected_error =
+      GoogleServiceAuthError::FromConnectionError(error_no);
+
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnIssueAuthTokenFailure(_, expected_error))
+      .Times(1);
+
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+
+  MockFetcher mock_fetcher(issue_auth_token_source_, status, 0, std::string(),
+                           net::URLFetcher::GET, &auth);
+  auth.OnURLFetchComplete(&mock_fetcher);
+}
+
+
+TEST_F(GaiaAuthFetcherTest, ParseRequest) {
+  RunParsingTest("SID=sid\nLSID=lsid\nAuth=auth\n", "sid", "lsid", "auth");
+  RunParsingTest("LSID=lsid\nSID=sid\nAuth=auth\n", "sid", "lsid", "auth");
+  RunParsingTest("SID=sid\nLSID=lsid\nAuth=auth", "sid", "lsid", "auth");
+  RunParsingTest("SID=sid\nAuth=auth\n", "sid", std::string(), "auth");
+  RunParsingTest("LSID=lsid\nAuth=auth\n", std::string(), "lsid", "auth");
+  RunParsingTest("\nAuth=auth\n", std::string(), std::string(), "auth");
+  RunParsingTest("SID=sid", "sid", std::string(), std::string());
+}
+
+TEST_F(GaiaAuthFetcherTest, ParseErrorRequest) {
+  RunErrorParsingTest("Url=U\n"
+                      "Error=E\n"
+                      "CaptchaToken=T\n"
+                      "CaptchaUrl=C\n", "E", "U", "C", "T");
+  RunErrorParsingTest("CaptchaToken=T\n"
+                      "Error=E\n"
+                      "Url=U\n"
+                      "CaptchaUrl=C\n", "E", "U", "C", "T");
+  RunErrorParsingTest("\n\n\nCaptchaToken=T\n"
+                      "\nError=E\n"
+                      "\nUrl=U\n"
+                      "CaptchaUrl=C\n", "E", "U", "C", "T");
+}
+
+TEST_F(GaiaAuthFetcherTest, WorkingIssueAuthToken) {
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnIssueAuthTokenSuccess(_, "token"))
+      .Times(1);
+
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+  net::URLRequestStatus status(net::URLRequestStatus::SUCCESS, 0);
+  MockFetcher mock_fetcher(issue_auth_token_source_, status, net::HTTP_OK,
+                           "token", net::URLFetcher::GET, &auth);
+  auth.OnURLFetchComplete(&mock_fetcher);
+}
+
+TEST_F(GaiaAuthFetcherTest, CheckTwoFactorResponse) {
+  std::string response =
+      base::StringPrintf("Error=BadAuthentication\n%s\n",
+                         GaiaAuthFetcher::kSecondFactor);
+  EXPECT_TRUE(GaiaAuthFetcher::IsSecondFactorSuccess(response));
+}
+
+TEST_F(GaiaAuthFetcherTest, CheckNormalErrorCode) {
+  std::string response = "Error=BadAuthentication\n";
+  EXPECT_FALSE(GaiaAuthFetcher::IsSecondFactorSuccess(response));
+}
+
+TEST_F(GaiaAuthFetcherTest, CaptchaParse) {
+  net::URLRequestStatus status(net::URLRequestStatus::SUCCESS, 0);
+  std::string data = "Url=http://www.google.com/login/captcha\n"
+                     "Error=CaptchaRequired\n"
+                     "CaptchaToken=CCTOKEN\n"
+                     "CaptchaUrl=Captcha?ctoken=CCTOKEN\n";
+  GoogleServiceAuthError error =
+      GaiaAuthFetcher::GenerateAuthError(data, status);
+
+  std::string token = "CCTOKEN";
+  GURL image_url("http://accounts.google.com/Captcha?ctoken=CCTOKEN");
+  GURL unlock_url("http://www.google.com/login/captcha");
+
+  EXPECT_EQ(error.state(), GoogleServiceAuthError::CAPTCHA_REQUIRED);
+  EXPECT_EQ(error.captcha().token, token);
+  EXPECT_EQ(error.captcha().image_url, image_url);
+  EXPECT_EQ(error.captcha().unlock_url, unlock_url);
+}
+
+TEST_F(GaiaAuthFetcherTest, AccountDeletedError) {
+  net::URLRequestStatus status(net::URLRequestStatus::SUCCESS, 0);
+  std::string data = "Error=AccountDeleted\n";
+  GoogleServiceAuthError error =
+      GaiaAuthFetcher::GenerateAuthError(data, status);
+  EXPECT_EQ(error.state(), GoogleServiceAuthError::ACCOUNT_DELETED);
+}
+
+TEST_F(GaiaAuthFetcherTest, AccountDisabledError) {
+  net::URLRequestStatus status(net::URLRequestStatus::SUCCESS, 0);
+  std::string data = "Error=AccountDisabled\n";
+  GoogleServiceAuthError error =
+      GaiaAuthFetcher::GenerateAuthError(data, status);
+  EXPECT_EQ(error.state(), GoogleServiceAuthError::ACCOUNT_DISABLED);
+}
+
+TEST_F(GaiaAuthFetcherTest, BadAuthenticationError) {
+  net::URLRequestStatus status(net::URLRequestStatus::SUCCESS, 0);
+  std::string data = "Error=BadAuthentication\n";
+  GoogleServiceAuthError error =
+      GaiaAuthFetcher::GenerateAuthError(data, status);
+  EXPECT_EQ(error.state(), GoogleServiceAuthError::INVALID_GAIA_CREDENTIALS);
+}
+
+TEST_F(GaiaAuthFetcherTest, IncomprehensibleError) {
+  net::URLRequestStatus status(net::URLRequestStatus::SUCCESS, 0);
+  std::string data = "Error=Gobbledygook\n";
+  GoogleServiceAuthError error =
+      GaiaAuthFetcher::GenerateAuthError(data, status);
+  EXPECT_EQ(error.state(), GoogleServiceAuthError::SERVICE_UNAVAILABLE);
+}
+
+TEST_F(GaiaAuthFetcherTest, ServiceUnavailableError) {
+  net::URLRequestStatus status(net::URLRequestStatus::SUCCESS, 0);
+  std::string data = "Error=ServiceUnavailable\n";
+  GoogleServiceAuthError error =
+      GaiaAuthFetcher::GenerateAuthError(data, status);
+  EXPECT_EQ(error.state(), GoogleServiceAuthError::SERVICE_UNAVAILABLE);
+}
+
+TEST_F(GaiaAuthFetcherTest, OAuthLoginTokenSuccess) {
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnClientOAuthCode("test-code")).Times(0);
+  EXPECT_CALL(consumer, OnClientOAuthSuccess(
+      GaiaAuthConsumer::ClientOAuthResult("rt1", "at1", 3600))).Times(1);
+
+  net::TestURLFetcherFactory factory;
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+  auth.StartCookieForOAuthLoginTokenExchange("0");
+  net::TestURLFetcher* fetcher = factory.GetFetcherByID(0);
+  EXPECT_TRUE(NULL != fetcher);
+  EXPECT_EQ(net::LOAD_NORMAL, fetcher->GetLoadFlags());
+  EXPECT_EQ(std::string::npos,
+            fetcher->GetOriginalURL().query().find("device_type=chrome"));
+
+  EXPECT_TRUE(auth.HasPendingFetch());
+  scoped_refptr<net::HttpResponseHeaders> reponse_headers =
+      new net::HttpResponseHeaders("");
+  reponse_headers->AddCookie(kGetAuthCodeValidCookie);
+  MockFetcher mock_fetcher1(
+      client_login_to_oauth2_source_,
+      net::URLRequestStatus(net::URLRequestStatus::SUCCESS, 0),
+      net::HTTP_OK,
+      std::string(),
+      net::URLFetcher::POST,
+      &auth);
+  mock_fetcher1.set_response_headers(reponse_headers);
+  auth.OnURLFetchComplete(&mock_fetcher1);
+  EXPECT_TRUE(auth.HasPendingFetch());
+  MockFetcher mock_fetcher2(
+      oauth2_token_source_,
+      net::URLRequestStatus(net::URLRequestStatus::SUCCESS, 0), net::HTTP_OK,
+      kGetTokenPairValidResponse, net::URLFetcher::POST, &auth);
+  auth.OnURLFetchComplete(&mock_fetcher2);
+  EXPECT_FALSE(auth.HasPendingFetch());
+}
+
+TEST_F(GaiaAuthFetcherTest, OAuthLoginTokenSuccessNoTokenFetch) {
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnClientOAuthCode("test-code")).Times(1);
+  EXPECT_CALL(consumer, OnClientOAuthSuccess(
+      GaiaAuthConsumer::ClientOAuthResult("", "", 0))).Times(0);
+
+  net::TestURLFetcherFactory factory;
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+  auth.StartCookieForOAuthLoginTokenExchange(
+      false, "0", "ABCDE_12345", "");
+  net::TestURLFetcher* fetcher = factory.GetFetcherByID(0);
+  EXPECT_TRUE(NULL != fetcher);
+  EXPECT_EQ(net::LOAD_NORMAL, fetcher->GetLoadFlags());
+  EXPECT_EQ(std::string::npos,
+            fetcher->GetOriginalURL().query().find("device_type=chrome"));
+
+  scoped_refptr<net::HttpResponseHeaders> reponse_headers =
+      new net::HttpResponseHeaders("");
+  reponse_headers->AddCookie(kGetAuthCodeValidCookie);
+  EXPECT_TRUE(auth.HasPendingFetch());
+  MockFetcher mock_fetcher1(
+      client_login_to_oauth2_source_,
+      net::URLRequestStatus(net::URLRequestStatus::SUCCESS, 0),
+      net::HTTP_OK,
+      std::string(),
+      net::URLFetcher::POST,
+      &auth);
+  mock_fetcher1.set_response_headers(reponse_headers);
+  auth.OnURLFetchComplete(&mock_fetcher1);
+  EXPECT_FALSE(auth.HasPendingFetch());
+}
+
+TEST_F(GaiaAuthFetcherTest, OAuthLoginTokenWithCookies_DeviceId) {
+  MockGaiaConsumer consumer;
+  net::TestURLFetcherFactory factory;
+  std::string expected_device_id("ABCDE-12345");
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+  auth.StartCookieForOAuthLoginTokenExchangeWithDeviceId("0",
+                                                         expected_device_id);
+  net::TestURLFetcher* fetcher = factory.GetFetcherByID(0);
+  EXPECT_TRUE(NULL != fetcher);
+  EXPECT_EQ(net::LOAD_NORMAL, fetcher->GetLoadFlags());
+  EXPECT_NE(std::string::npos,
+            fetcher->GetOriginalURL().query().find("device_type=chrome"));
+  net::HttpRequestHeaders extra_request_headers;
+  fetcher->GetExtraRequestHeaders(&extra_request_headers);
+  std::string device_id;
+  EXPECT_TRUE(extra_request_headers.GetHeader("X-Device-ID", &device_id));
+  EXPECT_EQ(device_id, expected_device_id);
+}
+
+TEST_F(GaiaAuthFetcherTest, OAuthLoginTokenClientLoginToOAuth2Failure) {
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnClientOAuthFailure(_))
+      .Times(1);
+
+  net::TestURLFetcherFactory factory;
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+  auth.StartCookieForOAuthLoginTokenExchange(std::string());
+
+  EXPECT_TRUE(auth.HasPendingFetch());
+  MockFetcher mock_fetcher(
+      client_login_to_oauth2_source_,
+      net::URLRequestStatus(net::URLRequestStatus::SUCCESS, 0),
+      net::HTTP_FORBIDDEN,
+      std::string(),
+      net::URLFetcher::POST,
+      &auth);
+  auth.OnURLFetchComplete(&mock_fetcher);
+  EXPECT_FALSE(auth.HasPendingFetch());
+}
+
+TEST_F(GaiaAuthFetcherTest, OAuthLoginTokenOAuth2TokenPairFailure) {
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnClientOAuthFailure(_))
+      .Times(1);
+
+  net::TestURLFetcherFactory factory;
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+  auth.StartCookieForOAuthLoginTokenExchange(std::string());
+
+  scoped_refptr<net::HttpResponseHeaders> reponse_headers =
+      new net::HttpResponseHeaders("");
+  reponse_headers->AddCookie(kGetAuthCodeValidCookie);
+  EXPECT_TRUE(auth.HasPendingFetch());
+  MockFetcher mock_fetcher1(
+      client_login_to_oauth2_source_,
+      net::URLRequestStatus(net::URLRequestStatus::SUCCESS, 0),
+      net::HTTP_OK,
+      std::string(),
+      net::URLFetcher::POST,
+      &auth);
+  mock_fetcher1.set_response_headers(reponse_headers);
+  auth.OnURLFetchComplete(&mock_fetcher1);
+  EXPECT_TRUE(auth.HasPendingFetch());
+  MockFetcher mock_fetcher2(
+      oauth2_token_source_,
+      net::URLRequestStatus(net::URLRequestStatus::SUCCESS, 0),
+      net::HTTP_FORBIDDEN,
+      std::string(),
+      net::URLFetcher::POST,
+      &auth);
+  auth.OnURLFetchComplete(&mock_fetcher2);
+  EXPECT_FALSE(auth.HasPendingFetch());
+}
+
+TEST_F(GaiaAuthFetcherTest, MergeSessionSuccess) {
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnMergeSessionSuccess("<html></html>"))
+      .Times(1);
+
+  net::TestURLFetcherFactory factory;
+
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+  auth.StartMergeSession("myubertoken", std::string());
+
+  EXPECT_TRUE(auth.HasPendingFetch());
+  MockFetcher mock_fetcher(
+      merge_session_source_,
+      net::URLRequestStatus(net::URLRequestStatus::SUCCESS, 0), net::HTTP_OK,
+      "<html></html>", net::URLFetcher::GET, &auth);
+  auth.OnURLFetchComplete(&mock_fetcher);
+  EXPECT_FALSE(auth.HasPendingFetch());
+}
+
+TEST_F(GaiaAuthFetcherTest, MergeSessionSuccessRedirect) {
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnMergeSessionSuccess("<html></html>"))
+      .Times(1);
+
+  net::TestURLFetcherFactory factory;
+
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+  auth.StartMergeSession("myubertoken", std::string());
+
+  // Make sure the fetcher created has the expected flags.  Set its url()
+  // properties to reflect a redirect.
+  net::TestURLFetcher* test_fetcher = factory.GetFetcherByID(0);
+  EXPECT_TRUE(test_fetcher != NULL);
+  EXPECT_TRUE(test_fetcher->GetLoadFlags() == net::LOAD_NORMAL);
+  EXPECT_TRUE(auth.HasPendingFetch());
+
+  GURL final_url("http://www.google.com/CheckCookie");
+  test_fetcher->set_url(final_url);
+  test_fetcher->set_status(
+      net::URLRequestStatus(net::URLRequestStatus::SUCCESS, 0));
+  test_fetcher->set_response_code(net::HTTP_OK);
+  test_fetcher->SetResponseString("<html></html>");
+
+  auth.OnURLFetchComplete(test_fetcher);
+  EXPECT_FALSE(auth.HasPendingFetch());
+}
+
+TEST_F(GaiaAuthFetcherTest, UberAuthTokenSuccess) {
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnUberAuthTokenSuccess("uberToken"))
+      .Times(1);
+
+  net::TestURLFetcherFactory factory;
+
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+  auth.StartTokenFetchForUberAuthExchange("myAccessToken",
+                                          true /* is_bound_to_channel_id */);
+
+  EXPECT_TRUE(auth.HasPendingFetch());
+  MockFetcher mock_fetcher(
+      uberauth_token_source_,
+      net::URLRequestStatus(net::URLRequestStatus::SUCCESS, 0), net::HTTP_OK,
+      "uberToken", net::URLFetcher::POST, &auth);
+  auth.OnURLFetchComplete(&mock_fetcher);
+  EXPECT_FALSE(auth.HasPendingFetch());
+}
+
+TEST_F(GaiaAuthFetcherTest, ParseClientLoginToOAuth2Response) {
+  {  // No cookies.
+    std::string auth_code;
+    net::ResponseCookies cookies;
+    EXPECT_FALSE(GaiaAuthFetcher::ParseClientLoginToOAuth2Response(
+        cookies, &auth_code));
+    EXPECT_EQ("", auth_code);
+  }
+  {  // Few cookies, nothing appropriate.
+    std::string auth_code;
+    net::ResponseCookies cookies;
+    cookies.push_back(kGetAuthCodeCookieNoSecure);
+    cookies.push_back(kGetAuthCodeCookieNoHttpOnly);
+    cookies.push_back(kGetAuthCodeCookieNoOAuthCode);
+    EXPECT_FALSE(GaiaAuthFetcher::ParseClientLoginToOAuth2Response(
+        cookies, &auth_code));
+    EXPECT_EQ("", auth_code);
+  }
+  {  // Few cookies, one of them is valid.
+    std::string auth_code;
+    net::ResponseCookies cookies;
+    cookies.push_back(kGetAuthCodeCookieNoSecure);
+    cookies.push_back(kGetAuthCodeCookieNoHttpOnly);
+    cookies.push_back(kGetAuthCodeCookieNoOAuthCode);
+    cookies.push_back(kGetAuthCodeValidCookie);
+    EXPECT_TRUE(GaiaAuthFetcher::ParseClientLoginToOAuth2Response(
+        cookies, &auth_code));
+    EXPECT_EQ("test-code", auth_code);
+  }
+  {  // Single valid cookie (like in real responses).
+    std::string auth_code;
+    net::ResponseCookies cookies;
+    cookies.push_back(kGetAuthCodeValidCookie);
+    EXPECT_TRUE(GaiaAuthFetcher::ParseClientLoginToOAuth2Response(
+        cookies, &auth_code));
+    EXPECT_EQ("test-code", auth_code);
+  }
+}
+
+TEST_F(GaiaAuthFetcherTest, StartOAuthLogin) {
+  // OAuthLogin returns the same as the ClientLogin endpoint, minus CAPTCHA
+  // responses.
+  std::string data("SID=sid\nLSID=lsid\nAuth=auth\n");
+
+  GaiaAuthConsumer::ClientLoginResult result;
+  result.lsid = "lsid";
+  result.sid = "sid";
+  result.token = "auth";
+  result.data = data;
+
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnClientLoginSuccess(result))
+      .Times(1);
+
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+  net::URLRequestStatus status(net::URLRequestStatus::SUCCESS, 0);
+  MockFetcher mock_fetcher(oauth_login_gurl_, status, net::HTTP_OK, data,
+                           net::URLFetcher::GET, &auth);
+  auth.OnURLFetchComplete(&mock_fetcher);
+}
+
+TEST_F(GaiaAuthFetcherTest, ListAccounts) {
+  std::string data("[\"gaia.l.a.r\", ["
+      "[\"gaia.l.a\", 1, \"First Last\", \"user@gmail.com\", "
+      "\"//googleusercontent.com/A/B/C/D/photo.jpg\", 1, 1, 0]]]");
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnListAccountsSuccess(data)).Times(1);
+
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+  net::URLRequestStatus status(net::URLRequestStatus::SUCCESS, 0);
+  MockFetcher mock_fetcher(
+      GaiaUrls::GetInstance()->ListAccountsURLWithSource(std::string()), status,
+      net::HTTP_OK, data, net::URLFetcher::GET, &auth);
+  auth.OnURLFetchComplete(&mock_fetcher);
+}
+
+TEST_F(GaiaAuthFetcherTest, LogOutSuccess) {
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnLogOutSuccess()).Times(1);
+
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+  net::URLRequestStatus status(net::URLRequestStatus::SUCCESS, 0);
+  MockFetcher mock_fetcher(
+      GaiaUrls::GetInstance()->LogOutURLWithSource(std::string()), status,
+      net::HTTP_OK, std::string(), net::URLFetcher::GET, &auth);
+  auth.OnURLFetchComplete(&mock_fetcher);
+}
+
+TEST_F(GaiaAuthFetcherTest, LogOutFailure) {
+  int error_no = net::ERR_CONNECTION_RESET;
+  net::URLRequestStatus status(net::URLRequestStatus::FAILED, error_no);
+
+  GoogleServiceAuthError expected_error =
+      GoogleServiceAuthError::FromConnectionError(error_no);
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnLogOutFailure(expected_error)).Times(1);
+
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+
+  MockFetcher mock_fetcher(
+      GaiaUrls::GetInstance()->LogOutURLWithSource(std::string()), status, 0,
+      std::string(), net::URLFetcher::GET, &auth);
+  auth.OnURLFetchComplete(&mock_fetcher);
+}
+
+TEST_F(GaiaAuthFetcherTest, GetCheckConnectionInfo) {
+  std::string data(
+      "[{\"carryBackToken\": \"token1\", \"url\": \"http://www.google.com\"}]");
+  MockGaiaConsumer consumer;
+  EXPECT_CALL(consumer, OnGetCheckConnectionInfoSuccess(data)).Times(1);
+
+  GaiaAuthFetcher auth(&consumer, std::string(), GetRequestContext());
+  net::URLRequestStatus status(net::URLRequestStatus::SUCCESS, 0);
+  MockFetcher mock_fetcher(
+      GaiaUrls::GetInstance()->GetCheckConnectionInfoURLWithSource(
+          std::string()),
+      status, net::HTTP_OK, data, net::URLFetcher::GET, &auth);
+  auth.OnURLFetchComplete(&mock_fetcher);
+}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     // Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef GOOGLE_APIS_GAIA_GAIA_AUTH_FETCHER_H_
+#define GOOGLE_APIS_GAIA_GAIA_AUTH_FETCHER_H_
+
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "base/gtest_prod_util.h"
+#include "base/macros.h"
+#include "google_apis/gaia/gaia_auth_consumer.h"
+#include "google_apis/gaia/google_service_auth_error.h"
+#include "net/traffic_annotation/network_traffic_annotation.h"
+#include "net/url_request/url_fetcher_delegate.h"
+#include "url/gurl.h"
+
+// Authenticate a user against the Google Accounts ClientLogin API
+// with various capabilities and return results to a GaiaAuthConsumer.
+//
+// In the future, we will also issue auth tokens from this class.
+// This class should be used on a single thread, but it can be whichever thread
+// that you like.
+//
+// This class can handle one request at a time on any thread. To parallelize
+// requests, create multiple GaiaAuthFetcher's.
+
+class GaiaAuthFetcherTest;
+
+namespace net {
+class URLFetcher;
+class URLRequestContextGetter;
+class URLRequestStatus;
+}
+
+class GaiaAuthFetcher : public net::URLFetcherDelegate {
+ public:
+  // Magic string indicating that, while a second factor is still
+  // needed to complete authentication, the user provided the right password.
+  static const char kSecondFactor[];
+
+  // Magic string indicating that though the user does not have Less Secure
+  // Apps enabled, the user provided the right password.
+  static const char kWebLoginRequired[];
+
+  // This will later be hidden behind an auth service which caches
+  // tokens.
+  GaiaAuthFetcher(GaiaAuthConsumer* consumer,
+                  const std::string& source,
+                  net::URLRequestContextGetter* getter);
+  ~GaiaAuthFetcher() override;
+
+  // Start a request to obtain |service| token for the the account identified by
+  // |uber_token|.
+  //
+  // Either OnIssueAuthTokenSuccess or OnIssueAuthTokenFailure will be
+  // called on the consumer on the original thread.
+  void StartTokenAuth(const std::string& uber_token,
+                      const char* const service);
+
+  // Start a request to obtain service token for the the account identified by
+  // |oauth2_access_token| and the |service|.
+  //
+  // Either OnIssueAuthTokenSuccess or OnIssueAuthTokenFailure will be
+  // called on the consumer on the original thread.
+  void StartIssueAuthTokenForOAuth2(const std::string& oauth2_access_token,
+                                    const char* const service);
+
+  // Start a request to revoke |auth_token|.
+  //
+  // OnOAuth2RevokeTokenCompleted will be called on the consumer on the original
+  // thread.
+  void StartRevokeOAuth2Token(const std::string& auth_token);
+
+  // Start a request to exchange the cookies of a signed-in user session
+  // for an OAuthLogin-scoped oauth2 token.  In the case of a session with
+  // multiple accounts signed in, |session_index| indicate the which of accounts
+  // within the session.
+  //
+  // Either OnClientOAuthSuccess or OnClientOAuthFailure will be
+  // called on the consumer on the original thread.
+  void StartCookieForOAuthLoginTokenExchange(const std::string& session_index);
+
+  // Start a request to exchange the cookies of a signed-in user session
+  // for an OAuthLogin-scoped oauth2 token. In the case of a session with
+  // multiple accounts signed in, |session_index| indicate the which of accounts
+  // within the session.
+  // Resulting refresh token is annotated on the server with |device_id|. Format
+  // of device_id on the server is at most 64 unicode characters.
+  //
+  // Either OnClientOAuthSuccess or OnClientOAuthFailure will be
+  // called on the consumer on the original thread.
+  void StartCookieForOAuthLoginTokenExchangeWithDeviceId(
+      const std::string& session_index,
+      const std::string& device_id);
+
+  // Start a request to exchange the cookies of a signed-in user session
+  // and for specified client for an OAuthLogin-scoped oauth2 token. Client is
+  // determined by its |client_id|. In the case of a session with multiple
+  // accounts signed in, |session_index| indicate the which of accounts
+  // within the session. If |fetch_token_from_auth_code| is not set fetching
+  // process stops after receiving an auth code and ClientOAuthSuccess won't be
+  // called.
+  // Resulting refresh token is annotated on the server with |device_id|. Format
+  // of device_id on the server is at most 64 unicode characters.
+  //
+  // Either OnClientOAuthCode or ClientOAuthSuccess or OnClientOAuthFailure
+  // will be called on the consumer on the original thread.
+  void StartCookieForOAuthLoginTokenExchange(
+      bool fetch_token_from_auth_code,
+      const std::string& session_index,
+      const std::string& client_id,
+      const std::string& device_id);
+
+  // Start a request to exchange the authorization code for an OAuthLogin-scoped
+  // oauth2 token.
+  //
+  // Either OnClientOAuthSuccess or OnClientOAuthFailure will be
+  // called on the consumer on the original thread.
+  void StartAuthCodeForOAuth2TokenExchange(const std::string& auth_code);
+
+  // Start a request to exchange the authorization code for an OAuthLogin-scoped
+  // oauth2 token.
+  // Resulting refresh token is annotated on the server with |device_id|. Format
+  // of device_id on the server is at most 64 unicode characters.
+  //
+  // Either OnClientOAuthSuccess or OnClientOAuthFailure will be
+  // call

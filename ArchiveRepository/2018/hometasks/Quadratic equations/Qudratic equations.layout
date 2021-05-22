@@ -1,0 +1,38 @@
+
+ *
+ * Purpose:     Returns the size of the raw message in bytes.  If it's
+ *              compact dataset, the data part is also included.
+ *              This function doesn't take into account message alignment.
+ *
+ * Return:      Success:        Message data size in bytes
+ *
+ *              Failure:        0
+ *
+ * Programmer:  Robb Matzke
+ *              Wednesday, October  8, 1997
+ *
+ *-------------------------------------------------------------------------
+ */
+static size_t
+H5O_layout_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
+{
+    const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
+    size_t                  ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* check args */
+    HDassert(f);
+    HDassert(mesg);
+
+    /* Compute serialized size */
+    /* (including possibly compact data) */
+    ret_value = H5D_layout_meta_size(f, mesg, TRUE);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_layout_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_layout_reset
+ *

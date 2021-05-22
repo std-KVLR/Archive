@@ -1,0 +1,12 @@
+# depslib dependency file v1.0
+1545683749 source:d:\programming\cfiles\c++\tasksstroustrup\task11\main.cpp
+	<iostream>
+	<fstream>
+	<clocale>
+	<windows.h>
+	<string>
+	<stdexcept>
+	<vector>
+	<sstream>
+	<iomanip>
+

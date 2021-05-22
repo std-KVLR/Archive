@@ -1,0 +1,16 @@
+# depslib dependency file v1.0
+1505386017 source:o:\squeezy\main.c
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+
+1505737603 source:o:\z73114\squeezy\main.c
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+
+1505758624 source:f:\squeezy\main.c
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+

@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1555004227 source:d:\programming\cfiles\qsort\main.c
+	<stdio.h>
+	<string.h>
+

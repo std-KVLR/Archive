@@ -1,0 +1,94 @@
+is);
+				delete *it;
+
+				++it;
+			}
+
+			m_connected_slots.erase(m_connected_slots.begin(), m_connected_slots.end());
+		}
+
+#if !defined(NDEBUG)
+			bool connected(has_slots_interface* pclass)
+		{
+			lock_block<mt_policy> lock(this);
+			typename connections_list::const_iterator itNext, it = m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = m_connected_slots.end();
+			while(it != itEnd)
+			{
+				itNext = it;
+				++itNext;
+				if ((*it)->getdest() == pclass)
+					return true;
+				it = itNext;
+			}
+			return false;
+		}
+#endif
+
+		void disconnect(has_slots_interface* pclass)
+		{
+			lock_block<mt_policy> lock(this);
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
+
+			while(it != itEnd)
+			{
+				if((*it)->getdest() == pclass)
+				{
+					delete *it;
+					m_connected_slots.erase(it);
+					pclass->signal_disconnect(this);
+					return;
+				}
+
+				++it;
+			}
+		}
+
+		void slot_disconnect(has_slots_interface* pslot)
+		{
+			lock_block<mt_policy> lock(this);
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
+
+			while(it != itEnd)
+			{
+				typename connections_list::iterator itNext = it;
+				++itNext;
+
+				if((*it)->getdest() == pslot)
+				{
+					delete *it;
+					m_connected_slots.erase(it);
+				}
+
+				it = itNext;
+			}
+		}
+
+		void slot_duplicate(const has_slots_interface* oldtarget, has_slots_interface* newtarget)
+		{
+			lock_block<mt_policy> lock(this);
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
+
+			while(it != itEnd)
+			{
+				if((*it)->getdest() == oldtarget)
+				{
+					m_connected_slots.push_back((*it)->duplicate(newtarget));
+				}
+
+				++it;
+			}
+		}
+
+	protected:
+		connections_list m_connected_slots;
+	};
+
+	template<class arg1_type, class mt_policy>
+	class _signal_base1 : public _signal_base<mt_policy>
+	{
+	public:
+		typedef std::list<_con

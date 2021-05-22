@@ -1,0 +1,2836 @@
+
+#define MOD_RIGHT					16384
+#define MOD_LEFT					32768
+#define LLKHF_EXTENDED				 (KF_EXTENDED >> 8)
+#define LLKHF_INJECTED				   0x00000010
+#define LLKHF_ALTDOWN				  (KF_ALTDOWN >> 8)
+#define LLKHF_UP				       (KF_UP >> 8)
+
+#define CURSOR_SHOWING				   0x00000001
+#define WS_ACTIVECAPTION			   0x00000001
+
+#define GA_PARENT					    1
+#define GA_ROOT 					    2
+#define GA_ROOTOWNER					    3
+
+#define MAPVK_VK_TO_VSC 			 	    0
+#define MAPVK_VSC_TO_VK 			 	    1
+#define MAPVK_VK_TO_CHAR				    2
+#define MAPVK_VSC_TO_VK_EX				    3
+#define MAPVK_VK_TO_VSC_EX				    4
+
+
+#if WINVER >= _WIN32_WINNT_NT4 /* || _WIN32_WINDOWS_95 */
+#define ENDSESSION_LOGOFF			   0x80000000
+
+#define IDCLOSE 					    8
+#define IDHELP						    9
+#endif	/* Win9x || WINNT >= WinNT4 */
+
+
+#if _WIN32_WINNT >= _WIN32_WINNT_NT4
+#define GET_WHEEL_DELTA_WPARAM(wparam)		((short)(HIWORD(wparam)))
+
+#define MB_SERVICE_NOTIFICATION 		   0x00200000
+#define MOUSEEVENTF_WHEEL			   0x00000800
+
+/* The following group of definitions were formerly duplicated from
+ * header <pbt.h>, which is now declared obsolete.
+ */
+#define PBT_APMQUERYSUSPEND				    0
+#define PBT_APMQUERYSTANDBY				    1
+#define PBT_APMQUERYSUSPENDFAILED			    2
+#define PBT_APMQUERYSTANDBYFAILED			    3
+#define PBT_APMSUSPEND					    4
+#define PBT_APMSTANDBY					    5
+#define PBT_APMRESUMECRITICAL				    6
+#define PBT_APMRESUMESUSPEND				    7
+#define PBT_APMRESUMESTANDBY				    8
+#define PBT_APMBATTERYLOW				    9
+#define PBT_APMPOWERSTATUSCHANGE			   10
+#define PBT_APMOEMEVENT 				   11
+#define PBT_APMRESUMEAUTOMATIC				   18
+#define PBTF_APMRESUMEFROMFAILURE			    1
+/* end pbt.h */
+
+#define SM_CMETRICS					   88
+
+#define WHEEL_DELTA					  120
+#define WHEEL_PAGESCROLL				UINT_MAX
+
+
+#ifdef _WIN32_WINNT
+#if _WIN32_WINNT < _WIN32_WINNT_NT4
+/* The following are defined for the WinNT platforms only, but this
+ * generic representation acquired a new value from WinNT4 onwards...
+ */
+#define MB_SERVICE_NOTIFICATION 		   0x00040000
+#endif
+/* ...whereas this alternative always represents the value which is
+ * specific to the older WinNT3x platforms.
+ */
+#define MB_SERVICE_NOTIFICATION_NT3X		   0x00040000
+#endif
+
+
+#if _WIN32_WINNT < _WIN32_WINNT_NT4
+/* This is defined for all Win32 platforms, but a different value
+ * applies for WinNT, from WinNT4 onwards.
+ */
+#define SM_CMETRICS					   76
+#endif
+#if _WIN32_WINNT < _WIN32_WINNT_WIN2K
+/* Similarly, these are defined with different values, for all WinNT
+ * derivatives, from Win2K onwards...
+ */
+#define CF_MAX						   17
+#define WM_MOUSELAST					  522
+#endif
+#if _WIN32_WINNT < _WIN32_WINNT_WINXP
+/* ...and these, with the change in value becoming applicable for
+ * all WinNT derivatives from WinXP onwards.
+ */
+#define QS_INPUT					    7
+#define QS_ALLEVENTS					  191
+#define QS_ALLINPUT					  255
+
+#define WM_KEYLAST					  264
+#endif
+
+
+#if _WIN32_WINNT >= _WIN32_WINNT_NT4SP3
+#define INPUT_MOUSE				   0x00000000
+#define INPUT_KEYBOARD				   0x00000001
+#define INPUT_HARDWARE				   0x00000002
+
+#endif	/* WINNT >= WinNT4-SP3 */
+#endif	/* WINNT >= WinNT4 */
+
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN2K || _WIN32_WINDOWS >= _WIN32_WINDOWS_98
+#define DC_GRADIENT				   0x00000020
+
+#define EDS_RAWMODE				   0x00000002
+
+#define ISMEX_NOSEND				   0x00000000
+#define ISMEX_CALLBACK				   0x00000004
+#define ISMEX_NOTIFY				   0x00000002
+#define ISMEX_REPLIED				   0x00000008
+#define ISMEX_SEND				   0x00000001
+
+#define MONITOR_DEFAULTTONULL				    0
+#define MONITOR_DEFAULTTOPRIMARY			    1
+#define MONITOR_DEFAULTTONEAREST			    2
+#define MONITORINFOF_PRIMARY				    1
+
+#define SW_SMOOTHSCROLL 			       0x0010
+#define TPM_RECURSE					    1
+
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN2K || _WIN32_WINDOWS >= _WIN32_WINDOWS_ME
+#define ASFW_ANY				  ((DWORD)(-1))
+
+#define GMMP_USE_DISPLAY_POINTS 			    1
+#define GMMP_USE_HIGH_RESOLUTION_POINTS 		    2
+
+#define LSFW_LOCK					    1
+#define LSFW_UNLOCK					    2
+
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN2K
+#define AW_HOR_POSITIVE 			   0x00000001
+#define AW_HOR_NEGATIVE 			   0x00000002
+#define AW_VER_POSITIVE 			   0x00000004
+#define AW_VER_NEGATIVE 			   0x00000008
+#define AW_CENTER				   0x00000010
+#define AW_HIDE 				   0x00010000
+#define AW_ACTIVATE				   0x00020000
+#define AW_SLIDE				   0x00040000
+#define AW_BLEND				   0x00080000
+
+#define CF_DIBV5					   17
+#define CF_MAX						   18
+
+#define CHILDID_SELF					    0
+
+#define DC_BUTTONS				   0x00001000
+
+#define DEVICE_NOTIFY_WINDOW_HANDLE		   0x00000000
+#define DEVICE_NOTIFY_SERVICE_HANDLE		   0x00000001
+
+#define DFC_POPUPMENU					    5
+
+#define DFCS_TRANSPARENT			        0x800
+#define DFCS_HOT				       0x1000
+
+#define EM_GETIMESTATUS 				  217
+#define EM_SETIMESTATUS 				  216
+
+#define EVENT_MIN				   0x00000001
+#define EVENT_SYSTEM_SOUND			   0x00000001
+#define EVENT_SYSTEM_ALERT			   0x00000002
+#define EVENT_SYSTEM_FOREGROUND 		   0x00000003
+#define EVENT_SYSTEM_MENUSTART			   0x00000004
+#define EVENT_SYSTEM_MENUEND			   0x00000005
+#define EVENT_SYSTEM_MENUPOPUPSTART		   0x00000006
+#define EVENT_SYSTEM_MENUPOPUPEND		   0x00000007
+#define EVENT_SYSTEM_CAPTURESTART		   0x00000008
+#define EVENT_SYSTEM_CAPTUREEND 		   0x00000009
+#define EVENT_SYSTEM_MOVESIZESTART		   0x0000000A
+#define EVENT_SYSTEM_MOVESIZEEND		   0x0000000B
+#define EVENT_SYSTEM_CONTEXTHELPSTART		   0x0000000C
+#define EVENT_SYSTEM_CONTEXTHELPEND		   0x0000000D
+#define EVENT_SYSTEM_DRAGDROPSTART		   0x0000000E
+#define EVENT_SYSTEM_DRAGDROPEND		   0x0000000F
+#define EVENT_SYSTEM_DIALOGSTART		   0x00000010
+#define EVENT_SYSTEM_DIALOGEND			   0x00000011
+#define EVENT_SYSTEM_SCROLLINGSTART		   0x00000012
+#define EVENT_SYSTEM_SCROLLINGEND		   0x00000013
+#define EVENT_SYSTEM_SWITCHSTART		   0x00000014
+#define EVENT_SYSTEM_SWITCHEND			   0x00000015
+#define EVENT_SYSTEM_MINIMIZESTART		   0x00000016
+#define EVENT_SYSTEM_MINIMIZEEND		   0x00000017
+#define EVENT_OBJECT_CREATE			   0x00008000
+#define EVENT_OBJECT_DESTROY			   0x00008001
+#define EVENT_OBJECT_SHOW			   0x00008002
+#define EVENT_OBJECT_HIDE			   0x00008003
+#define EVENT_OBJECT_REORDER			   0x00008004
+#define EVENT_OBJECT_FOCUS			   0x00008005
+#define EVENT_OBJECT_SELECTION			   0x00008006
+#define EVENT_OBJECT_SELECTIONADD		   0x00008007
+#define EVENT_OBJECT_SELECTIONREMOVE		   0x00008008
+#define EVENT_OBJECT_SELECTIONWITHIN		   0x00008009
+#define EVENT_OBJECT_STATECHANGE		   0x0000800A
+#define EVENT_OBJECT_LOCATIONCHANGE		   0x0000800B
+#define EVENT_OBJECT_NAMECHANGE 		   0x0000800C
+#define EVENT_OBJECT_DESCRIPTIONCHANGE		   0x0000800D
+#define EVENT_OBJECT_VALUECHANGE		   0x0000800E
+#define EVENT_OBJECT_PARENTCHANGE		   0x0000800F
+#define EVENT_OBJECT_HELPCHANGE 		   0x00008010
+#define EVENT_OBJECT_DEFACTIONCHANGE		   0x00008011
+#define EVENT_OBJECT_ACCELERATORCHANGE		   0x00008012
+#define EVENT_MAX				   0x7FFFFFFF
+
+#define EWX_FORCEIFHUNG 				   16
+
+#define FLASHW_STOP					    0
+#define FLASHW_CAPTION					    1
+#define FLASHW_TRAY					    2
+#define FLASHW_ALL			    (FLASHW_CAPTION | FLASHW_TRAY)
+#define FLASHW_TIMER					    4
+#define FLASHW_TIMERNOFG				   12
+
+#define GR_GDIOBJECTS					    0
+#define GR_USEROBJECTS					    1
+
+#define GUI_CARETBLINKING			   0x00000001
+#define GUI_INMOVESIZE				   0x00000002
+#define GUI_INMENUMODE				   0x00000004
+#define GUI_SYSTEMMENUMODE			   0x00000008
+#define GUI_POPUPMENUMODE			   0x00000010
+
+#define HSHELL_ACCESSIBILITYSTATE			   11
+#define HSHELL_APPCOMMAND				   12
+#define HSHELL_RUDEAPPACTIVATED 			32772
+#define HSHELL_FLASH					32774
+
+#define HWND_MESSAGE				   ((HWND)(-3))
+
+#define IDTRYAGAIN					   10
+#define IDCONTINUE					   11
+
+#define KEYEVENTF_UNICODE			   0x00000004
+#define KEYEVENTF_SCANCODE			   0x00000008
+
+#define LWA_COLORKEY					 0x01
+#define LWA_ALPHA					 0x02
+
+#define MB_CANCELTRYCONTINUE				    6
+
+#define MIM_MAXHEIGHT					    1
+#define MIM_BACKGROUND					    2
+#define MIM_HELPID					    4
+#define MIM_MENUDATA					    8
+#define MIM_STYLE					   16
+#define MIM_APPLYTOSUBMENUS 			   0x80000000L
+
+#define MNS_NOCHECK				   0x80000000
+#define MNS_MODELESS				   0x40000000
+#define MNS_DRAGDROP				   0x20000000
+#define MNS_AUTODISMISS 			   0x10000000
+#define MNS_NOTIFYBYPOS 			   0x08000000
+#define MNS_CHECKORBMP				   0x04000000
+
+#define MK_XBUTTON1					   32
+#define MK_XBUTTON2					   64
+
+#define MOUSEEVENTF_XDOWN			   0x00000080
+#define MOUSEEVENTF_XUP 			   0x00000100
+
+#define OBJID_WINDOW				   0x00000000
+#define OBJID_SYSMENU				   0xFFFFFFFF
+#define OBJID_TITLEBAR				   0xFFFFFFFE
+#define OBJID_MENU				   0xFFFFFFFD
+#define OBJID_CLIENT				   0xFFFFFFFC
+#define OBJID_VSCROLL				   0xFFFFFFFB
+#define OBJID_HSCROLL				   0xFFFFFFFA
+#define OBJID_SIZEGRIP				   0xFFFFFFF9
+#define OBJID_CARET				   0xFFFFFFF8
+#define OBJID_CURSOR				   0xFFFFFFF7
+#define OBJID_ALERT				   0xFFFFFFF6
+#define OBJID_SOUND				   0xFFFFFFF5
+
+# define PM_QS_INPUT				  (QS_INPUT << 16)
+# define PM_QS_POSTMESSAGE	    ((QS_POSTMESSAGE | QS_HOTKEY | QS_TIMER) << 16)
+# define PM_QS_PAINT				  (QS_PAINT << 16)
+# define PM_QS_SENDMESSAGE		    (QS_SENDMESSAGE << 16)
+
+#define SMTO_NOTIMEOUTIFNOTHUNG 		       0x0008
+
+#define ULW_COLORKEY					 0x01
+#define ULW_ALPHA					 0x02
+#define ULW_OPAQUE					 0x04
+
+#define VK_XBUTTON1					    5
+#define VK_XBUTTON2					    6
+#define VK_BROWSER_BACK 				 0xA6
+#define VK_BROWSER_FORWARD				 0xA7
+#define VK_BROWSER_REFRESH				 0xA8
+#define VK_BROWSER_STOP 				 0xA9
+#define VK_BROWSER_SEARCH				 0xAA
+#define VK_BROWSER_FAVORITES				 0xAB
+#define VK_BROWSER_HOME 				 0xAC
+#define VK_VOLUME_MUTE					 0xAD
+#define VK_VOLUME_DOWN					 0xAE
+#define VK_VOLUME_UP					 0xAF
+#define VK_MEDIA_NEXT_TRACK				 0xB0
+#define VK_MEDIA_PREV_TRACK				 0xB1
+#define VK_MEDIA_STOP					 0xB2
+#define VK_MEDIA_PLAY_PAUSE				 0xB3
+#define VK_LAUNCH_MAIL					 0xB4
+#define VK_LAUNCH_MEDIA_SELECT				 0xB5
+#define VK_LAUNCH_APP1					 0xB6
+#define VK_LAUNCH_APP2					 0xB7
+#define VK_OEM_PLUS					 0xBB
+#define VK_OEM_COMMA					 0xBC
+#define VK_OEM_MINUS					 0xBD
+#define VK_OEM_PERIOD					 0xBE
+#define VK_OEM_102					 0xE2
+#define VK_PACKET					 0xE7
+
+#define WINEVENT_OUTOFCONTEXT			       0x0000
+#define WINEVENT_SKIPOWNTHREAD			       0x0001
+#define WINEVENT_SKIPOWNPROCESS 		       0x0002
+#define WINEVENT_INCONTEXT			       0x0004
+
+#define WM_GETOBJECT				       0x003D
+#define WM_CHANGEUISTATE			       0x0127
+#define WM_UPDATEUISTATE			       0x0128
+#define WM_QUERYUISTATE 			       0x0129
+#define WM_UNINITMENUPOPUP			       0x0125
+#define WM_MENURBUTTONUP				  290
+#define WM_MENUCOMMAND				       0x0126
+#define WM_MENUGETOBJECT			       0x0124
+#define WM_MENUDRAG				       0x0123
+#define WM_APPCOMMAND				       0x0319
+#define WM_NCXBUTTONDOWN				  171
+#define WM_NCXBUTTONUP					  172
+#define WM_NCXBUTTONDBLCLK				  173
+#define WM_NCMOUSEHOVER 			       0x02A0
+#define WM_NCMOUSELEAVE 			       0x02A2
+
+#define WM_XBUTTONDOWN					  523
+#define WM_XBUTTONUP					  524
+#define WM_XBUTTONDBLCLK				  525
+#define WM_MOUSELAST					  525
+
+#define XBUTTON1				       0x0001
+#define XBUTTON2				       0x0002
+
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WINXP
+#define CB_SETMINVISIBLE			       0x1701
+#define CB_GETMINVISIBLE			       0x1702
+
+#define CONSOLE_APPLICATION_16BIT		   0x00000001
+#define CONSOLE_CARET_SELECTION 		   0x00000001
+#define CONSOLE_CARET_VISIBLE			   0x00000002
+
+#define CS_DROPSHADOW				      0x20000
+
+#define DEVICE_NOTIFY_ALL_INTERFACE_CLASSES	   0x00000004
+
+#define EVENT_CONSOLE_CARET			   0x00004001
+#define EVENT_CONSOLE_UPDATE_REGION		   0x00004002
+#define EVENT_CONSOLE_UPDATE_SIMPLE		   0x00004003
+#define EVENT_CONSOLE_UPDATE_SCROLL		   0x00004004
+#define EVENT_CONSOLE_LAYOUT			   0x00004005
+#define EVENT_CONSOLE_START_APPLICATION 	   0x00004006
+#define EVENT_CONSOLE_END_APPLICATION		   0x00004007
+
+#define FE_FONTSMOOTHINGSTANDARD		       0x0001
+#define FE_FONTSMOOTHINGCLEARTYPE		       0x0002
+
+#define GUI_16BITTASK				   0x00000020
+
+#define HSHELL_WINDOWREPLACED				   13
+#define HSHELL_WINDOWREPLACING				   14
+
+#define ICON_SMALL2					    2
+
+#define KEYBOARD_OVERRUN_MAKE_CODE		       0x00FF
+
+#define MOUSE_MOVE_RELATIVE			   0x00000000
+#define MOUSE_MOVE_ABSOLUTE			   0x00000001
+#define MOUSE_VIRTUAL_DESKTOP			   0x00000002
+#define MOUSE_ATTRIBUTES_CHANGED		   0x00000004
+
+#define PW_CLIENTONLY				   0x00000001
+
+#define QS_INPUT					 1031
+#define QS_RAWINPUT					 1024
+#define QS_ALLEVENTS					 1215
+#define QS_ALLINPUT					 1279
+
+#define RIM_INPUT				   0x00000000
+#define RIM_INPUTSINK				   0x00000001
+#define RIM_TYPEMOUSE				   0x00000000
+#define RIM_TYPEKEYBOARD			   0x00000001
+#define RIM_TYPEHID				   0x00000002
+#define RI_MOUSE_LEFT_BUTTON_DOWN		       0x0001
+#define RI_MOUSE_LEFT_BUTTON_UP 		       0x0002
+#define RI_MOUSE_RIGHT_BUTTON_DOWN		       0x0004
+#define RI_MOUSE_RIGHT_BUTTON_UP		       0x0008
+#define RI_MOUSE_MIDDLE_BUTTON_DOWN		       0x0010
+#define RI_MOUSE_MIDDLE_BUTTON_UP		       0x0020
+#define RI_MOUSE_BUTTON_1_DOWN		      RI_MOUSE_LEFT_BUTTON_DOWN
+#define RI_MOUSE_BUTTON_1_UP		       RI_MOUSE_LEFT_BUTTON_UP
+#define RI_MOUSE_BUTTON_2_DOWN		     RI_MOUSE_RIGHT_BUTTON_DOWN
+#define RI_MOUSE_BUTTON_2_UP		      RI_MOUSE_RIGHT_BUTTON_UP
+#define RI_MOUSE_BUTTON_3_DOWN		     RI_MOUSE_MIDDLE_BUTTON_DOWN
+#define RI_MOUSE_BUTTON_3_UP		      RI_MOUSE_MIDDLE_BUTTON_UP
+#define RI_MOUSE_BUTTON_4_DOWN			       0x0040
+#define RI_MOUSE_BUTTON_4_UP			       0x0080
+#define RI_MOUSE_BUTTON_5_DOWN			       0x0100
+#define RI_MOUSE_BUTTON_5_UP			       0x0200
+#define RI_MOUSE_WHEEL				       0x0400
+#define RI_KEY_MAKE				       0x0000
+#define RI_KEY_BREAK				       0x0001
+#define RI_KEY_E0				       0x0002
+#define RI_KEY_E1				       0x0004
+#define RI_KEY_TERMSRV_SET_LED			       0x0008
+#define RI_KEY_TERMSRV_SHADOW			       0x0010
+#define RID_INPUT				   0x10000003
+#define RID_HEADER				   0x10000005
+#define RIDI_PREPARSEDDATA			   0x20000005
+#define RIDI_DEVICENAME 			   0x20000007
+#define RIDI_DEVICEINFO 			   0x2000000B
+#define RIDEV_REMOVE				   0x00000001
+#define RIDEV_EXCLUDE				   0x00000010
+#define RIDEV_PAGEONLY				   0x00000020
+#define RIDEV_NOLEGACY				   0x00000030
+#define RIDEV_INPUTSINK 			   0x00000100
+#define RIDEV_CAPTUREMOUSE			   0x00000200
+#define RIDEV_NOHOTKEYS 			   0x00000200
+#define RIDEV_APPKEYS				   0x00000400
+
+#define SPI_GETDROPSHADOW			       0x1024
+#define SPI_GETFLATMENU 			       0x1022
+#define SPI_GETFOCUSBORDERHEIGHT		       0x2010
+#define SPI_GETFOCUSBORDERWIDTH 		       0x200E
+#define SPI_GETFONTSMOOTHINGCONTRAST		       0x200C
+#define SPI_GETFONTSMOOTHINGTYPE		       0x200A
+#define SPI_GETMOUSECLICKLOCK			       0x101E
+#define SPI_GETMOUSECLICKLOCKTIME		       0x2008
+#define SPI_GETMOUSESONAR			       0x101C
+#define SPI_GETMOUSEVANISH			       0x1020
+#define SPI_SETDROPSHADOW			       0x1025
+#define SPI_SETFLATMENU 			       0x1023
+#define SPI_SETFOCUSBORDERHEIGHT		       0x2011
+#define SPI_SETFOCUSBORDERWIDTH 		       0x200F
+#define SPI_SETFONTSMOOTHINGCONTRAST		       0x200D
+#define SPI_SETFONTSMOOTHINGTYPE		       0x200B
+#define SPI_SETMOUSECLICKLOCK			       0x101F
+#define SPI_SETMOUSECLICKLOCKTIME		       0x2009
+#define SPI_SETMOUSESONAR			       0x101D
+#define SPI_SETMOUSEVANISH			       0x1021
+
+#define UNICODE_NOCHAR				       0xFFFF
+
+#define WM_INPUT				       0x00FF
+#define WM_KEYLAST					  265
+#define WM_UNICHAR					  265
+
+
+#if _WIN32_WINNT >= _WIN32_WINNT_VISTA
+#define PBT_POWERSETTINGCHANGE			 	32787
+
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN7
+#define TOUCHEVENTF_DOWN			       0x0001
+#define TOUCHEVENTF_INRANGE			       0x0008
+#define TOUCHEVENTF_MOVE			       0x0002
+#define TOUCHEVENTF_NOCOALESCE			       0x0020
+#define TOUCHEVENTF_PALM			       0x0080
+#define TOUCHEVENTF_PEN 			       0x0040
+#define TOUCHEVENTF_PRIMARY			       0x0010
+#define TOUCHEVENTF_UP				       0x0004
+
+#define TOUCHEVENTMASKF_CONTACTAREA		       0x0004
+#define TOUCHEVENTMASKF_EXTRAINFO		       0x0002
+#define TOUCHEVENTMASKF_TIMEFROMSYSTEM		       0x0001
+
+#define WM_TOUCHMOVE					  576
+#define WM_TOUCHDOWN					  577
+#define WM_TOUCHUP					  578
+
+#endif	/* WINNT >= Win7 */
+#endif	/* WINNT >= Vista */
+#endif	/* WINNT >= WinXP */
+#endif	/* WINNT >= Win2K */
+#endif	/* WINNT >= Win2K || Win9x >= WinME */
+#endif	/* WINNT >= Win2K || Win9x >= Win98 */
+
+
+#ifndef RC_INVOKED
+#define DEKSTOPENUMPROC __AW_SUFFIXED__(DEKSTOPENUMPROC)
+#define WINSTAENUMPROC  __AW_SUFFIXED__(WINSTAENUMPROC)
+#define MAKEINTRESOURCE __AW_SUFFIXED__(MAKEINTRESOURCE)
+
+typedef BOOL (CALLBACK *DLGPROC) (HWND, UINT, WPARAM, LPARAM);
+typedef VOID (CALLBACK *TIMERPROC) (HWND, UINT, UINT_PTR, DWORD);
+typedef BOOL (CALLBACK *GRAYSTRINGPROC) (HDC, LPARAM, int);
+typedef LRESULT (CALLBACK *HOOKPROC) (int, WPARAM, LPARAM);
+
+#define PROPENUMPROC __AW_SUFFIXED__(PROPENUMPROC)
+typedef BOOL (CALLBACK *PROPENUMPROCA) (HWND, LPCSTR, HANDLE);
+typedef BOOL (CALLBACK *PROPENUMPROCW) (HWND, LPCWSTR, HANDLE);
+
+#define PROPENUMPROCEX __AW_SUFFIXED__(PROPENUMPROCEX)
+typedef BOOL (CALLBACK *PROPENUMPROCEXA) (HWND, LPSTR, HANDLE, DWORD);
+typedef BOOL (CALLBACK *PROPENUMPROCEXW) (HWND, LPWSTR, HANDLE, DWORD);
+
+#define EDITWORDBREAKPROC __AW_SUFFIXED__(EDITWORDBREAKPROC)
+typedef int (CALLBACK *EDITWORDBREAKPROCA) (LPSTR, int, int, int);
+typedef int (CALLBACK *EDITWORDBREAKPROCW) (LPWSTR, int, int, int);
+typedef LRESULT (CALLBACK *WNDPROC) (HWND, UINT, WPARAM, LPARAM);
+typedef BOOL (CALLBACK *DRAWSTATEPROC) (HDC, LPARAM, WPARAM, int, int);
+typedef BOOL (CALLBACK *WNDENUMPROC) (HWND, LPARAM);
+typedef BOOL (CALLBACK *ENUMWINDOWSPROC) (HWND, LPARAM);
+typedef BOOL (CALLBACK *MONITORENUMPROC) (HMONITOR, HDC, LPRECT, LPARAM);
+typedef BOOL (CALLBACK *NAMEENUMPROCA) (LPSTR, LPARAM);
+typedef BOOL (CALLBACK *NAMEENUMPROCW) (LPWSTR, LPARAM);
+
+typedef NAMEENUMPROCA	DESKTOPENUMPROCA;
+typedef NAMEENUMPROCW	DESKTOPENUMPROCW;
+typedef NAMEENUMPROCA	WINSTAENUMPROCA;
+typedef NAMEENUMPROCW	WINSTAENUMPROCW;
+
+typedef void (CALLBACK *SENDASYNCPROC) (HWND, UINT, DWORD, LRESULT);
+
+DECLARE_HANDLE(HDWP);
+DECLARE_HANDLE(HDEVNOTIFY);
+
+typedef struct tagMENUGETOBJECTINFO
+{ DWORD 			dwFlags;
+  UINT				uPos;
+  HMENU 			hmenu;
+  PVOID 			riid;
+  PVOID 			pvObj;
+} MENUGETOBJECTINFO, *PMENUGETOBJECTINFO;
+
+typedef struct tagACCEL
+{ BYTE				fVirt;
+  WORD				key;
+  WORD				cmd;
+} ACCEL, *LPACCEL;
+
+typedef struct tagACCESSTIMEOUT
+{ UINT				cbSize;
+  DWORD 			dwFlags;
+  DWORD 			iTimeOutMSec;
+} ACCESSTIMEOUT, *LPACCESSTIMEOUT;
+
+typedef struct tagANIMATIONINFO
+{ UINT				cbSize;
+  int				iMinAnimate;
+} ANIMATIONINFO, *LPANIMATIONINFO;
+
+typedef struct tagCREATESTRUCTA
+{ LPVOID			lpCreateParams;
+  HINSTANCE			hInstance;
+  HMENU 			hMenu;
+  HWND				hwndParent;
+  int				cy;
+  int				cx;
+  int				y;
+  int				x;
+  LONG				style;
+  LPCSTR			lpszName;
+  LPCSTR			lpszClass;
+  DWORD 			dwExStyle;
+} CREATESTRUCTA, *LPCREATESTRUCTA;
+
+typedef struct tagCREATESTRUCTW
+{ LPVOID			lpCreateParams;
+  HINSTANCE			hInstance;
+  HMENU 			hMenu;
+  HWND				hwndParent;
+  int				cy;
+  int				cx;
+  int				y;
+  int				x;
+  LONG				style;
+  LPCWSTR			lpszName;
+  LPCWSTR			lpszClass;
+  DWORD 			dwExStyle;
+} CREATESTRUCTW, *LPCREATESTRUCTW;
+
+typedef __AW_SUFFIXED__(CREATESTRUCT) CREATESTRUCT, *LPCREATESTRUCT;
+
+typedef struct tagCBT_CREATEWNDA
+{ LPCREATESTRUCTA		lpcs;
+  HWND				hwndInsertAfter;
+} CBT_CREATEWNDA, *LPCBT_CREATEWNDA;
+
+typedef struct tagCBT_CREATEWNDW
+{ LPCREATESTRUCTW		lpcs;
+  HWND				hwndInsertAfter;
+} CBT_CREATEWNDW, *LPCBT_CREATEWNDW;
+
+typedef __AW_SUFFIXED__(CBT_CREATEWND) CBT_CREATEWND, *LPCBT_CREATEWND;
+
+typedef struct tagCBTACTIVATESTRUCT
+{ BOOL				fMouse;
+  HWND				hWndActive;
+} CBTACTIVATESTRUCT, *LPCBTACTIVATESTRUCT;
+
+typedef struct tagCLIENTCREATESTRUCT
+{ HANDLE			hWindowMenu;
+  UINT				idFirstChild;
+} CLIENTCREATESTRUCT, *LPCLIENTCREATESTRUCT;
+
+typedef struct tagCOMPAREITEMSTRUCT
+{ UINT				CtlType;
+  UINT				CtlID;
+  HWND				hwndItem;
+  UINT				itemID1;
+  DWORD 			itemData1;
+  UINT				itemID2;
+  DWORD 			itemData2;
+  DWORD 			dwLocaleId;
+} COMPAREITEMSTRUCT, *LPCOMPAREITEMSTRUCT;
+
+typedef struct tagCOPYDATASTRUCT
+{ DWORD 			dwData;
+  DWORD 			cbData;
+  PVOID 			lpData;
+} COPYDATASTRUCT, *PCOPYDATASTRUCT;
+
+typedef struct tagCURSORSHAPE
+{ int				xHotSpot;
+  int				yHotSpot;
+  int				cx;
+  int				cy;
+  int				cbWidth;
+  BYTE				Planes;
+  BYTE				BitsPixel;
+} CURSORSHAPE, *LPCURSORSHAPE;
+
+typedef struct tagCWPRETSTRUCT
+{ LRESULT			lResult;
+  LPARAM			lParam;
+  WPARAM			wParam;
+  DWORD 			message;
+  HWND				hwnd;
+} CWPRETSTRUCT;
+
+typedef struct tagCWPSTRUCT
+{ LPARAM			lParam;
+  WPARAM			wParam;
+  UINT				message;
+  HWND				hwnd;
+} CWPSTRUCT, *PCWPSTRUCT;
+
+typedef struct tagDEBUGHOOKINFO
+{ DWORD 			idThread;
+  DWORD 			idThreadInstaller;
+  LPARAM			lParam;
+  WPARAM			wParam;
+  int				code;
+} DEBUGHOOKINFO, *PDEBUGHOOKINFO, *LPDEBUGHOOKINFO;
+
+typedef struct tagDELETEITEMSTRUCT
+{ UINT				CtlType;
+  UINT				CtlID;
+  UINT				itemID;
+  HWND				hwndItem;
+  UINT				itemData;
+} DELETEITEMSTRUCT, *PDELETEITEMSTRUCT, *LPDELETEITEMSTRUCT;
+
+#pragma pack(push,2)
+
+typedef struct
+{ DWORD 			style;
+  DWORD 			dwExtendedStyle;
+  short 			x;
+  short 			y;
+  short 			cx;
+  short 			cy;
+  WORD				id;
+} DLGITEMTEMPLATE, *LPDLGITEMTEMPLATE;
+
+typedef struct
+{ DWORD 			style;
+  DWORD 			dwExtendedStyle;
+  WORD				cdit;
+  short 			x;
+  short 			y;
+  short 			cx;
+  short 			cy;
+} DLGTEMPLATE, *LPDLGTEMPLATE, *LPDLGTEMPLATEA, *LPDLGTEMPLATEW;
+
+typedef const DLGTEMPLATE *LPCDLGTEMPLATE;
+
+#pragma pack(pop)
+
+typedef struct tagDRAWITEMSTRUCT
+{ UINT				CtlType;
+  UINT				CtlID;
+  UINT				itemID;
+  UINT				itemAction;
+  UINT				itemState;
+  HWND				hwndItem;
+  HDC				hDC;
+  RECT				rcItem;
+  DWORD 			itemData;
+} DRAWITEMSTRUCT, *LPDRAWITEMSTRUCT, *PDRAWITEMSTRUCT;
+
+typedef struct
+{ UINT				cbSize;
+  int				iTabLength;
+  int				iLeftMargin;
+  int				iRightMargin;
+  UINT				uiLengthDrawn;
+} DRAWTEXTPARAMS, *LPDRAWTEXTPARAMS;
+
+typedef struct tagPAINTSTRUCT
+{ HDC				hdc;
+  BOOL				fErase;
+  RECT				rcPaint;
+  BOOL				fRestore;
+  BOOL				fIncUpdate;
+  BYTE				rgbReserved[32];
+} PAINTSTRUCT, *LPPAINTSTRUCT;
+
+typedef struct tagMSG
+{ HWND				hwnd;
+  UINT				message;
+  WPARAM			wParam;
+  LPARAM			lParam;
+  DWORD 			time;
+  POINT 			pt;
+} MSG, *LPMSG, *PMSG;
+
+typedef struct _ICONINFO
+{ BOOL				fIcon;
+  DWORD 			xHotspot;
+  DWORD 			yHotspot;
+  HBITMAP			hbmMask;
+  HBITMAP			hbmColor;
+} ICONINFO, *PICONINFO;
+
+typedef struct tagNMHDR
+{ HWND				hwndFrom;
+  UINT				idFrom;
+  UINT				code;
+} NMHDR, *LPNMHDR;
+
+typedef struct _WNDCLASSA
+{ UINT				style;
+  WNDPROC			lpfnWndProc;
+  int				cbClsExtra;
+  int				cbWndExtra;
+  HINSTANCE			hInstance;
+  HICON 			hIcon;
+  HCURSOR			hCursor;
+  HBRUSH			hbrBackground;
+  LPCSTR			lpszMenuName;
+  LPCSTR			lpszClassName;
+} WNDCLASSA, *LPWNDCLASSA, *PWNDCLASSA;
+
+typedef struct _WNDCLASSW
+{ UINT				style;
+  WNDPROC			lpfnWndProc;
+  int				cbClsExtra;
+  int				cbWndExtra;
+  HINSTANCE			hInstance;
+  HICON 			hIcon;
+  HCURSOR			hCursor;
+  HBRUSH			hbrBackground;
+  LPCWSTR			lpszMenuName;
+  LPCWSTR			lpszClassName;
+} WNDCLASSW, *LPWNDCLASSW, *PWNDCLASSW;
+
+typedef __AW_SUFFIXED__(WNDCLASS) WNDCLASS, *LPWNDCLASS, *PWNDCLASS;
+
+typedef struct _WNDCLASSEXA
+{ UINT				cbSize;
+  UINT				style;
+  WNDPROC			lpfnWndProc;
+  int				cbClsExtra;
+  int				cbWndExtra;
+  HINSTANCE			hInstance;
+  HICON 			hIcon;
+  HCURSOR			hCursor;
+  HBRUSH			hbrBackground;
+  LPCSTR			lpszMenuName;
+  LPCSTR			lpszClassName;
+  HICON 			hIconSm;
+} WNDCLASSEXA, *LPWNDCLASSEXA, *PWNDCLASSEXA;
+
+typedef struct _WNDCLASSEXW
+{ UINT				cbSize;
+  UINT				style;
+  WNDPROC			lpfnWndProc;
+  int				cbClsExtra;
+  int				cbWndExtra;
+  HINSTANCE			hInstance;
+  HICON 			hIcon;
+  HCURSOR			hCursor;
+  HBRUSH			hbrBackground;
+  LPCWSTR			lpszMenuName;
+  LPCWSTR			lpszClassName;
+  HICON 			hIconSm;
+} WNDCLASSEXW, *LPWNDCLASSEXW, *PWNDCLASSEXW;
+
+typedef __AW_SUFFIXED__(WNDCLASSEX) WNDCLASSEX, *LPWNDCLASSEX, *PWNDCLASSEX;
+
+typedef struct tagMENUITEMINFOA
+{ UINT				cbSize;
+  UINT				fMask;
+  UINT				fType;
+  UINT				fState;
+  UINT				wID;
+  HMENU 			hSubMenu;
+  HBITMAP			hbmpChecked;
+  HBITMAP			hbmpUnchecked;
+  ULONG_PTR			dwItemData;
+  LPSTR 			dwTypeData;
+  UINT				cch;
+# if		_WIN32_WINNT >= _WIN32_WINNT_WIN2K
+  HBITMAP			hbmpItem;
+# endif
+} MENUITEMINFOA, *LPMENUITEMINFOA;
+
+typedef const MENUITEMINFOA *LPCMENUITEMINFOA;
+
+typedef struct tagMENUITEMINFOW
+{ UINT				cbSize;
+  UINT				fMask;
+  UINT				fType;
+  UINT				fState;
+  UINT				wID;
+  HMENU 			hSubMenu;
+  HBITMAP			hbmpChecked;
+  HBITMAP			hbmpUnchecked;
+  ULONG_PTR			dwItemData;
+  LPWSTR			dwTypeData;
+  UINT				cch;
+# if		_WIN32_WINNT >= _WIN32_WINNT_WIN2K
+  HBITMAP			hbmpItem;
+# endif
+} MENUITEMINFOW, *LPMENUITEMINFOW;
+
+typedef const MENUITEMINFOW *LPCMENUITEMINFOW;
+typedef __AW_SUFFIXED__(MENUITEMINFO) MENUITEMINFO, *LPMENUITEMINFO;
+typedef __AW_SUFFIXED__(LPCMENUITEMINFO) LPCMENUITEMINFO;
+
+typedef struct tagSCROLLINFO
+{ UINT				cbSize;
+  UINT				fMask;
+  int				nMin;
+  int				nMax;
+  UINT				nPage;
+  int				nPos;
+  int				nTrackPos;
+} SCROLLINFO, *LPSCROLLINFO;
+
+typedef const SCROLLINFO *LPCSCROLLINFO;
+
+typedef struct _WINDOWPLACEMENT
+{ UINT				length;
+  UINT				flags;
+  UINT				showCmd;
+  POINT 			ptMinPosition;
+  POINT 			ptMaxPosition;
+  RECT				rcNormalPosition;
+} WINDOWPLACEMENT, *LPWINDOWPLACEMENT, *PWINDOWPLACEMENT;
+
+typedef struct
+{ WORD				versionNumber;
+  WORD				offset;
+} MENUITEMTEMPLATEHEADER;
+
+typedef struct
+{ WORD				mtOption;
+  WORD				mtID;
+  WCHAR 			mtString[1];
+} MENUITEMTEMPLATE;
+
+typedef void MENUTEMPLATE, MENUTEMPLATEA, MENUTEMPLATEW;
+typedef void *LPMENUTEMPLATE, *LPMENUTEMPLATEA, *LPMENUTEMPLATEW;
+
+typedef struct tagHELPINFO
+{ UINT				cbSize;
+  int				iContextType;
+  int				iCtrlId;
+  HANDLE			hItemHandle;
+  DWORD 			dwContextId;
+  POINT 			MousePos;
+} HELPINFO, *LPHELPINFO;
+
+typedef void (CALLBACK *MSGBOXCALLBACK) (LPHELPINFO);
+
+typedef struct
+{ UINT				cbSize;
+  HWND				hwndOwner;
+  HINSTANCE			hInstance;
+  LPCSTR			lpszText;
+  LPCSTR			lpszCaption;
+  DWORD 			dwStyle;
+  LPCSTR			lpszIcon;
+  DWORD 			dwContextHelpId;
+  MSGBOXCALLBACK		lpfnMsgBoxCallback;
+  DWORD 			dwLanguageId;
+} MSGBOXPARAMSA, *PMSGBOXPARAMSA, *LPMSGBOXPARAMSA;
+
+typedef struct
+{ UINT				cbSize;
+  HWND				hwndOwner;
+  HINSTANCE			hInstance;
+  LPCWSTR			lpszText;
+  LPCWSTR			lpszCaption;
+  DWORD 			dwStyle;
+  LPCWSTR			lpszIcon;
+  DWORD 			dwContextHelpId;
+  MSGBOXCALLBACK		lpfnMsgBoxCallback;
+  DWORD 			dwLanguageId;
+} MSGBOXPARAMSW, *PMSGBOXPARAMSW, *LPMSGBOXPARAMSW;
+
+typedef __AW_SUFFIXED__(MSGBOXPARAMS) MSGBOXPARAMS, *PMSGBOXPARAMS, *LPMSGBOXPARAMS;
+
+typedef struct tagUSEROBJECTFLAGS
+{ BOOL				fInherit;
+  BOOL				fReserved;
+  DWORD 			dwFlags;
+} USEROBJECTFLAGS;
+
+typedef struct tagFILTERKEYS
+{ UINT				cbSize;
+  DWORD 			dwFlags;
+  DWORD 			iWaitMSec;
+  DWORD 			iDelayMSec;
+  DWORD 			iRepeatMSec;
+  DWORD 			iBounceMSec;
+} FILTERKEYS;
+
+typedef struct tagHIGHCONTRASTA
+{ UINT				cbSize;
+  DWORD 			dwFlags;
+  LPSTR 			lpszDefaultScheme;
+} HIGHCONTRASTA, *LPHIGHCONTRASTA;
+
+typedef struct tagHIGHCONTRASTW
+{ UINT				cbSize;
+  DWORD 			dwFlags;
+  LPWSTR			lpszDefaultScheme;
+} HIGHCONTRASTW, *LPHIGHCONTRASTW;
+
+typedef __AW_SUFFIXED__(HIGHCONTRAST) HIGHCONTRAST, *LPHIGHCONTRAST;
+
+typedef struct tagMINIMIZEDMETRICS
+{ UINT				cbSize;
+  int				iWidth;
+  int				iHorzGap;
+  int				iVertGap;
+  int				iArrange;
+} MINIMIZEDMETRICS, *LPMINIMIZEDMETRICS;
+
+typedef struct tagMOUSEKEYS
+{ UINT				cbSize;
+  DWORD 			dwFlags;
+  DWORD 			iMaxSpeed;
+  DWORD 			iTimeToMaxSpeed;
+  DWORD 			iCtrlSpeed;
+  DWORD 			dwReserved1;
+  DWORD 			dwReserved2;
+} MOUSEKEYS, *LPMOUSEKEYS;
+
+typedef struct tagSERIALKEYSA
+{ UINT				cbSize;
+  DWORD 			dwFlags;
+  LPSTR 			lpszActivePort;
+  LPSTR 			lpszPort;
+  UINT				iBaudRate;
+  UINT				iPortState;
+  UINT				iActive;
+} SERIALKEYSA, *LPSERIALKEYSA;
+
+typedef struct tagSERIALKEYSW
+{ UINT				cbSize;
+  DWORD 			dwFlags;
+  LPWSTR			lpszActivePort;
+  LPWSTR			lpszPort;
+  UINT				iBaudRate;
+  UINT				iPortState;
+  UINT				iActive;
+} SERIALKEYSW, *LPSERIALKEYSW;
+
+typedef __AW_SUFFIXED__(SERIALKEYS) SERIALKEYS, *LPSERIALKEYS;
+
+typedef struct tagSOUNDSENTRYA
+{ UINT				cbSize;
+  DWORD 			dwFlags;
+  DWORD 			iFSTextEffect;
+  DWORD 			iFSTextEffectMSec;
+  DWORD 			iFSTextEffectColorBits;
+  DWORD 			iFSGrafEffect;
+  DWORD 			iFSGrafEffectMSec;
+  DWORD 			iFSGrafEffectColor;
+  DWORD 			iWindowsEffect;
+  DWORD 			iWindowsEffectMSec;
+  LPSTR 			lpszWindowsEffectDLL;
+  DWORD 			iWindowsEffectOrdinal;
+} SOUNDSENTRYA, *LPSOUNDSENTRYA;
+
+typedef struct tagSOUNDSENTRYW
+{ UINT				cbSize;
+  DWORD 			dwFlags;
+  DWORD 			iFSTextEffect;
+  DWORD 			iFSTextEffectMSec;
+  DWORD 			iFSTextEffectColorBits;
+  DWORD 			iFSGrafEffect;
+  DWORD 			iFSGrafEffectMSec;
+  DWORD 			iFSGrafEffectColor;
+  DWORD 			iWindowsEffect;
+  DWORD 			iWindowsEffectMSec;
+  LPWSTR			lpszWindowsEffectDLL;
+  DWORD 			iWindowsEffectOrdinal;
+} SOUNDSENTRYW, *LPSOUNDSENTRYW;
+
+typedef __AW_SUFFIXED__(SOUNDSENTRY) SOUNDSENTRY, *LPSOUNDSENTRY;
+
+typedef struct tagSTICKYKEYS
+{ DWORD 			cbSize;
+  DWORD 			dwFlags;
+} STICKYKEYS, *LPSTICKYKEYS;
+
+typedef struct tagTOGGLEKEYS
+{ DWORD 			cbSize;
+  DWORD 			dwFlags;
+} TOGGLEKEYS;
+
+typedef struct tagMOUSEHOOKSTRUCT
+{ POINT 			pt;
+  HWND				hwnd;
+  UINT				wHitTestCode;
+  DWORD 			dwExtraInfo;
+} MOUSEHOOKSTRUCT, *LPMOUSEHOOKSTRUCT, *PMOUSEHOOKSTRUCT;
+
+typedef struct tagTRACKMOUSEEVENT
+{ DWORD 			cbSize;
+  DWORD 			dwFlags;
+  HWND				hwndTrack;
+  DWORD 			dwHoverTime;
+} TRACKMOUSEEVENT, *LPTRACKMOUSEEVENT;
+
+typedef struct tagTPMPARAMS
+{ UINT				cbSize;
+  RECT				rcExclude;
+} TPMPARAMS, *LPTPMPARAMS;
+
+typedef struct tagEVENTMSG
+{ UINT				message;
+  UINT				paramL;
+  UINT				paramH;
+  DWORD 			time;
+  HWND				hwnd;
+} EVENTMSG, *PEVENTMSGMSG, *LPEVENTMSGMSG, *PEVENTMSG, *LPEVENTMSG;
+
+typedef struct _WINDOWPOS
+{ HWND				hwnd;
+  HWND				hwndInsertAfter;
+  int				x;
+  int				y;
+  int				cx;
+  int				cy;
+  UINT				flags;
+} WINDOWPOS, *PWINDOWPOS, *LPWINDOWPOS;
+
+typedef struct tagNCCALCSIZE_PARAMS
+{ RECT				rgrc[3];
+  PWINDOWPOS			lppos;
+} NCCALCSIZE_PARAMS, *LPNCCALCSIZE_PARAMS;
+
+typedef struct tagMDICREATESTRUCTA
+{ LPCSTR			szClass;
+  LPCSTR			szTitle;
+  HANDLE			hOwner;
+  int				x;
+  int				y;
+  int				cx;
+  int				cy;
+  DWORD 			style;
+  LPARAM			lParam;
+} MDICREATESTRUCTA, *LPMDICREATESTRUCTA;
+
+typedef struct tagMDICREATESTRUCTW
+{ LPCWSTR			szClass;
+  LPCWSTR			szTitle;
+  HANDLE			hOwner;
+  int				x;
+  int				y;
+  int				cx;
+  int				cy;
+  DWORD 			style;
+  LPARAM			lParam;
+} MDICREATESTRUCTW, *LPMDICREATESTRUCTW;
+
+typedef __AW_SUFFIXED__(MDICREATESTRUCT) MDICREATESTRUCT, *LPMDICREATESTRUCT;
+
+typedef struct tagMINMAXINFO
+{ POINT 			ptReserved;
+  POINT 			ptMaxSize;
+  POINT 			ptMaxPosition;
+  POINT 			ptMinTrackSize;
+  POINT 			ptMaxTrackSize;
+} MINMAXINFO, *PMINMAXINFO, *LPMINMAXINFO;
+
+typedef struct tagMDINEXTMENU
+{ HMENU 			hmenuIn;
+  HMENU 			hmenuNext;
+  HWND				hwndNext;
+} MDINEXTMENU, *PMDINEXTMENU, *LPMDINEXTMENU;
+
+typedef struct tagMEASUREITEMSTRUCT
+{ UINT				CtlType;
+  UINT				CtlID;
+  UINT				itemID;
+  UINT				itemWidth;
+  UINT				itemHeight;
+  DWORD 			itemData;
+} MEASUREITEMSTRUCT, *PMEASUREITEMSTRUCT, *LPMEASUREITEMSTRUCT;
+
+typedef struct tagDROPSTRUCT
+{ HWND				hwndSource;
+  HWND				hwndSink;
+  DWORD 			wFmt;
+  DWORD 			dwData;
+  POINT 			ptDrop;
+  DWORD 			dwControlData;
+} DROPSTRUCT, *PDROPSTRUCT, *LPDROPSTRUCT;
+
+typedef DWORD HELPPOLY;
+
+typedef struct tagMULTIKEYHELPA
+{ DWORD 			mkSize;
+  CHAR				mkKeylist;
+  CHAR				szKeyphrase[1];
+} MULTIKEYHELPA, *PMULTIKEYHELPA, *LPMULTIKEYHELPA;
+
+typedef struct tagMULTIKEYHELPW
+{ DWORD 			mkSize;
+  WCHAR 			mkKeylist;
+  WCHAR 			szKeyphrase[1];
+} MULTIKEYHELPW, *PMULTIKEYHELPW, *LPMULTIKEYHELPW;
+
+typedef __AW_SUFFIXED__(MULTIKEYHELP) MULTIKEYHELP, *PMULTIKEYHELP, *LPMULTIKEYHELP;
+
+typedef struct tagHELPWININFOA
+{ int				wStructSize;
+  int				x;
+  int				y;
+  int				dx;
+  int				dy;
+  int				wMax;
+  CHAR				rgchMember[2];
+} HELPWININFOA, *PHELPWININFOA, *LPHELPWININFOA;
+
+typedef struct tagHELPWININFOW
+{ int				wStructSize;
+  int				x;
+  int				y;
+  int				dx;
+  int				dy;
+  int				wMax;
+  WCHAR 			rgchMember[2];
+} HELPWININFOW, *PHELPWININFOW, *LPHELPWININFOW;
+
+typedef struct tagSTYLESTRUCT
+{ DWORD 			styleOld;
+  DWORD 			styleNew;
+} STYLESTRUCT, *LPSTYLESTRUCT;
+
+typedef struct tagALTTABINFO
+{ DWORD 			cbSize;
+  int				cItems;
+  int				cColumns;
+  int				cRows;
+  int				iColFocus;
+  int				iRowFocus;
+  int				cxItem;
+  int				cyItem;
+  POINT 			ptStart;
+} ALTTABINFO, *PALTTABINFO, *LPALTTABINFO;
+
+typedef struct tagCOMBOBOXINFO
+{ DWORD 			cbSize;
+  RECT				rcItem;
+  RECT				rcButton;
+  DWORD 			stateButton;
+  HWND				hwndCombo;
+  HWND				hwndItem;
+  HWND				hwndList;
+} COMBOBOXINFO, *PCOMBOBOXINFO, *LPCOMBOBOXINFO;
+
+typedef struct tagCURSORINFO
+{ DWORD 			cbSize;
+  DWORD 			flags;
+  HCURSOR			hCursor;
+  POINT 			ptScreenPos;
+} CURSORINFO, *PCURSORINFO, *LPCURSORINFO;
+
+typedef struct tagMENUBARINFO
+{ DWORD 			cbSize;
+  RECT				rcBar;
+  HMENU 			hMenu;
+  HWND				hwndMenu;
+  BOOL				fBarFocused:1;
+  BOOL				fFocused:1;
+} MENUBARINFO, *PMENUBARINFO;
+
+typedef struct tagMENUINFO
+{ DWORD 			cbSize;
+  DWORD 			fMask;
+  DWORD 			dwStyle;
+  UINT				cyMax;
+  HBRUSH			hbrBack;
+  DWORD 			dwContextHelpID;
+  ULONG_PTR			dwMenuData;
+} MENUINFO, *LPMENUINFO;
+
+typedef MENUINFO CONST *LPCMENUINFO;
+
+#define CCHILDREN_SCROLLBAR	5
+
+typedef struct tagSCROLLBARINFO
+{ DWORD 			cbSize;
+  RECT				rcScrollBar;
+  int				dxyLineButton;
+  int				xyThumbTop;
+  int				xyThumbBottom;
+  int				reserved;
+  DWORD 			rgstate[CCHILDREN_SCROLLBAR+1];
+} SCROLLBARINFO, *PSCROLLBARINFO, *LPSCROLLBARINFO;
+
+typedef struct tagWINDOWINFO
+{ DWORD 			cbSize;
+  RECT				rcWindow;
+  RECT				rcClient;
+  DWORD 			dwStyle;
+  DWORD 			dwExStyle;
+  DWORD 			dwWindowStatus;
+  UINT				cxWindowBorders;
+  UINT				cyWindowBorders;
+  ATOM				atomWindowType;
+  WORD				wCreatorVersion;
+} WINDOWINFO, *PWINDOWINFO, *LPWINDOWINFO;
+
+typedef struct tagLASTINPUTINFO
+{ UINT				cbSize;
+  DWORD 			dwTime;
+} LASTINPUTINFO, *PLASTINPUTINFO;
+
+typedef struct tagMONITORINFO
+{ DWORD 			cbSize;
+  RECT				rcMonitor;
+  RECT				rcWork;
+  DWORD 			dwFlags;
+} MONITORINFO, *LPMONITORINFO;
+
+#define CCHDEVICENAME		32
+
+#ifdef __cplusplus
+typedef struct tagMONITORINFOEXA : public tagMONITORINFO
+{ CHAR				szDevice[CCHDEVICENAME];
+} MONITORINFOEXA, *LPMONITORINFOEXA;
+
+typedef struct tagMONITORINFOEXW : public tagMONITORINFO
+{ WCHAR 			szDevice[CCHDEVICENAME];
+} MONITORINFOEXW, *LPMONITORINFOEXW;
+
+#else	/* !__cplusplus */
+typedef struct tagMONITORINFOEXA
+{ DWORD 			cbSize;
+  RECT				rcMonitor;
+  RECT				rcWork;
+  DWORD 			dwFlags;
+  CHAR				szDevice[CCHDEVICENAME];
+} MONITORINFOEXA, *LPMONITORINFOEXA;
+
+typedef struct tagMONITORINFOEXW
+{ DWORD 			cbSize;
+  RECT				rcMonitor;
+  RECT				rcWork;
+  DWORD 			dwFlags;
+  WCHAR 			szDevice[CCHDEVICENAME];
+} MONITORINFOEXW, *LPMONITORINFOEXW;
+#endif	/* !__cplusplus */
+
+typedef __AW_SUFFIXED__(MONITORINFOEX) MONITORINFOEX, *LPMONITORINFOEX;
+
+typedef struct tagKBDLLHOOKSTRUCT
+{ DWORD 			vkCode;
+  DWORD 			scanCode;
+  DWORD 			flags;
+  DWORD 			time;
+  DWORD 			dwExtraInfo;
+} KBDLLHOOKSTRUCT, *LPKBDLLHOOKSTRUCT, *PKBDLLHOOKSTRUCT;
+
+typedef struct
+{ POINT 			pt;
+  DWORD 			mouseData;
+  DWORD 			flags;
+  DWORD 			time;
+  ULONG_PTR			dwExtraInfo;
+} MSLLHOOKSTRUCT, *PMSLLHOOKSTRUCT;
+
+#define AnsiToOem CharToOemA
+#define OemToAnsi OemToCharA
+#define AnsiToOemBuff CharToOemBuffA
+#define OemToAnsiBuff OemToCharBuffA
+#define AnsiUpper CharUpperA
+#define AnsiUpperBuff CharUpperBuffA
+#define AnsiLower CharLowerA
+#define AnsiLowerBuff CharLowerBuffA
+#define AnsiNext CharNextA
+#define AnsiPrev CharPrevA
+#define MAKELPARAM(l, h)	((LPARAM)(MAKELONG(l, h)))
+#define MAKEWPARAM(l, h)	((WPARAM)(MAKELONG(l, h)))
+#define MAKELRESULT(l, h)	((LRESULT)(MAKELONG(l, h)))
+
+#define POINTSTOPOINT(p, ps)	 \
+{ (p).x=LOWORD(*(DWORD *)(&ps)); \
+  (p).y=HIWORD(*(DWORD *)(&ps)); \
+}
+#define POINTTOPOINTS(p)	((POINTS)(MAKELONG((p).x,(p).y)))
+
+#ifndef _LPCGUID_DEFINED
+#define _LPCGUID_DEFINED
+typedef const GUID *LPCGUID;
+#endif
+
+WINUSERAPI HKL  WINAPI ActivateKeyboardLayout (HKL, UINT);
+WINUSERAPI BOOL WINAPI AdjustWindowRect (LPRECT, DWORD, BOOL);
+WINUSERAPI BOOL WINAPI AdjustWindowRectEx (LPRECT, DWORD, BOOL, DWORD);
+
+WINUSERAPI BOOL WINAPI AnyPopup (void);
+
+#define AppendMenu __AW_SUFFIXED__(AppendMenu)
+WINUSERAPI BOOL WINAPI AppendMenuA (HMENU, UINT, UINT_PTR, LPCSTR);
+WINUSERAPI BOOL WINAPI AppendMenuW (HMENU, UINT, UINT_PTR, LPCWSTR);
+
+WINUSERAPI UINT WINAPI ArrangeIconicWindows (HWND);
+WINUSERAPI BOOL WINAPI AttachThreadInput (DWORD, DWORD, BOOL);
+WINUSERAPI HDWP WINAPI BeginDeferWindowPos (int);
+WINUSERAPI HDC  WINAPI BeginPaint (HWND, LPPAINTSTRUCT);
+WINUSERAPI BOOL WINAPI BringWindowToTop (HWND);
+WINUSERAPI long WINAPI BroadcastSystemMessage (DWORD, LPDWORD, UINT, WPARAM, LPARAM);
+
+#define CallMsgFilter __AW_SUFFIXED__(CallMsgFilter)
+WINUSERAPI BOOL WINAPI CallMsgFilterA (LPMSG, INT);
+WINUSERAPI BOOL WINAPI CallMsgFilterW (LPMSG, INT);
+
+#define CallWindowProc __AW_SUFFIXED__(CallWindowProc)
+WINUSERAPI LRESULT WINAPI CallWindowProcA (WNDPROC, HWND, UINT, WPARAM, LPARAM);
+WINUSERAPI LRESULT WINAPI CallWindowProcW (WNDPROC, HWND, UINT, WPARAM, LPARAM);
+
+WINUSERAPI WORD WINAPI CascadeWindows (HWND, UINT, LPCRECT, UINT, const HWND *);
+WINUSERAPI BOOL WINAPI ChangeClipboardChain (HWND, HWND);
+
+#define DefHookProc(c, p, lp, h)  CallNextHookEx ((HHOOK)(*(h)), c, p, lp)
+WINUSERAPI LRESULT WINAPI CallNextHookEx (HHOOK, int, WPARAM, LPARAM);
+
+#define ChangeMenu __AW_SUFFIXED__(ChangeMenu)
+WINUSERAPI BOOL WINAPI ChangeMenuA (HMENU, UINT, LPCSTR, UINT, UINT);
+WINUSERAPI BOOL WINAPI ChangeMenuW (HMENU, UINT, LPCWSTR, UINT, UINT);
+
+#define CharLower __AW_SUFFIXED__(CharLower)
+WINUSERAPI LPSTR  WINAPI CharLowerA (LPSTR);
+WINUSERAPI LPWSTR WINAPI CharLowerW (LPWSTR);
+
+#define CharLowerBuff __AW_SUFFIXED__(CharLowerBuff)
+WINUSERAPI DWORD WINAPI CharLowerBuffA (LPSTR, DWORD);
+WINUSERAPI DWORD WINAPI CharLowerBuffW (LPWSTR, DWORD);
+
+#define CharNext __AW_SUFFIXED__(CharNext)
+WINUSERAPI LPSTR  WINAPI CharNextA (LPCSTR);
+WINUSERAPI LPWSTR WINAPI CharNextW (LPCWSTR);
+WINUSERAPI LPSTR  WINAPI CharNextExA (WORD, LPCSTR, DWORD);
+
+#define CharPrev __AW_SUFFIXED__(CharPrev)
+WINUSERAPI LPSTR  WINAPI CharPrevA (LPCSTR, LPCSTR);
+WINUSERAPI LPWSTR WINAPI CharPrevW (LPCWSTR, LPCWSTR);
+WINUSERAPI LPSTR  WINAPI CharPrevExA (WORD, LPCSTR, LPCSTR, DWORD);
+
+#define CharToOem __AW_SUFFIXED__(CharToOem)
+WINUSERAPI BOOL WINAPI CharToOemA (LPCSTR, LPSTR);
+WINUSERAPI BOOL WINAPI CharToOemW (LPCWSTR, LPSTR);
+
+#define CharToOemBuff __AW_SUFFIXED__(CharToOemBuff)
+WINUSERAPI BOOL WINAPI CharToOemBuffA (LPCSTR, LPSTR, DWORD);
+WINUSERAPI BOOL WINAPI CharToOemBuffW (LPCWSTR, LPSTR, DWORD);
+
+#define CharUpper __AW_SUFFIXED__(CharUpper)
+WINUSERAPI LPSTR  WINAPI CharUpperA (LPSTR);
+WINUSERAPI LPWSTR WINAPI CharUpperW (LPWSTR);
+
+#define CharUpperBuff __AW_SUFFIXED__(CharUpperBuff)
+WINUSERAPI DWORD WINAPI CharUpperBuffA (LPSTR, DWORD);
+WINUSERAPI DWORD WINAPI CharUpperBuffW (LPWSTR, DWORD);
+
+WINUSERAPI BOOL  WINAPI CheckDlgButton (HWND, int, UINT);
+WINUSERAPI DWORD WINAPI CheckMenuItem (HMENU, UINT, UINT);
+WINUSERAPI BOOL  WINAPI CheckMenuRadioItem (HMENU, UINT, UINT, UINT, UINT);
+WINUSERAPI BOOL  WINAPI CheckRadioButton (HWND, int, int, int);
+WINUSERAPI HWND  WINAPI ChildWindowFromPoint (HWND, POINT);
+WINUSERAPI HWND  WINAPI ChildWindowFromPointEx (HWND, POINT, UINT);
+WINUSERAPI BOOL  WINAPI ClientToScreen (HWND, LPPOINT);
+WINUSERAPI BOOL  WINAPI ClipCursor (LPCRECT);
+WINUSERAPI BOOL  WINAPI CloseClipboard (void);
+WINUSERAPI BOOL  WINAPI CloseDesktop (HDESK);
+WINUSERAPI BOOL  WINAPI CloseWindow (HWND);
+WINUSERAPI BOOL  WINAPI CloseWindowStation (HWINSTA);
+
+#define CopyAcceleratorTable __AW_SUFFIXED__(CopyAcceleratorTable)
+WINUSERAPI int WINAPI CopyAcceleratorTableA (HACCEL, LPACCEL, int);
+WINUSERAPI int WINAPI CopyAcceleratorTableW (HACCEL, LPACCEL, int);
+
+#define CopyCursor(c) ((HCURSOR)(CopyIcon ((HICON)(c))))
+WINUSERAPI HICON  WINAPI CopyIcon (HICON);
+WINUSERAPI HANDLE WINAPI CopyImage (HANDLE, UINT, int, int, UINT);
+WINUSERAPI BOOL   WINAPI CopyRect (LPRECT, LPCRECT);
+WINUSERAPI int    WINAPI CountClipboardFormats (void);
+
+#define CreateAcceleratorTable __AW_SUFFIXED__(CreateAcceleratorTable)
+WINUSERAPI HACCEL WINAPI CreateAcceleratorTableA (LPACCEL, int);
+WINUSERAPI HACCEL WINAPI CreateAcceleratorTableW (LPACCEL, int);
+
+WINUSERAPI BOOL    WINAPI CreateCaret (HWND, HBITMAP, int, int);
+WINUSERAPI HCURSOR WINAPI CreateCursor (HINSTANCE, int, int, int, int, PCVOID, PCVOID);
+
+#define CreateDialog __AW_SUFFIXED__(CreateDialog)
+#define CreateDialogA(h,n,w,f)  CreateDialogParamA (h, n, w, f, 0)
+#define CreateDialogW(h,n,w,f)  CreateDialogParamW (h, n, w, f, 0)
+
+#define CreateDialogIndirect __AW_SUFFIXED__(CreateDialogIndirect)
+#define CreateDialogIndirectA(h,t,w,f)  CreateDialogIndirectParamA (h, t, w, f, 0)
+#define CreateDialogIndirectW(h,t,w,f)  CreateDialogIndirectParamW (h, t, w, f, 0)
+
+#define CreateDialogIndirectParam __AW_SUFFIXED__(CreateDialogIndirectParam)
+WINUSERAPI HWND WINAPI
+CreateDialogIndirectParamA (HINSTANCE, LPCDLGTEMPLATE, HWND, DLGPROC, LPARAM);
+WINUSERAPI HWND WINAPI
+CreateDialogIndirectParamW (HINSTANCE, LPCDLGTEMPLATE, HWND, DLGPROC, LPARAM);
+
+#define CreateDialogParam __AW_SUFFIXED__(CreateDialogParam)
+WINUSERAPI HWND WINAPI CreateDialogParamA (HINSTANCE, LPCSTR, HWND, DLGPROC, LPARAM);
+WINUSERAPI HWND WINAPI CreateDialogParamW (HINSTANCE, LPCWSTR, HWND, DLGPROC, LPARAM);
+
+WINUSERAPI HICON WINAPI CreateIcon (HINSTANCE, int, int, BYTE, BYTE, const BYTE *, const BYTE *);
+WINUSERAPI HICON WINAPI CreateIconFromResource (PBYTE, DWORD, BOOL, DWORD);
+WINUSERAPI HICON WINAPI CreateIconFromResourceEx (PBYTE, DWORD, BOOL, DWORD, int, int, UINT);
+WINUSERAPI HICON WINAPI CreateIconIndirect (PICONINFO);
+
+#define CreateMDIWindow __AW_SUFFIXED__(CreateMDIWindow)
+WINUSERAPI HWND WINAPI CreateMDIWindowA (LPCSTR, LPCSTR, DWORD, int, int, int, int, HWND, HINSTANCE, LPARAM);
+WINUSERAPI HWND WINAPI CreateMDIWindowW (LPCWSTR, LPCWSTR, DWORD, int, int, int, int, HWND, HINSTANCE, LPARAM);
+WINUSERAPI HMENU WINAPI CreateMenu (void);
+WINUSERAPI HMENU WINAPI CreatePopupMenu (void);
+
+#define CreateWindow __AW_SUFFIXED__(CreateWindow)
+#define CreateWindowA(a, b, c, d, e, f, g, h, i, j, k)  \
+  CreateWindowExA (0, a, b, c, d, e, f, g, h, i, j, k)
+#define CreateWindowW(a, b, c, d, e, f, g, h, i, j, k)  \
+  CreateWindowExW (0, a, b, c, d, e, f, g, h, i, j, k)
+
+#define CreateWindowEx __AW_SUFFIXED__(CreateWindowEx)
+WINUSERAPI HWND WINAPI CreateWindowExA
+(DWORD, LPCSTR, LPCSTR, DWORD, int, int, int, int, HWND, HMENU, HINSTANCE, LPVOID);
+WINUSERAPI HWND WINAPI CreateWindowExW
+(DWORD, LPCWSTR, LPCWSTR, DWORD, int, int, int, int, HWND, HMENU, HINSTANCE, LPVOID);
+
+#define CreateWindowStation __AW_SUFFIXED__(CreateWindowStation)
+WINUSERAPI HWINSTA WINAPI CreateWindowStationA (LPCSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES);
+WINUSERAPI HWINSTA WINAPI CreateWindowStationW (LPCWSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES);
+
+WINUSERAPI HDWP WINAPI DeferWindowPos (HDWP, HWND, HWND, int, int, int, int, UINT);
+
+#define DefDlgProc __AW_SUFFIXED__(DefDlgProc)
+WINUSERAPI LRESULT WINAPI DefDlgProcA (HWND, UINT, WPARAM, LPARAM);
+WINUSERAPI LRESULT WINAPI DefDlgProcW (HWND, UINT, WPARAM, LPARAM);
+
+#define DefFrameProc __AW_SUFFIXED__(DefFrameProc)
+WINUSERAPI LRESULT WINAPI DefFrameProcA (HWND, HWND, UINT, WPARAM, LPARAM);
+WINUSERAPI LRESULT WINAPI DefFrameProcW (HWND, HWND, UINT, WPARAM, LPARAM);
+
+#define DefMDIChildProc __AW_SUFFIXED__(DefMDIChildProc)
+WINUSERAPI LRESULT WINAPI DefMDIChildProcA (HWND, UINT, WPARAM, LPARAM);
+WINUSERAPI LRESULT WINAPI DefMDIChildProcW (HWND, UINT, WPARAM, LPARAM);
+
+#define DefWindowProc __AW_SUFFIXED__(DefWindowProc)
+WINUSERAPI LRESULT WINAPI DefWindowProcA (HWND, UINT, WPARAM, LPARAM);
+WINUSERAPI LRESULT WINAPI DefWindowProcW (HWND, UINT, WPARAM, LPARAM);
+
+WINUSERAPI BOOL WINAPI DeleteMenu (HMENU, UINT, UINT);
+WINUSERAPI BOOL WINAPI DeregisterShellHookWindow (HWND);
+WINUSERAPI BOOL WINAPI DestroyAcceleratorTable (HACCEL);
+WINUSERAPI BOOL WINAPI DestroyCaret (void);
+WINUSERAPI BOOL WINAPI DestroyCursor (HCURSOR);
+WINUSERAPI BOOL WINAPI DestroyIcon (HICON);
+WINUSERAPI BOOL WINAPI DestroyMenu (HMENU);
+WINUSERAPI BOOL WINAPI DestroyWindow (HWND);
+
+#define DialogBox __AW_SUFFIXED__(DialogBox)
+#define DialogBoxA(i,t,p,f)  DialogBoxParamA (i, t, p, f, 0)
+#define DialogBoxW(i,t,p,f)  DialogBoxParamW (i, t, p, f, 0)
+
+#define DialogBoxIndirect __AW_SUFFIXED__(DialogBoxIndirect)
+#define DialogBoxIndirectA(i,t,p,f)  DialogBoxIndirectParamA (i, t, p, f, 0)
+#define DialogBoxIndirectW(i,t,p,f)  DialogBoxIndirectParamW (i, t, p, f, 0)
+
+#define DialogBoxIndirectParam __AW_SUFFIXED__(DialogBoxIndirectParam)
+WINUSERAPI int WINAPI DialogBoxIndirectParamA (HINSTANCE, LPCDLGTEMPLATE, HWND, DLGPROC, LPARAM);
+WINUSERAPI int WINAPI DialogBoxIndirectParamW (HINSTANCE, LPCDLGTEMPLATE, HWND, DLGPROC, LPARAM);
+
+#define DialogBoxParam __AW_SUFFIXED__(DialogBoxParam)
+
+#ifdef _WIN32_WCE
+extern int DialogBoxParamA (HINSTANCE, LPCSTR, HWND, DLGPROC, LPARAM);
+extern int DialogBoxParamW (HINSTANCE, LPCWSTR, HWND, DLGPROC, LPARAM);
+#else
+WINUSERAPI int WINAPI DialogBoxParamA (HINSTANCE, LPCSTR, HWND, DLGPROC, LPARAM);
+WINUSERAPI int WINAPI DialogBoxParamW (HINSTANCE, LPCWSTR, HWND, DLGPROC, LPARAM);
+#endif
+
+#define DispatchMessage __AW_SUFFIXED__(DispatchMessage)
+WINUSERAPI LONG WINAPI DispatchMessageA (const MSG *);
+WINUSERAPI LONG WINAPI DispatchMessageW (const MSG *);
+
+#define DlgDirList __AW_SUFFIXED__(DlgDirList)
+WINUSERAPI int WINAPI DlgDirListA (HWND, LPSTR, int, int, UINT);
+WINUSERAPI int WINAPI DlgDirListW (HWND, LPWSTR, int, int, UINT);
+
+#define DlgDirListComboBox __AW_SUFFIXED__(DlgDirListComboBox)
+WINUSERAPI int WINAPI DlgDirListComboBoxA (HWND, LPSTR, int, int, UINT);
+WINUSERAPI int WINAPI DlgDirListComboBoxW (HWND, LPWSTR, int, int, UINT);
+
+#define DlgDirSelectComboBoxEx __AW_SUFFIXED__(DlgDirSelectComboBoxEx)
+WINUSERAPI BOOL WINAPI DlgDirSelectComboBoxExA (HWND, LPSTR, int, int);
+WINUSERAPI BOOL WINAPI DlgDirSelectComboBoxExW (HWND, LPWSTR, int, int);
+
+#define DlgDirSelectEx __AW_SUFFIXED__(DlgDirSelectEx)
+WINUSERAPI BOOL WINAPI DlgDirSelectExA (HWND, LPSTR, int, int);
+WINUSERAPI BOOL WINAPI DlgDirSelectExW (HWND, LPWSTR, int, int);
+
+WINUSERAPI BOOL  WINAPI DragDetect (HWND, POINT);
+WINUSERAPI DWORD WINAPI DragObject (HWND, HWND, UINT, DWORD, HCURSOR);
+WINUSERAPI BOOL  WINAPI DrawAnimatedRects (HWND, int, LPCRECT, LPCRECT);
+WINUSERAPI BOOL  WINAPI DrawCaption (HWND, HDC, LPCRECT, UINT);
+WINUSERAPI BOOL  WINAPI DrawEdge (HDC, LPRECT, UINT, UINT);
+WINUSERAPI BOOL  WINAPI DrawFocusRect (HDC, LPCRECT);
+WINUSERAPI BOOL  WINAPI DrawFrameControl (HDC, LPRECT, UINT, UINT);
+WINUSERAPI BOOL  WINAPI DrawIcon (HDC, int, int, HICON);
+WINUSERAPI BOOL  WINAPI DrawIconEx (HDC, int, int, HICON, int, int, UINT, HBRUSH, UINT);
+WINUSERAPI BOOL  WINAPI DrawMenuBar (HWND);
+
+#define DrawState __AW_SUFFIXED__(DrawState)
+WINUSERAPI BOOL WINAPI DrawStateA
+(HDC, HBRUSH, DRAWSTATEPROC, LPARAM, WPARAM, int, int, int, int, UINT);
+WINUSERAPI BOOL WINAPI DrawStateW
+(HDC, HBRUSH, DRAWSTATEPROC, LPARAM, WPARAM, int, int, int, int, UINT);
+
+#define DrawText __AW_SUFFIXED__(DrawText)
+WINUSERAPI int WINAPI DrawTextA (HDC, LPCSTR, int, LPRECT, UINT);
+WINUSERAPI int WINAPI DrawTextW (HDC, LPCWSTR, int, LPRECT, UINT);
+
+#define DrawTextEx __AW_SUFFIXED__(DrawTextEx)
+WINUSERAPI int WINAPI DrawTextExA (HDC, LPSTR, int, LPRECT, UINT, LPDRAWTEXTPARAMS);
+WINUSERAPI int WINAPI DrawTextExW (HDC, LPWSTR, int, LPRECT, UINT, LPDRAWTEXTPARAMS);
+
+WINUSERAPI BOOL WINAPI EmptyClipboard (void);
+WINUSERAPI BOOL WINAPI EnableMenuItem (HMENU, UINT, UINT);
+WINUSERAPI BOOL WINAPI EnableScrollBar (HWND, UINT, UINT);
+WINUSERAPI BOOL WINAPI EnableWindow (HWND, BOOL);
+WINUSERAPI BOOL WINAPI EndDeferWindowPos (HDWP);
+WINUSERAPI BOOL WINAPI EndDialog (HWND, int);
+WINUSERAPI BOOL WINAPI EndMenu (void);
+WINUSERAPI BOOL WINAPI EndPaint (HWND, const PAINTSTRUCT *);
+
+WINUSERAPI BOOL WINAPI EnumChildWindows (HWND, ENUMWINDOWSPROC, LPARAM);
+WINUSERAPI UINT WINAPI EnumClipboardFormats (UINT);
+
+#define EnumDesktops __AW_SUFFIXED__(EnumDesktops)
+WINUSERAPI BOOL WINAPI EnumDesktopsA (HWINSTA, DESKTOPENUMPROCA, LPARAM);
+WINUSERAPI BOOL WINAPI EnumDesktopsW (HWINSTA, DESKTOPENUMPROCW, LPARAM);
+
+WINUSERAPI BOOL WINAPI EnumDesktopWindows (HDESK, ENUMWINDOWSPROC, LPARAM);
+WINUSERAPI BOOL WINAPI EnumDisplayMonitors (HDC, LPCRECT, MONITORENUMPROC, LPARAM);
+
+#define EnumProps __AW_SUFFIXED__(EnumProps)
+WINUSERAPI int WINAPI EnumPropsA (HWND, PROPENUMPROCA);
+WINUSERAPI int WINAPI EnumPropsW (HWND, PROPENUMPROCW);
+
+#define EnumPropsEx __AW_SUFFIXED__(EnumPropsEx)
+WINUSERAPI int WINAPI EnumPropsExA (HWND, PROPENUMPROCEXA, LPARAM);
+WINUSERAPI int WINAPI EnumPropsExW (HWND, PROPENUMPROCEXW, LPARAM);
+
+#define EnumTaskWindows(h,f,p)  EnumThreadWindows ((DWORD)(h), f, p)
+WINUSERAPI BOOL WINAPI EnumThreadWindows (DWORD, WNDENUMPROC, LPARAM);
+WINUSERAPI BOOL WINAPI EnumWindows (WNDENUMPROC, LPARAM);
+
+#define EnumWindowStations __AW_SUFFIXED__(EnumWindowStations)
+WINUSERAPI BOOL WINAPI EnumWindowStationsA (WINSTAENUMPROCA, LPARAM);
+WINUSERAPI BOOL WINAPI EnumWindowStationsW (WINSTAENUMPROCW, LPARAM);
+
+WINUSERAPI BOOL WINAPI EqualRect (LPCRECT, LPCRECT);
+
+#define ExitWindows(r, c)  ExitWindowsEx (EWX_LOGOFF, 0)
+WINUSERAPI BOOL WINAPI ExitWindowsEx (UINT, DWORD);
+
+#define FindWindow __AW_SUFFIXED__(FindWindow)
+WINUSERAPI HWND WINAPI FindWindowA (LPCSTR, LPCSTR);
+WINUSERAPI HWND WINAPI FindWindowW (LPCWSTR, LPCWSTR);
+
+#define FindWindowEx __AW_SUFFIXED__(FindWindowEx)
+WINUSERAPI HWND WINAPI FindWindowExA (HWND, HWND, LPCSTR, LPCSTR);
+WINUSERAPI HWND WINAPI FindWindowExW (HWND, HWND, LPCWSTR, LPCWSTR);
+
+WINUSERAPI BOOL WINAPI FlashWindow (HWND, BOOL);
+
+int WINAPI FrameRect (HDC, LPCRECT, HBRUSH);
+WINUSERAPI BOOL  WINAPI FrameRgn (HDC, HRGN, HBRUSH, int, int);
+WINUSERAPI HWND  WINAPI GetActiveWindow (void);
+WINUSERAPI HWND  WINAPI GetAncestor (HWND, UINT);
+WINUSERAPI SHORT WINAPI GetAsyncKeyState (int);
+WINUSERAPI HWND  WINAPI GetCapture (void);
+WINUSERAPI UINT  WINAPI GetCaretBlinkTime (void);
+WINUSERAPI BOOL  WINAPI GetCaretPos (LPPOINT);
+
+#define GetClassInfo __AW_SUFFIXED__(GetClassInfo)
+WINUSERAPI BOOL WINAPI GetClassInfoA (HINSTANCE, LPCSTR, LPWNDCLASSA);
+WINUSERAPI BOOL WINAPI GetClassInfoW (HINSTANCE, LPCWSTR, LPWNDCLASSW);
+
+#define GetClassInfoEx __AW_SUFFIXED__(GetClassInfoEx)
+WINUSERAPI BOOL WINAPI GetClassInfoExA (HINSTANCE, LPCSTR, LPWNDCLASSEXA);
+WINUSERAPI BOOL WINAPI GetClassInfoExW (HINSTANCE, LPCWSTR, LPWNDCLASSEXW);
+
+#define GetClassLong __AW_SUFFIXED__(GetClassLong)
+WINUSERAPI DWORD WINAPI GetClassLongA (HWND, int);
+WINUSERAPI DWORD WINAPI GetClassLongW (HWND, int);
+
+#ifdef _WIN64
+#define GetClassLongPtr __AW_SUFFIXED__(GetClassLongPtr)
+WINUSERAPI ULONG_PTR WINAPI GetClassLongPtrA (HWND, int);
+WINUSERAPI ULONG_PTR WINAPI GetClassLongPtrW (HWND, int);
+#else
+#define GetClassLongPtr   GetClassLong
+#define GetClassLongPtrA  GetClassLongA
+#define GetClassLongPtrW  GetClassLongW
+#endif
+
+#define GetClassName __AW_SUFFIXED__(GetClassName)
+WINUSERAPI int WINAPI GetClassNameA (HWND, LPSTR, int);
+WINUSERAPI int WINAPI GetClassNameW (HWND, LPWSTR, int);
+
+WINUSERAPI WORD WINAPI GetClassWord (HWND, int);
+WINUSERAPI BOOL WINAPI GetClientRect (HWND, LPRECT);
+
+#define GetClipboardFormatName __AW_SUFFIXED__(GetClipboardFormatName)
+WINUSERAPI int WINAPI GetClipboardFormatNameA (UINT, LPSTR, int);
+WINUSERAPI int WINAPI GetClipboardFormatNameW (UINT, LPWSTR, int);
+
+WINUSERAPI HANDLE WINAPI GetClipboardData (UINT);
+WINUSERAPI HWND WINAPI GetClipboardOwner (void);
+
+HWND WINAPI GetClipboardViewer (void);
+WINUSERAPI BOOL WINAPI GetClipCursor (LPRECT);
+WINUSERAPI BOOL WINAPI GetCursorPos (LPPOINT);
+WINUSERAPI HDC WINAPI GetDC (HWND);
+WINUSERAPI HDC WINAPI GetDCEx (HWND, HRGN, DWORD);
+WINUSERAPI HWND WINAPI GetDesktopWindow (void);
+WINUSERAPI long WINAPI GetDialogBaseUnits (void);
+WINUSERAPI int WINAPI GetDlgCtrlID (HWND);
+WINUSERAPI HWND WINAPI GetDlgItem (HWND, int);
+WINUSERAPI UINT WINAPI GetDlgItemInt (HWND, int, PBOOL, BOOL);
+
+#define GetDlgItemText __AW_SUFFIXED__(GetDlgItemText)
+WINUSERAPI UINT WINAPI GetDlgItemTextA (HWND, int, LPSTR, int);
+WINUSERAPI UINT WINAPI GetDlgItemTextW (HWND, int, LPWSTR, int);
+
+WINUSERAPI UINT WINAPI GetDoubleClickTime (void);
+WINUSERAPI HWND WINAPI GetFocus (void);
+WINUSERAPI HWND WINAPI GetForegroundWindow (void);
+WINUSERAPI BOOL WINAPI GetIconInfo (HICON, PICONINFO);
+WINUSERAPI BOOL WINAPI GetInputState (void);
+WINUSERAPI UINT WINAPI GetKBCodePage (void);
+WINUSERAPI HKL WINAPI GetKeyboardLayout (DWORD);
+WINUSERAPI UINT WINAPI GetKeyboardLayoutList (int, HKL *);
+
+#define GetKeyboardLayoutName __AW_SUFFIXED__(GetKeyboardLayoutName)
+WINUSERAPI BOOL WINAPI GetKeyboardLayoutNameA (LPSTR);
+WINUSERAPI BOOL WINAPI GetKeyboardLayoutNameW (LPWSTR);
+
+WINUSERAPI BOOL WINAPI GetKeyboardState (PBYTE);
+WINUSERAPI int WINAPI GetKeyboardType (int);
+
+#define GetKeyNameText __AW_SUFFIXED__(GetKeyNameText)
+WINUSERAPI int WINAPI GetKeyNameTextA (LONG, LPSTR, int);
+WINUSERAPI int WINAPI GetKeyNameTextW (LONG, LPWSTR, int);
+
+WINUSERAPI SHORT WINAPI GetKeyState (int);
+WINUSERAPI HWND WINAPI GetLastActivePopup (HWND);
+WINUSERAPI HMENU WINAPI GetMenu (HWND);
+WINUSERAPI LONG WINAPI GetMenuCheckMarkDimensions (void);
+WINUSERAPI DWORD WINAPI GetMenuContextHelpId (HMENU);
+WINUSERAPI UINT WINAPI GetMenuDefaultItem (HMENU, UINT, UINT);
+WINUSERAPI int WINAPI GetMenuItemCount (HMENU);
+WINUSERAPI UINT WINAPI GetMenuItemID (HMENU, int);
+
+#define GetMenuItemInfo __AW_SUFFIXED__(GetMenuItemInfo)
+WINUSERAPI BOOL WINAPI GetMenuItemInfoA (HMENU, UINT, BOOL, LPMENUITEMINFOA);
+WINUSERAPI BOOL WINAPI GetMenuItemInfoW (HMENU, UINT, BOOL, LPMENUITEMINFOW);
+
+WINUSERAPI BOOL WINAPI GetMenuItemRect (HWND, HMENU, UINT, LPRECT);
+WINUSERAPI UINT WINAPI GetMenuState (HMENU, UINT, UINT);
+
+#define GetMenuString __AW_SUFFIXED__(GetMenuString)
+WINUSERAPI int WINAPI GetMenuStringA (HMENU, UINT, LPSTR, int, UINT);
+WINUSERAPI int WINAPI GetMenuStringW (HMENU, UINT, LPWSTR, int, UINT);
+
+#define GetMessage __AW_SUFFIXED__(GetMessage)
+WINUSERAPI BOOL WINAPI GetMessageA (LPMSG, HWND, UINT, UINT);
+WINUSERAPI BOOL WINAPI GetMessageW (LPMSG, HWND, UINT, UINT);
+
+WINUSERAPI LONG WINAPI GetMessageExtraInfo (void);
+WINUSERAPI DWORD WINAPI GetMessagePos (void);
+WINUSERAPI LONG WINAPI GetMessageTime (void);
+
+WINUSERAPI HWND WINAPI GetNextDlgGroupItem (HWND, HWND, BOOL);
+WINUSERAPI HWND WINAPI GetNextDlgTabItem (HWND, HWND, BOOL);
+WINUSERAPI HWND WINAPI GetOpenClipboardWindow (void);
+WINUSERAPI HWND WINAPI GetParent (HWND);
+WINUSERAPI int WINAPI GetPriorityClipboardFormat (UINT *, int);
+
+#define GetProp __AW_SUFFIXED__(GetProp)
+WINUSERAPI HANDLE WINAPI GetPropA (HWND, LPCSTR);
+WINUSERAPI HANDLE WINAPI GetPropW (HWND, LPCWSTR);
+
+WINUSERAPI DWORD WINAPI GetQueueStatus (UINT);
+WINUSERAPI BOOL WINAPI GetScrollInfo (HWND, int, LPSCROLLINFO);
+WINUSERAPI int WINAPI GetScrollPos (HWND, int);
+WINUSERAPI BOOL WINAPI GetScrollRange (HWND, int, LPINT, LPINT);
+WINUSERAPI HMENU WINAPI GetSubMenu (HMENU, int);
+WINUSERAPI DWORD WINAPI GetSysColor (int);
+WINUSERAPI HBRUSH WINAPI GetSysColorBrush (int);
+WINUSERAPI HMENU WINAPI GetSystemMenu (HWND, BOOL);
+WINUSERAPI int WINAPI GetSystemMetrics (int);
+#define GetSysModalWindow() (NULL)
+
+#define GetTabbedTextExtent __AW_SUFFIXED__(GetTabbedTextExtent)
+WINUSERAPI DWORD WINAPI GetTabbedTextExtentA (HDC, LPCSTR, int, int, LPINT);
+WINUSERAPI DWORD WINAPI GetTabbedTextExtentW (HDC, LPCWSTR, int, int, LPINT);
+
+#define GetWindowLong __AW_SUFFIXED__(GetWindowLong)
+WINUSERAPI LONG WINAPI GetWindowLongA (HWND, int);
+WINUSERAPI LONG WINAPI GetWindowLongW (HWND, int);
+
+#ifdef _WIN64
+#define GetWindowLongPtr __AW_SUFFIXED__(GetWindowLongPtr)
+WINUSERAPI LONG_PTR WINAPI GetWindowLongPtrA (HWND, int);
+WINUSERAPI LONG_PTR WINAPI GetWindowLongPtrW (HWND, int);
+#else
+#define GetWindowLongPtr   GetWindowLong
+#define GetWindowLongPtrA  GetWindowLongA
+#define GetWindowLongPtrW  GetWindowLongW
+#endif
+
+WINUSERAPI HDESK WINAPI GetThreadDesktop (DWORD);
+WINUSERAPI HWND WINAPI GetTopWindow (HWND);
+WINUSERAPI BOOL WINAPI GetUpdateRect (HWND, LPRECT, BOOL);
+WINUSERAPI int WINAPI GetUpdateRgn (HWND, HRGN, BOOL);
+
+#define GetUserObjectInformation __AW_SUFFIXED__(GetUserObjectInformation)
+WINUSERAPI BOOL WINAPI GetUserObjectInformationA (HANDLE, int, PVOID, DWORD, PDWORD);
+WINUSERAPI BOOL WINAPI GetUserObjectInformationW (HANDLE, int, PVOID, DWORD, PDWORD);
+
+WINUSERAPI BOOL WINAPI GetUserObjectSecurity
+(HANDLE, PSECURITY_INFORMATION, PSECURITY_DESCRIPTOR, DWORD, PDWORD);
+
+WINUSERAPI HWND WINAPI GetWindow (HWND, UINT);
+#define GetNextWindow(h, c) GetWindow(h, c)
+
+WINUSERAPI DWORD WINAPI GetWindowContextHelpId (HWND);
+WINUSERAPI HDC WINAPI GetWindowDC (HWND);
+WINUSERAPI BOOL WINAPI GetWindowPlacement (HWND, WINDOWPLACEMENT *);
+WINUSERAPI BOOL WINAPI GetWindowRect (HWND, LPRECT);
+WINUSERAPI int WINAPI GetWindowRgn (HWND, HRGN);
+WINUSERAPI WORD WINAPI GetWindowWord (HWND, int);
+
+#define GetWindowTask(hWnd) ((HANDLE)(GetWindowThreadProcessId(hWnd, NULL)))
+
+#define GetWindowText __AW_SUFFIXED__(GetWindowText)
+WINUSERAPI int WINAPI GetWindowTextA (HWND, LPSTR, int);
+WINUSERAPI int WINAPI GetWindowTextW (HWND, LPWSTR, int);
+
+#define GetWindowTextLength __AW_SUFFIXED__(GetWindowTextLength)
+WINUSERAPI int WINAPI GetWindowTextLengthA (HWND);
+WINUSERAPI int WINAPI GetWindowTextLengthW (HWND);
+
+#define GetAltTabInfo __AW_SUFFIXED__(GetAltTabInfo)
+WINUSERAPI BOOL WINAPI GetAltTabInfoA (HWND, int, PALTTABINFO, LPSTR, UINT);
+WINUSERAPI BOOL WINAPI GetAltTabInfoW (HWND, int, PALTTABINFO, LPWSTR, UINT);
+
+WINUSERAPI BOOL WINAPI GetComboBoxInfo (HWND, PCOMBOBOXINFO);
+WINUSERAPI BOOL WINAPI GetCursorInfo (PCURSORINFO);
+
+WINUSERAPI BOOL WINAPI GetLastInputInfo (PLASTINPUTINFO);
+WINUSERAPI DWORD WINAPI GetListBoxInfo (HWND);
+WINUSERAPI BOOL WINAPI GetMenuBarInfo (HWND, LONG, LONG, PMENUBARINFO);
+WINUSERAPI BOOL WINAPI GetMenuInfo (HMENU, LPMENUINFO);
+
+WINUSERAPI BOOL WINAPI GetWindowInfo (HWND, PWINDOWINFO);
+WINUSERAPI BOOL WINAPI GetScrollBarInfo (HWND, LONG, PSCROLLBARINFO);
+
+#define GetMonitorInfo __AW_SUFFIXED__(GetMonitorInfo)
+WINUSERAPI BOOL WINAPI GetMonitorInfoA (HMONITOR, LPMONITORINFO);
+WINUSERAPI BOOL WINAPI GetMonitorInfoW (HMONITOR, LPMONITORINFO);
+
+#define GetWindowModuleFileName __AW_SUFFIXED__(GetWindowModuleFileName)
+WINUSERAPI UINT WINAPI GetWindowModuleFileNameA (HWND, LPSTR, UINT);
+WINUSERAPI UINT WINAPI GetWindowModuleFileNameW (HWND, LPWSTR, UINT);
+
+#define GrayString __AW_SUFFIXED__(GrayString)
+WINUSERAPI BOOL WINAPI GrayStringA (HDC, HBRUSH, GRAYSTRINGPROC, LPARAM, int, int, int, int, int);
+WINUSERAPI BOOL WINAPI GrayStringW (HDC, HBRUSH, GRAYSTRINGPROC, LPARAM, int, int, int, int, int);
+
+WINUSERAPI BOOL WINAPI HideCaret (HWND);
+WINUSERAPI BOOL WINAPI HiliteMenuItem (HWND, HMENU, UINT, UINT);
+WINUSERAPI BOOL WINAPI InflateRect (LPRECT, int, int);
+WINUSERAPI BOOL WINAPI InSendMessage (void);
+
+#define InsertMenu __AW_SUFFIXED__(InsertMenu)
+WINUSERAPI BOOL WINAPI InsertMenuA (HMENU, UINT, UINT, UINT, LPCSTR);
+WINUSERAPI BOOL WINAPI InsertMenuW (HMENU, UINT, UINT, UINT, LPCWSTR);
+
+#define InsertMenuItem __AW_SUFFIXED__(InsertMenuItem)
+WINUSERAPI BOOL WINAPI InsertMenuItemA (HMENU, UINT, BOOL, LPCMENUITEMINFOA);
+WINUSERAPI BOOL WINAPI InsertMenuItemW (HMENU, UINT, BOOL, LPCMENUITEMINFOW);
+
+WINUSERAPI INT WINAPI InternalGetWindowText (HWND, LPWSTR, INT);
+WINUSERAPI BOOL WINAPI IntersectRect (LPRECT, LPCRECT, LPCRECT);
+WINUSERAPI BOOL WINAPI InvalidateRect (HWND, LPCRECT, BOOL);
+WINUSERAPI BOOL WINAPI InvalidateRgn (HWND, HRGN, BOOL);
+WINUSERAPI BOOL WINAPI InvertRect (HDC, LPCRECT);
+
+#define IsCharAlpha __AW_SUFFIXED__(IsCharAlpha)
+WINUSERAPI BOOL WINAPI IsCharAlphaA (CHAR ch);
+WINUSERAPI BOOL WINAPI IsCharAlphaW (WCHAR);
+
+#define IsCharAlphaNumeric __AW_SUFFIXED__(IsCharAlphaNumeric)
+WINUSERAPI BOOL WINAPI IsCharAlphaNumericA (CHAR);
+WINUSERAPI BOOL WINAPI IsCharAlphaNumericW (WCHAR);
+
+#define IsCharLower __AW_SUFFIXED__(IsCharLower)
+WINUSERAPI BOOL WINAPI IsCharLowerA (CHAR);
+WINUSERAPI BOOL WINAPI IsCharLowerW (WCHAR);
+
+#define IsCharUpper __AW_SUFFIXED__(IsCharUpper)
+WINUSERAPI BOOL WINAPI IsCharUpperA (CHAR);
+WINUSERAPI BOOL WINAPI IsCharUpperW (WCHAR);
+
+WINUSERAPI BOOL WINAPI IsChild (HWND, HWND);
+WINUSERAPI BOOL WINAPI IsClipboardFormatAvailable (UINT);
+WINUSERAPI UINT WINAPI IsDlgButtonChecked (HWND, int);
+
+#define IsDialogMessage __AW_SUFFIXED__(IsDialogMessage)
+WINUSERAPI BOOL WINAPI IsDialogMessageA (HWND, LPMSG);
+WINUSERAPI BOOL WINAPI IsDialogMessageW (HWND, LPMSG);
+
+WINUSERAPI BOOL WINAPI IsIconic (HWND);
+WINUSERAPI BOOL WINAPI IsMenu (HMENU);
+WINUSERAPI BOOL WINAPI IsRectEmpty (LPCRECT);
+WINUSERAPI BOOL WINAPI IsWindow (HWND);
+WINUSERAPI BOOL WINAPI IsWindowEnabled (HWND);
+WINUSERAPI BOOL WINAPI IsWindowUnicode (HWND);
+WINUSERAPI BOOL WINAPI IsWindowVisible (HWND);
+
+WINUSERAPI BOOL WINAPI IsZoomed (HWND);
+WINUSERAPI VOID WINAPI keybd_event (BYTE, BYTE, DWORD, DWORD);
+WINUSERAPI BOOL WINAPI KillTimer (HWND, UINT_PTR);
+
+#define LoadAccelerators __AW_SUFFIXED__(LoadAccelerators)
+WINUSERAPI HACCEL WINAPI LoadAcceleratorsA (HINSTANCE, LPCSTR);
+WINUSERAPI HACCEL WINAPI LoadAcceleratorsW (HINSTANCE, LPCWSTR);
+
+#define LoadBitmap __AW_SUFFIXED__(LoadBitmap)
+WINUSERAPI HBITMAP WINAPI LoadBitmapA (HINSTANCE, LPCSTR);
+WINUSERAPI HBITMAP WINAPI LoadBitmapW (HINSTANCE, LPCWSTR);
+
+#define LoadCursor __AW_SUFFIXED__(LoadCursor)
+WINUSERAPI HCURSOR WINAPI LoadCursorA (HINSTANCE, LPCSTR);
+WINUSERAPI HCURSOR WINAPI LoadCursorW (HINSTANCE, LPCWSTR);
+
+#define LoadCursorFromFile __AW_SUFFIXED__(LoadCursorFromFile)
+WINUSERAPI HCURSOR WINAPI LoadCursorFromFileA (LPCSTR);
+WINUSERAPI HCURSOR WINAPI LoadCursorFromFileW (LPCWSTR);
+
+#define LoadIcon __AW_SUFFIXED__(LoadIcon)
+WINUSERAPI HICON WINAPI LoadIconA (HINSTANCE, LPCSTR);
+WINUSERAPI HICON WINAPI LoadIconW (HINSTANCE, LPCWSTR);
+
+#define LoadImage __AW_SUFFIXED__(LoadImage)
+WINUSERAPI HANDLE WINAPI LoadImageA (HINSTANCE, LPCSTR, UINT, int, int, UINT);
+WINUSERAPI HANDLE WINAPI LoadImageW (HINSTANCE, LPCWSTR, UINT, int, int, UINT);
+
+#define LoadKeyboardLayout __AW_SUFFIXED__(LoadKeyboardLayout)
+WINUSERAPI HKL WINAPI LoadKeyboardLayoutA (LPCSTR, UINT);
+WINUSERAPI HKL WINAPI LoadKeyboardLayoutW (LPCWSTR, UINT);
+
+#define LoadMenu __AW_SUFFIXED__(LoadMenu)
+WINUSERAPI HMENU WINAPI LoadMenuA (HINSTANCE, LPCSTR);
+WINUSERAPI HMENU WINAPI LoadMenuW (HINSTANCE, LPCWSTR);
+
+#define LoadMenuIndirect __AW_SUFFIXED__(LoadMenuIndirect)
+WINUSERAPI HMENU WINAPI LoadMenuIndirectA (const MENUTEMPLATE *);
+WINUSERAPI HMENU WINAPI LoadMenuIndirectW (const MENUTEMPLATE *);
+
+#define LoadString __AW_SUFFIXED__(LoadString)
+WINUSERAPI int WINAPI LoadStringA (HINSTANCE, UINT, LPSTR, int);
+WINUSERAPI int WINAPI LoadStringW (HINSTANCE, UINT, LPWSTR, int);
+
+WINUSERAPI BOOL WINAPI LockWindowUpdate (HWND);
+
+WINUSERAPI int WINAPI LookupIconIdFromDirectory (PBYTE, BOOL);
+WINUSERAPI int WINAPI LookupIconIdFromDirectoryEx (PBYTE, BOOL, int, int, UINT);
+WINUSERAPI BOOL WINAPI MapDialogRect (HWND, LPRECT);
+
+#define MapVirtualKey __AW_SUFFIXED__(MapVirtualKey)
+WINUSERAPI UINT WINAPI MapVirtualKeyA (UINT, UINT);
+WINUSERAPI UINT WINAPI MapVirtualKeyW (UINT, UINT);
+
+#define MapVirtualKeyEx __AW_SUFFIXED__(MapVirtualKeyEx)
+WINUSERAPI UINT WINAPI MapVirtualKeyExA (UINT, UINT, HKL);
+WINUSERAPI UINT WINAPI MapVirtualKeyExW (UINT, UINT, HKL);
+
+WINUSERAPI int WINAPI MapWindowPoints (HWND, HWND, LPPOINT, UINT);
+WINUSERAPI int WINAPI MenuItemFromPoint (HWND, HMENU, POINT);
+WINUSERAPI BOOL WINAPI MessageBeep (UINT);
+
+#define MessageBox __AW_SUFFIXED__(MessageBox)
+WINUSERAPI int WINAPI MessageBoxA (HWND, LPCSTR, LPCSTR, UINT);
+WINUSERAPI int WINAPI MessageBoxW (HWND, LPCWSTR, LPCWSTR, UINT);
+
+#define MessageBoxEx __AW_SUFFIXED__(MessageBoxEx)
+WINUSERAPI int WINAPI MessageBoxExA (HWND, LPCSTR, LPCSTR, UINT, WORD);
+WINUSERAPI int WINAPI MessageBoxExW (HWND, LPCWSTR, LPCWSTR, UINT, WORD);
+
+#define MessageBoxIndirect __AW_SUFFIXED__(MessageBoxIndirect)
+WINUSERAPI int WINAPI MessageBoxIndirectA (CONST MSGBOXPARAMSA *);
+WINUSERAPI int WINAPI MessageBoxIndirectW (CONST MSGBOXPARAMSW *);
+
+#define ModifyMenu __AW_SUFFIXED__(ModifyMenu)
+WINUSERAPI BOOL WINAPI ModifyMenuA (HMENU, UINT, UINT, UINT, LPCSTR);
+WINUSERAPI BOOL WINAPI ModifyMenuW (HMENU, UINT, UINT, UINT, LPCWSTR);
+
+WINUSERAPI void WINAPI mouse_event (DWORD, DWORD, DWORD, DWORD, ULONG_PTR);
+WINUSERAPI BOOL WINAPI MoveWindow (HWND, int, int, int, int, BOOL);
+WINUSERAPI DWORD WINAPI MsgWaitForMultipleObjects (DWORD, CONST HANDLE *, BOOL, DWORD, DWORD);
+WINUSERAPI DWORD WINAPI MsgWaitForMultipleObjectsEx (DWORD, CONST HANDLE *, DWORD, DWORD, DWORD);
+
+WINUSERAPI DWORD WINAPI OemKeyScan (WORD);
+
+#define OemToChar __AW_SUFFIXED__(OemToChar)
+WINUSERAPI BOOL WINAPI OemToCharA (LPCSTR, LPSTR);
+WINUSERAPI BOOL WINAPI OemToCharW (LPCSTR, LPWSTR);
+
+#define OemToCharBuff __AW_SUFFIXED__(OemToCharBuff)
+WINUSERAPI BOOL WINAPI OemToCharBuffA (LPCSTR, LPSTR, DWORD);
+WINUSERAPI BOOL WINAPI OemToCharBuffW (LPCSTR, LPWSTR, DWORD);
+
+WINUSERAPI BOOL WINAPI OffsetRect (LPRECT, int, int);
+WINUSERAPI BOOL WINAPI OpenClipboard (HWND);
+
+#define OpenDesktop __AW_SUFFIXED__(OpenDesktop)
+WINUSERAPI HDESK WINAPI OpenDesktopA (LPSTR, DWORD, BOOL, DWORD);
+WINUSERAPI HDESK WINAPI OpenDesktopW (LPWSTR, DWORD, BOOL, DWORD);
+
+WINUSERAPI BOOL WINAPI OpenIcon (HWND);
+WINUSERAPI HDESK WINAPI OpenInputDesktop (DWORD, BOOL, DWORD);
+
+#define OpenWindowStation __AW_SUFFIXED__(OpenWindowStation)
+WINUSERAPI HWINSTA WINAPI OpenWindowStationA (LPSTR, BOOL, DWORD);
+WINUSERAPI HWINSTA WINAPI OpenWindowStationW (LPWSTR, BOOL, DWORD);
+
+WINUSERAPI BOOL WINAPI PaintDesktop (HDC);
+
+#define PeekMessage __AW_SUFFIXED__(PeekMessage)
+WINUSERAPI BOOL WINAPI PeekMessageA (LPMSG, HWND, UINT, UINT, UINT);
+WINUSERAPI BOOL WINAPI PeekMessageW (LPMSG, HWND, UINT, UINT, UINT);
+
+#define PostAppMessage __AW_SUFFIXED__(PostAppMessage)
+#define PostAppMessageA(t,m,w,l)  PostThreadMessageA ((DWORD)(t), m, w, l)
+#define PostAppMessageW(t,m,w,l)  PostThreadMessageW ((DWORD)(t), m, w, l)
+
+#define PostMessage __AW_SUFFIXED__(PostMessage)
+WINUSERAPI BOOL WINAPI PostMessageA (HWND, UINT, WPARAM, LPARAM);
+WINUSERAPI BOOL WINAPI PostMessageW (HWND, UINT, WPARAM, LPARAM);
+
+#define PostThreadMessage __AW_SUFFIXED__(PostThreadMessage)
+WINUSERAPI BOOL WINAPI PostThreadMessageA (DWORD, UINT, WPARAM, LPARAM);
+WINUSERAPI BOOL WINAPI PostThreadMessageW (DWORD, UINT, WPARAM, LPARAM);
+
+WINUSERAPI void WINAPI PostQuitMessage (int);
+
+WINUSERAPI BOOL WINAPI PtInRect (LPCRECT, POINT);
+WINUSERAPI BOOL WINAPI RedrawWindow (HWND, LPCRECT, HRGN, UINT);
+WINUSERAPI HWND WINAPI RealChildWindowFromPoint (HWND, POINT);
+
+#define RealGetWindowClass __AW_SUFFIXED__(RealGetWindowClass)
+WINUSERAPI UINT WINAPI RealGetWindowClassA (HWND, LPSTR, UINT);
+WINUSERAPI UINT WINAPI RealGetWindowClassW (HWND, LPWSTR, UINT);
+
+#define RegisterClass __AW_SUFFIXED__(RegisterClass)
+WINUSERAPI ATOM WINAPI RegisterClassA (CONST WNDCLASSA *);
+WINUSERAPI ATOM WINAPI RegisterClassW (CONST WNDCLASSW *);
+
+#define RegisterClassEx __AW_SUFFIXED__(RegisterClassEx)
+WINUSERAPI ATOM WINAPI RegisterClassExA (CONST WNDCLASSEXA *);
+WINUSERAPI ATOM WINAPI RegisterClassExW (CONST WNDCLASSEXW *);
+
+#define RegisterClipboardFormat __AW_SUFFIXED__(RegisterClipboardFormat)
+WINUSERAPI UINT WINAPI RegisterClipboardFormatA (LPCSTR);
+WINUSERAPI UINT WINAPI RegisterClipboardFormatW (LPCWSTR);
+
+WINUSERAPI BOOL WINAPI RegisterHotKey (HWND, int, UINT, UINT);
+
+#define RegisterWindowMessage __AW_SUFFIXED__(RegisterWindowMessage)
+WINUSERAPI UINT WINAPI RegisterWindowMessageA (LPCSTR);
+WINUSERAPI UINT WINAPI RegisterWindowMessageW (LPCWSTR);
+
+WINUSERAPI BOOL WINAPI ReleaseCapture (void);
+WINUSERAPI int WINAPI ReleaseDC (HWND, HDC);
+WINUSERAPI BOOL WINAPI RemoveMenu (HMENU, UINT, UINT);
+
+#define RemoveProp __AW_SUFFIXED__(RemoveProp)
+WINUSERAPI HANDLE WINAPI RemovePropA (HWND, LPCSTR);
+WINUSERAPI HANDLE WINAPI RemovePropW (HWND, LPCWSTR);
+
+WINUSERAPI BOOL WINAPI ReplyMessage (LRESULT);
+WINUSERAPI BOOL WINAPI ScreenToClient (HWND, LPPOINT);
+WINUSERAPI BOOL WINAPI ScrollDC (HDC, int, int, LPCRECT, LPCRECT, HRGN, LPRECT);
+WINUSERAPI BOOL WINAPI ScrollWindow (HWND, int, int, LPCRECT, LPCRECT);
+WINUSERAPI int WINAPI ScrollWindowEx (HWND, int, int, LPCRECT, LPCRECT, HRGN, LPRECT, UINT);
+
+#define SendDlgItemMessage __AW_SUFFIXED__(SendDlgItemMessage)
+WINUSERAPI LONG WINAPI SendDlgItemMessageA (HWND, int, UINT, WPARAM, LPARAM);
+WINUSERAPI LONG WINAPI SendDlgItemMessageW (HWND, int, UINT, WPARAM, LPARAM);
+
+#define SendMessage __AW_SUFFIXED__(SendMessage)
+WINUSERAPI LRESULT WINAPI SendMessageA (HWND, UINT, WPARAM, LPARAM);
+WINUSERAPI LRESULT WINAPI SendMessageW (HWND, UINT, WPARAM, LPARAM);
+
+#define SendMessageCallback __AW_SUFFIXED__(SendMessageCallback)
+WINUSERAPI BOOL WINAPI SendMessageCallbackA (HWND, UINT, WPARAM, LPARAM, SENDASYNCPROC, DWORD);
+WINUSERAPI BOOL WINAPI SendMessageCallbackW (HWND, UINT, WPARAM, LPARAM, SENDASYNCPROC, DWORD);
+
+#define SendMessageTimeout __AW_SUFFIXED__(SendMessageTimeout)
+WINUSERAPI LRESULT WINAPI SendMessageTimeoutA (HWND, UINT, WPARAM, LPARAM, UINT, UINT, PDWORD_PTR);
+WINUSERAPI LRESULT WINAPI SendMessageTimeoutW (HWND, UINT, WPARAM, LPARAM, UINT, UINT, PDWORD_PTR);
+
+#define SendNotifyMessage __AW_SUFFIXED__(SendNotifyMessage)
+WINUSERAPI BOOL WINAPI SendNotifyMessageA (HWND, UINT, WPARAM, LPARAM);
+WINUSERAPI BOOL WINAPI SendNotifyMessageW (HWND, UINT, WPARAM, LPARAM);
+
+WINUSERAPI HWND WINAPI SetActiveWindow (HWND);
+WINUSERAPI HWND WINAPI SetCapture (HWND hWnd);
+WINUSERAPI BOOL WINAPI SetCaretBlinkTime (UINT);
+WINUSERAPI BOOL WINAPI SetCaretPos (int, int);
+
+#define SetClassLong __AW_SUFFIXED__(SetClassLong)
+WINUSERAPI DWORD WINAPI SetClassLongA (HWND, int, LONG);
+WINUSERAPI DWORD WINAPI SetClassLongW (HWND, int, LONG);
+
+#ifdef _WIN64
+#define SetClassLongPtr __AW_SUFFIXED__(SetClassLongPtr)
+WINUSERAPI ULONG_PTR WINAPI SetClassLongPtrA (HWND, int, LONG_PTR);
+WINUSERAPI ULONG_PTR WINAPI SetClassLongPtrW (HWND, int, LONG_PTR);
+#else
+#define SetClassLongPtr   SetClassLong
+#define SetClassLongPtrA  SetClassLongA
+#define SetClassLongPtrW  SetClassLongW
+#endif
+
+WINUSERAPI WORD WINAPI SetClassWord (HWND, int, WORD);
+WINUSERAPI HANDLE WINAPI SetClipboardData (UINT, HANDLE);
+WINUSERAPI HWND WINAPI SetClipboardViewer (HWND);
+WINUSERAPI HCURSOR WINAPI SetCursor (HCURSOR);
+WINUSERAPI BOOL WINAPI SetCursorPos (int, int);
+WINUSERAPI VOID WINAPI SetDebugErrorLevel (DWORD);
+WINUSERAPI BOOL WINAPI SetDlgItemInt (HWND, int, UINT, BOOL);
+
+#define SetDlgItemText __AW_SUFFIXED__(SetDlgItemText)
+WINUSERAPI BOOL WINAPI SetDlgItemTextA (HWND, int, LPCSTR);
+WINUSERAPI BOOL WINAPI SetDlgItemTextW (HWND, int, LPCWSTR);
+
+WINUSERAPI BOOL WINAPI SetDoubleClickTime (UINT);
+WINUSERAPI HWND WINAPI SetFocus (HWND);
+WINUSERAPI BOOL WINAPI SetForegroundWindow (HWND);
+WINUSERAPI BOOL WINAPI SetKeyboardState (PBYTE);
+WINUSERAPI BOOL WINAPI SetMenu (HWND, HMENU);
+WINUSERAPI BOOL WINAPI SetMenuContextHelpId (HMENU, DWORD);
+WINUSERAPI BOOL WINAPI SetMenuDefaultItem (HMENU, UINT, UINT);
+WINUSERAPI BOOL WINAPI SetMenuInfo (HMENU, LPCMENUINFO);
+WINUSERAPI BOOL WINAPI SetMenuItemBitmaps (HMENU, UINT, UINT, HBITMAP, HBITMAP);
+
+#define SetMenuItemInfo __AW_SUFFIXED__(SetMenuItemInfo)
+WINUSERAPI BOOL WINAPI SetMenuItemInfoA (HMENU, UINT, BOOL, LPCMENUITEMINFOA);
+WINUSERAPI BOOL WINAPI SetMenuItemInfoW ( HMENU, UINT, BOOL, LPCMENUITEMINFOW);
+
+WINUSERAPI LPARAM WINAPI SetMessageExtraInfo (LPARAM);
+WINUSERAPI BOOL WINAPI SetMessageQueue (int);
+WINUSERAPI HWND WINAPI SetParent (HWND, HWND);
+WINUSERAPI BOOL WINAPI SetProcessWindowStation (HWINSTA);
+
+#define SetProp __AW_SUFFIXED__(SetProp)
+WINUSERAPI BOOL WINAPI SetPropA (HWND, LPCSTR, HANDLE);
+WINUSERAPI BOOL WINAPI SetPropW (HWND, LPCWSTR, HANDLE);
+
+WINUSERAPI BOOL WINAPI SetRect (LPRECT, int, int, int, int);
+WINUSERAPI BOOL WINAPI SetRectEmpty (LPRECT);
+WINUSERAPI int WINAPI SetScrollInfo (HWND, int, LPCSCROLLINFO, BOOL);
+WINUSERAPI int WINAPI SetScrollPos (HWND, int, int, BOOL);
+WINUSERAPI BOOL WINAPI SetScrollRange (HWND, int, int, int, BOOL);
+WINUSERAPI BOOL WINAPI SetSysColors (int, const INT *, const COLORREF *);
+
+#define SetSysModalWindow(h) (NULL)
+
+WINUSERAPI BOOL WINAPI SetSystemCursor (HCURSOR, DWORD);
+WINUSERAPI BOOL WINAPI SetThreadDesktop (HDESK);
+WINUSERAPI UINT WINAPI SetTimer (HWND, UINT_PTR, UINT, TIMERPROC);
+
+#define SetUserObjectInformation __AW_SUFFIXED__(SetUserObjectInformation)
+WINUSERAPI BOOL WINAPI SetUserObjectInformationA (HANDLE, int, PVOID, DWORD);
+WINUSERAPI BOOL WINAPI SetUserObjectInformationW (HANDLE, int, PVOID, DWORD);
+
+WINUSERAPI BOOL WINAPI SetUserObjectSecurity
+(HANDLE, PSECURITY_INFORMATION, PSECURITY_DESCRIPTOR);
+
+WINUSERAPI BOOL WINAPI SetWindowContextHelpId (HWND, DWORD);
+
+#define SetWindowLong __AW_SUFFIXED__(SetWindowLong)
+WINUSERAPI LONG WINAPI SetWindowLongA (HWND, int, LONG);
+WINUSERAPI LONG WINAPI SetWindowLongW (HWND, int, LONG);
+
+#ifdef _WIN64
+#define SetWindowLongPtr __AW_SUFFIXED__(SetWindowLongPtr)
+WINUSERAPI LONG_PTR WINAPI SetWindowLongPtrA (HWND, int, LONG_PTR);
+WINUSERAPI LONG_PTR WINAPI SetWindowLongPtrW (HWND, int, LONG_PTR);
+#else
+#define SetWindowLongPtr   SetWindowLong
+#define SetWindowLongPtrA  SetWindowLongA
+#define SetWindowLongPtrW  SetWindowLongW
+#endif
+
+WINUSERAPI BOOL WINAPI SetWindowPlacement (HWND hWnd, const WINDOWPLACEMENT *);
+WINUSERAPI BOOL WINAPI SetWindowPos (HWND, HWND, int, int, int, int, UINT);
+WINUSERAPI int WINAPI SetWindowRgn (HWND, HRGN, BOOL);
+
+#define SetWindowsHook __AW_SUFFIXED__(SetWindowsHook)
+WINUSERAPI HHOOK WINAPI SetWindowsHookA (int, HOOKPROC);
+WINUSERAPI HHOOK WINAPI SetWindowsHookW (int, HOOKPROC);
+
+#define SetWindowsHookEx __AW_SUFFIXED__(SetWindowsHookEx)
+WINUSERAPI HHOOK WINAPI SetWindowsHookExA (int, HOOKPROC, HINSTANCE, DWORD);
+WINUSERAPI HHOOK WINAPI SetWindowsHookExW (int, HOOKPROC, HINSTANCE, DWORD);
+
+#define SetWindowText __AW_SUFFIXED__(SetWindowText)
+WINUSERAPI BOOL WINAPI SetWindowTextA (HWND, LPCSTR);
+WINUSERAPI BOOL WINAPI SetWindowTextW (HWND, LPCWSTR);
+
+WINUSERAPI WORD WINAPI SetWindowWord (HWND, int, WORD);
+WINUSERAPI BOOL WINAPI ShowCaret (HWND);
+WINUSERAPI int WINAPI ShowCursor (BOOL);
+WINUSERAPI BOOL WINAPI ShowOwnedPopups (HWND, BOOL);
+WINUSERAPI BOOL WINAPI ShowScrollBar (HWND, int, BOOL);
+WINUSERAPI BOOL WINAPI ShowWindow (HWND, int);
+WINUSERAPI BOOL WINAPI ShowWindowAsync (HWND, int);
+WINUSERAPI BOOL WINAPI SubtractRect (LPRECT, LPCRECT, LPCRECT);
+WINUSERAPI BOOL WINAPI SwapMouseButton (BOOL);
+WINUSERAPI BOOL WINAPI SwitchDesktop (HDESK);
+
+#define SystemParametersInfo __AW_SUFFIXED__(SystemParametersInfo)
+WINUSERAPI BOOL WINAPI SystemParametersInfoA (UINT, UINT, PVOID, UINT);
+WINUSERAPI BOOL WINAPI SystemParametersInfoW (UINT, UINT, PVOID, UINT);
+
+#define TabbedTextOut __AW_SUFFIXED__(TabbedTextOut)
+WINUSERAPI LONG WINAPI TabbedTextOutA (HDC, int, int, LPCSTR, int, int, LPINT, int);
+WINUSERAPI LONG WINAPI TabbedTextOutW (HDC, int, int, LPCWSTR, int, int, LPINT, int);
+
+WINUSERAPI WORD WINAPI TileWindows (HWND, UINT, LPCRECT, UINT, const HWND *);
+WINUSERAPI int WINAPI ToAscii (UINT, UINT, PBYTE, LPWORD, UINT);
+WINUSERAPI int WINAPI ToAsciiEx (UINT, UINT, PBYTE, LPWORD, UINT, HKL);
+WINUSERAPI int WINAPI ToUnicode (UINT, UINT, PBYTE, LPWSTR, int, UINT);
+WINUSERAPI int WINAPI ToUnicodeEx (UINT, UINT, PBYTE, LPWSTR, int, UINT, HKL);
+WINUSERAPI BOOL WINAPI TrackMouseEvent (LPTRACKMOUSEEVENT);
+WINUSERAPI BOOL WINAPI TrackPopupMenu (HMENU, UINT, int, int, int, HWND, LPCRECT);
+WINUSERAPI BOOL WINAPI TrackPopupMenuEx (HMENU, UINT, int, int, HWND, LPTPMPARAMS);
+
+#define TranslateAccelerator __AW_SUFFIXED__(TranslateAccelerator)
+WINUSERAPI int WINAPI TranslateAcceleratorA (HWND, HACCEL, LPMSG);
+WINUSERAPI int WINAPI TranslateAcceleratorW (HWND, HACCEL, LPMSG);
+
+WINUSERAPI BOOL WINAPI TranslateMDISysAccel (HWND, LPMSG);
+WINUSERAPI BOOL WINAPI TranslateMessage (const MSG *);
+WINUSERAPI BOOL WINAPI UnhookWindowsHook (int, HOOKPROC);
+WINUSERAPI BOOL WINAPI UnhookWindowsHookEx (HHOOK);
+
+WINUSERAPI BOOL WINAPI UnionRect (LPRECT, LPCRECT, LPCRECT);
+WINUSERAPI BOOL WINAPI UnloadKeyboardLayout (HKL);
+
+#define UnregisterClass __AW_SUFFIXED__(UnregisterClass)
+WINUSERAPI BOOL WINAPI UnregisterClassA (LPCSTR, HINSTANCE);
+WINUSERAPI BOOL WINAPI UnregisterClassW (LPCWSTR, HINSTANCE);
+
+WINUSERAPI BOOL WINAPI UnregisterHotKey (HWND, int);
+WINUSERAPI BOOL WINAPI UpdateWindow (HWND);
+
+WINUSERAPI BOOL WINAPI ValidateRect (HWND, LPCRECT);
+WINUSERAPI BOOL WINAPI ValidateRgn (HWND, HRGN);
+
+#define VkKeyScan __AW_SUFFIXED__(VkKeyScan)
+WINUSERAPI SHORT WINAPI VkKeyScanA (CHAR);
+WINUSERAPI SHORT WINAPI VkKeyScanW (WCHAR);
+
+#define VkKeyScanEx __AW_SUFFIXED__(VkKeyScanEx)
+WINUSERAPI SHORT WINAPI VkKeyScanExA (CHAR, HKL);
+WINUSERAPI SHORT WINAPI VkKeyScanExW (WCHAR, HKL);
+
+WINUSERAPI DWORD WINAPI WaitForInputIdle (HANDLE, DWORD);
+WINUSERAPI BOOL WINAPI WaitMessage (void);
+WINUSERAPI HWND WINAPI WindowFromDC (HDC hDC);
+WINUSERAPI HWND WINAPI WindowFromPoint (POINT);
+WINUSERAPI UINT WINAPI WinExec (LPCSTR, UINT);
+
+#define WinHelp __AW_SUFFIXED__(WinHelp)
+WINUSERAPI BOOL WINAPI WinHelpA (HWND, LPCSTR, UINT, DWORD);
+WINUSERAPI BOOL WINAPI WinHelpW (HWND, LPCWSTR, UINT, DWORD);
+
+#define wsprintf __AW_SUFFIXED__(wsprintf)
+WINUSERAPI int WINAPIV wsprintfA (LPSTR, LPCSTR,...);
+WINUSERAPI int WINAPIV wsprintfW (LPWSTR, LPCWSTR,...);
+
+#define wvsprintf __AW_SUFFIXED__(wvsprintf)
+WINUSERAPI int WINAPI wvsprintfA (LPSTR, LPCSTR, va_list arglist);
+WINUSERAPI int WINAPI wvsprintfW (LPWSTR, LPCWSTR, va_list arglist);
+
+#if _WIN32_WINNT >= _WIN32_WINNT_NT4
+#define BroadcastSystemMessage __AW_SUFFIXED__(BroadcastSystemMessage)
+WINUSERAPI long WINAPI BroadcastSystemMessageA (DWORD, LPDWORD, UINT, WPARAM, LPARAM);
+WINUSERAPI long WINAPI BroadcastSystemMessageW (DWORD, LPDWORD, UINT, WPARAM, LPARAM);
+
+#if _WIN32_WINNT >= _WIN32_WINNT_NT4SP3
+typedef struct tagMOUSEINPUT
+{ LONG				dx;
+  LONG				dy;
+  DWORD 			mouseData;
+  DWORD 			dwFlags;
+  DWORD 			time;
+  ULONG_PTR			dwExtraInfo;
+} MOUSEINPUT, *PMOUSEINPUT;
+
+typedef struct tagKEYBDINPUT
+{ WORD				wVk;
+  WORD				wScan;
+  DWORD 			dwFlags;
+  DWORD 			time;
+  ULONG_PTR			dwExtraInfo;
+} KEYBDINPUT, *PKEYBDINPUT;
+
+typedef struct tagHARDWAREINPUT
+{ DWORD 			uMsg;
+  WORD				wParamL;
+  WORD				wParamH;
+} HARDWAREINPUT, *PHARDWAREINPUT;
+
+typedef struct tagINPUT
+{ DWORD 			type;
+  _ANONYMOUS_UNION union
+  { MOUSEINPUT			  mi;
+    KEYBDINPUT			  ki;
+    HARDWAREINPUT 		  hi;
+  } DUMMYUNIONNAME;
+} INPUT, *PINPUT, *LPINPUT;
+
+WINUSERAPI UINT WINAPI SendInput (UINT, LPINPUT, int);
+
+#endif	/* WINNT >= WinNT4-SP3 */
+#endif	/* WINNT >= WinNT4 */
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN2K || _WIN32_WINDOWS >= _WIN32_WINDOWS_98
+typedef struct
+{ UINT				cbSize;
+  HWND				hwnd;
+  DWORD 			dwFlags;
+  UINT				uCount;
+  DWORD 			dwTimeout;
+} FLASHWINFO, *PFLASHWINFO;
+
+#define CCHILDREN_TITLEBAR	5
+
+typedef struct tagTITLEBARINFO
+{ DWORD 			cbSize;
+  RECT				rcTitleBar;
+  DWORD 			rgstate[CCHILDREN_TITLEBAR+1];
+} TITLEBARINFO, *PTITLEBARINFO, *LPTITLEBARINFO;
+
+WINUSERAPI BOOL WINAPI GetTitleBarInfo (HWND, PTITLEBARINFO);
+
+WINUSERAPI BOOL WINAPI BlockInput(BOOL);
+WINUSERAPI BOOL WINAPI FlashWindowEx (PFLASHWINFO);
+WINUSERAPI DWORD WINAPI GetClipboardSequenceNumber (void);
+WINUSERAPI DWORD WINAPI InSendMessageEx (LPVOID);
+
+WINUSERAPI HMONITOR WINAPI MonitorFromPoint (POINT, DWORD);
+WINUSERAPI HMONITOR WINAPI MonitorFromRect (LPCRECT, DWORD);
+WINUSERAPI HMONITOR WINAPI MonitorFromWindow (HWND, DWORD);
+
+WINUSERAPI BOOL WINAPI UnregisterDeviceNotification (HANDLE);
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN2K || _WIN32_WINDOWS >= _WIN32_WINDOWS_ME
+typedef struct tagMOUSEMOVEPOINT
+{ int				x;
+  int				y;
+  DWORD 			time;
+  ULONG_PTR			dwExtraInfo;
+} MOUSEMOVEPOINT, *PMOUSEMOVEPOINT, *LPMOUSEMOVEPOINT;
+
+WINUSERAPI BOOL WINAPI AllowSetForegroundWindow (DWORD);
+WINUSERAPI int WINAPI GetMouseMovePointsEx (UINT, LPMOUSEMOVEPOINT, LPMOUSEMOVEPOINT, int, DWORD);
+WINUSERAPI BOOL WINAPI LockSetForegroundWindow (UINT);
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN2K
+typedef struct tagGUITHREADINFO
+{ DWORD 			cbSize;
+  DWORD 			flags;
+  HWND				hwndActive;
+  HWND				hwndFocus;
+  HWND				hwndCapture;
+  HWND				hwndMenuOwner;
+  HWND				hwndMoveSize;
+  HWND				hwndCaret;
+  RECT				rcCaret;
+} GUITHREADINFO, *PGUITHREADINFO, *LPGUITHREADINFO;
+
+typedef VOID (CALLBACK *WINEVENTPROC) (HWINEVENTHOOK, DWORD, HWND, LONG, LONG, DWORD, DWORD);
+
+WINUSERAPI BOOL WINAPI AnimateWindow (HWND, DWORD, DWORD);
+
+WINUSERAPI BOOL WINAPI EndTask (HWND, BOOL, BOOL);
+
+WINUSERAPI DWORD WINAPI GetGuiResources (HANDLE, DWORD);
+WINUSERAPI BOOL WINAPI GetGUIThreadInfo (DWORD, LPGUITHREADINFO);
+WINUSERAPI BOOL WINAPI GetProcessDefaultLayout (DWORD *);
+WINUSERAPI HWND WINAPI GetShellWindow (void);
+
+WINUSERAPI BOOL WINAPI IsHungAppWindow (HWND);
+WINUSERAPI BOOL WINAPI LockWorkStation (void);
+WINUSERAPI void WINAPI NotifyWinEvent (DWORD, HWND, LONG, LONG);
+
+#define RegisterDeviceNotification __AW_SUFFIXED__(RegisterDeviceNotification)
+WINUSERAPI HDEVNOTIFY WINAPI RegisterDeviceNotificationA (HANDLE, LPVOID, DWORD);
+WINUSERAPI HDEVNOTIFY WINAPI RegisterDeviceNotificationW (HANDLE, LPVOID, DWORD);
+
+WINUSERAPI BOOL WINAPI SetLayeredWindowAttributes (HWND, COLORREF, BYTE, DWORD);
+WINUSERAPI BOOL WINAPI SetProcessDefaultLayout (DWORD);
+WINUSERAPI HWINEVENTHOOK WINAPI SetWinEventHook
+(UINT, UINT, HMODULE, WINEVENTPROC, DWORD, DWORD, UINT);
+WINUSERAPI VOID WINAPI SwitchToThisWindow (HWND, BOOL);
+
+WINUSERAPI BOOL WINAPI UnhookWinEvent (HWINEVENTHOOK);
+WINUSERAPI BOOL WINAPI UserHandleGrantAccess (HANDLE, HANDLE, BOOL);
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WINXP
+typedef struct
+{ UINT				cbSize;
+  HDESK 			hdesk;
+  HWND				hwnd;
+  LUID				luid;
+} BSMINFO, *PBSMINFO;
+
+DECLARE_HANDLE(HRAWINPUT);
+
+typedef struct tagRAWINPUTHEADER
+{ DWORD 			dwType;
+  DWORD 			dwSize;
+  HANDLE			hDevice;
+  WPARAM			wParam;
+} RAWINPUTHEADER, *PRAWINPUTHEADER;
+
+typedef struct tagRAWMOUSE
+{ USHORT			usFlags;
+  _ANONYMOUS_UNION union
+  { ULONG 			  ulButtons;
+    _ANONYMOUS_STRUCT struct
+    { USHORT			    usButtonFlags;
+      USHORT			    usButtonData;
+    };
+  };
+  ULONG 			ulRawButtons;
+  LONG				lLastX;
+  LONG				lLastY;
+  ULONG 			ulExtraInformation;
+} RAWMOUSE, *PRAWMOUSE, *LPRAWMOUSE;
+
+typedef struct tagRAWKEYBOARD
+{ USHORT			MakeCode;
+  USHORT			Flags;
+  USHORT			Reserved;
+  USHORT			VKey;
+  UINT				Message;
+  ULONG 			ExtraInformation;
+} RAWKEYBOARD, *PRAWKEYBOARD, *LPRAWKEYBOARD;
+
+typedef struct tagRAWHID
+{ DWORD 			dwSizeHid;
+  DWORD 			dwCount;
+  BYTE				bRawData;
+} RAWHID, *PRAWHID, *LPRAWHID;
+
+typedef struct tagRAWINPUT
+{ RAWINPUTHEADER		header;
+  union
+  { RAWMOUSE			  mouse;
+    RAWKEYBOARD 		  keyboard;
+    RAWHID			  hid;
+  }				data;
+} RAWINPUT, *PRAWINPUT, *LPRAWINPUT;
+
+typedef struct tagRAWINPUTDEVICE
+{ USHORT			usUsagePage;
+  USHORT			usUsage;
+  DWORD 			dwFlags;
+  HWND				hwndTarget;
+} RAWINPUTDEVICE, *PRAWINPUTDEVICE, *LPRAWINPUTDEVICE;
+
+typedef const RAWINPUTDEVICE *PCRAWINPUTDEVICE;
+
+typedef struct tagRAWINPUTDEVICELIST
+{ HANDLE			hDevice;
+  DWORD 			dwType;
+} RAWINPUTDEVICELIST, *PRAWINPUTDEVICELIST;
+
+typedef struct tagRID_DEVICE_INFO_MOUSE
+{ DWORD 			dwId;
+  DWORD 			dwNumberOfButtons;
+  DWORD 			dwSampleRate;
+  BOOL				fHasHorizontalWheel;
+} RID_DEVICE_INFO_MOUSE, *PRID_DEVICE_INFO_MOUSE;
+
+typedef struct tagRID_DEVICE_INFO_KEYBOARD
+{ DWORD 			dwType;
+  DWORD 			dwSubType;
+  DWORD 			dwKeyboardMode;
+  DWORD 			dwNumberOfFunctionKeys;
+  DWORD 			dwNumberOfIndicators;
+  DWORD 			dwNumberOfKeysTotal;
+} RID_DEVICE_INFO_KEYBOARD, *PRID_DEVICE_INFO_KEYBOARD;
+
+typedef struct tagRID_DEVICE_INFO_HID
+{ DWORD 			dwVendorId;
+  DWORD 			dwProductId;
+  DWORD 			dwVersionNumber;
+  USHORT			usUsagePage;
+  USHORT			usUsage;
+} RID_DEVICE_INFO_HID, *PRID_DEVICE_INFO_HID;
+
+typedef struct tagRID_DEVICE_INFO
+{ DWORD 			cbSize;
+  DWORD 			dwType;
+  _ANONYMOUS_UNION union
+  { RID_DEVICE_INFO_MOUSE 	  mouse;
+    RID_DEVICE_INFO_KEYBOARD 	  keyboard;
+    RID_DEVICE_INFO_HID 	  hid;
+  } DUMMYUNIONNAME;
+} RID_DEVICE_INFO, *PRID_DEVICE_INFO, *LPRID_DEVICE_INFO;
+
+#define BroadcastSystemMessageEx __AW_SUFFIXED__(BroadcastSystemMessageEx)
+WINUSERAPI long WINAPI BroadcastSystemMessageExA (DWORD, LPDWORD, UINT, WPARAM, LPARAM, PBSMINFO);
+WINUSERAPI long WINAPI BroadcastSystemMessageExW (DWORD, LPDWORD, UINT, WPARAM, LPARAM, PBSMINFO);
+
+WINUSERAPI LRESULT WINAPI DefRawInputProc (PRAWINPUT *, INT, UINT);
+
+WINUSERAPI BOOL WINAPI GetLayeredWindowAttributes (HWND, COLORREF *, BYTE *, DWORD *);
+WINUSERAPI UINT WINAPI GetRawInputBuffer (PRAWINPUT, PUINT, UINT);
+WINUSERAPI UINT WINAPI GetRawInputData (HRAWINPUT, UINT, LPVOID, PUINT, UINT);
+
+#define GetRawInputDeviceInfo __AW_SUFFIXED__(GetRawInputDeviceInfo)
+WINUSERAPI UINT WINAPI GetRawInputDeviceInfoA (HANDLE, UINT, LPVOID, PUINT);
+WINUSERAPI UINT WINAPI GetRawInputDeviceInfoW (HANDLE, UINT, LPVOID, PUINT);
+
+WINUSERAPI UINT WINAPI GetRawInputDeviceList (PRAWINPUTDEVICELIST, PUINT, UINT);
+WINUSERAPI UINT WINAPI GetRegisteredRawInputDevices (PRAWINPUTDEVICE, PUINT, UINT);
+
+WINUSERAPI BOOL WINAPI IsGUIThread (BOOL);
+WINUSERAPI BOOL WINAPI IsWinEventHookInstalled (DWORD);
+WINUSERAPI BOOL WINAPI PrintWindow (HWND, HDC, UINT);
+WINUSERAPI BOOL WINAPI RegisterRawInputDevices (PCRAWINPUTDEVICE, UINT, UINT);
+
+#if _WIN32_WINNT >= _WIN32_WINNT_VISTA
+typedef HANDLE HPOWERNOTIFY;
+
+typedef struct
+{ GUID				PowerSetting;
+  DWORD 			DataLength;
+  UCHAR 			Data[1];
+} POWERBROADCAST_SETTING, *PPOWERBROADCAST_SETTING;
+
+extern const GUID GUID_POWERSCHEME_PERSONALITY;
+extern const GUID GUID_MIN_POWER_SAVINGS;
+extern const GUID GUID_MAX_POWER_SAVINGS;
+extern const GUID GUID_TYPICAL_POWER_SAVINGS;
+extern const GUID GUID_ACDC_POWER_SOURCE;
+extern const GUID GUID_BATTERY_PERCENTAGE_REMAINING;
+extern const GUID GUID_IDLE_BACKGROUND_TASK;
+extern const GUID GUID_SYSTEM_AWAYMODE;
+extern const GUID GUID_MONITOR_POWER_ON;
+
+WINUSERAPI HPOWERNOTIFY WINAPI RegisterPowerSettingNotification (HANDLE, LPCGUID, DWORD);
+WINUSERAPI BOOL WINAPI UnregisterPowerSettingNotification (HPOWERNOTIFY);
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN7
+typedef struct _TOUCHINPUT
+{ LONG				x;
+  LONG				y;
+  HANDLE			hSource;
+  DWORD 			dwID;
+  DWORD 			dwFlags;
+  DWORD 			dwMask;
+  DWORD 			dwTime;
+  ULONG_PTR			dwExtraInfo;
+  DWORD 			cxContact;
+  DWORD 			cyContact;
+} TOUCHINPUT, *PTOUCHINPUT;
+
+BOOL WINAPI CloseTouchInputHandle (HANDLE hTouchInput);
+BOOL WINAPI GetTouchInputInfo (HANDLE hTouchInput, UINT cInputs, PTOUCHINPUT pInputs, int cbSize);
+BOOL WINAPI IsTouchWindow (HWND hWnd, PULONG pulFlags);
+BOOL WINAPI RegisterTouchWindow (HWND hWnd, ULONG ulFlags);
+BOOL WINAPI UnregisterTouchWindow (HWND hWnd);
+
+#endif	/* WINNT >= Win7 */
+#endif	/* WINNT >= Vista */
+#endif	/* WINNT >= WinXP */
+#endif	/* WINNT >= Win2K */
+#endif	/* WINNT >= Win2K || WINDOWS >= WinME */
+#endif	/* WINNT >= Win2K || WINDOWS >= Win98 */
+
+#ifndef NOGDI
+/* The user may exercise the option to exclude the typedefs and function
+ * prototypes in this section, by defining the NOGDI feature test macro,
+ * BEFORE including any Windows header file.
+ */
+typedef struct tagICONMETRICSA
+{ UINT				cbSize;
+  int				iHorzSpacing;
+  int				iVertSpacing;
+  int				iTitleWrap;
+  LOGFONTA			lfFont;
+} ICONMETRICSA, *LPICONMETRICSA;
+
+typedef struct tagICONMETRICSW
+{ UINT				cbSize;
+  int				iHorzSpacing;
+  int				iVertSpacing;
+  int				iTitleWrap;
+  LOGFONTW			lfFont;
+} ICONMETRICSW, *LPICONMETRICSW;
+
+typedef __AW_SUFFIXED__(ICONMETRICS) ICONMETRICS, *LPICONMETRICS;
+
+typedef struct tagNONCLIENTMETRICSA
+{ UINT				cbSize;
+  int				iBorderWidth;
+  int				iScrollWidth;
+  int				iScrollHeight;
+  int				iCaptionWidth;
+  int				iCaptionHeight;
+  LOGFONTA			lfCaptionFont;
+  int				iSmCaptionWidth;
+  int				iSmCaptionHeight;
+  LOGFONTA			lfSmCaptionFont;
+  int				iMenuWidth;
+  int				iMenuHeight;
+  LOGFONTA			lfMenuFont;
+  LOGFONTA			lfStatusFont;
+  LOGFONTA			lfMessageFont;
+} NONCLIENTMETRICSA, *LPNONCLIENTMETRICSA;
+
+typedef struct tagNONCLIENTMETRICSW
+{ UINT				cbSize;
+  int				iBorderWidth;
+  int				iScrollWidth;
+  int				iScrollHeight;
+  int				iCaptionWidth;
+  int				iCaptionHeight;
+  LOGFONTW			lfCaptionFont;
+  int				iSmCaptionWidth;
+  int				iSmCaptionHeight;
+  LOGFONTW			lfSmCaptionFont;
+  int				iMenuWidth;
+  int				iMenuHeight;
+  LOGFONTW			lfMenuFont;
+  LOGFONTW			lfStatusFont;
+  LOGFONTW			lfMessageFont;
+} NONCLIENTMETRICSW, *LPNONCLIENTMETRICSW;
+
+typedef __AW_SUFFIXED__(NONCLIENTMETRICS) NONCLIENTMETRICS, *LPNONCLIENTMETRICS;
+
+#define ChangeDisplaySettings __AW_SUFFIXED__(ChangeDisplaySettings)
+WINUSERAPI LONG WINAPI ChangeDisplaySettingsA (PDEVMODEA, DWORD);
+WINUSERAPI LONG WINAPI ChangeDisplaySettingsW (PDEVMODEW, DWORD);
+
+#define ChangeDisplaySettingsEx __AW_SUFFIXED__(ChangeDisplaySettingsEx)
+WINUSERAPI LONG WINAPI ChangeDisplaySettingsExA (LPCSTR, LPDEVMODEA, HWND, DWORD, LPVOID);
+WINUSERAPI LONG WINAPI ChangeDisplaySettingsExW (LPCWSTR, LPDEVMODEW, HWND, DWORD, LPVOID);
+
+#define CreateDesktop __AW_SUFFIXED__(CreateDesktop)
+WINUSERAPI HDESK WINAPI CreateDesktopA
+(LPCSTR, LPCSTR, LPDEVMODEA, DWORD, ACCESS_MASK, LPSECURITY_ATTRIBUTES);
+WINUSERAPI HDESK WINAPI CreateDesktopW
+(LPCWSTR, LPCWSTR, LPDEVMODEW, DWORD, ACCESS_MASK, LPSECURITY_ATTRIBUTES);
+
+#define EnumDisplayDevices __AW_SUFFIXED__(EnumDisplayDevices)
+WINUSERAPI BOOL WINAPI EnumDisplayDevicesA (LPCSTR, DWORD, PDISPLAY_DEVICEA, DWORD);
+WINUSERAPI BOOL WINAPI EnumDisplayDevicesW (LPCWSTR, DWORD, PDISPLAY_DEVICEW, DWORD);
+
+#define EnumDisplaySettings __AW_SUFFIXED__(EnumDisplaySettings)
+WINUSERAPI BOOL WINAPI EnumDisplaySettingsA (LPCSTR, DWORD, PDEVMODEA);
+WINUSERAPI BOOL WINAPI EnumDisplaySettingsW (LPCWSTR, DWORD, PDEVMODEW);
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN2K || _WIN32_WINDOWS >= _WIN32_WINDOWS_98
+WINUSERAPI BOOL WINAPI EnumDisplaySettingsExA (LPCSTR, DWORD, LPDEVMODEA, DWORD);
+WINUSERAPI BOOL WINAPI EnumDisplaySettingsExW (LPCWSTR, DWORD, LPDEVMODEW, DWORD);
+#define EnumDisplaySettingsEx __AW_SUFFIXED__(EnumDisplaySettingsEx)
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN2K
+WINUSERAPI BOOL WINAPI UpdateLayeredWindow
+(HWND, HDC, POINT *, SIZE *, HDC, POINT *, COLORREF, BLENDFUNCTION *, DWORD);
+
+#endif	/* WINNT >= Win2K */
+#endif	/* WINNT >= Win2K || WINDOWS >= Win98 */
+#endif	/* ! NOGDI */
+
+#endif	/* RC_INVOKED */
+
+_END_C_DECLS
+
+/* End selective inclusion on behalf of <winuser.h>, when done with
+ * inclusion of <winuser.h> itself.
+ */
+#undef __WINUSER_H_SOURCED__
+#endif	/* !_WINUSER_H: $RCSfile: winuser.h,v $: end of file */
+                                                                                   MZ       ÿÿ  ¸       @                                   €   º ´	Í!¸LÍ!This program cannot be run in DOS mode.
+$       PE  L 4ÀÏK        à 8    J   
+            @                     €    (;                                 p                                                                                                                    .text   Hÿ                        P`.data   ¸<     >                @ `À.data_cy    P     B             @ 0À.bss    t   `                     € @À.idata      p  
+   D             @ 0À                                                                                                                                                                                                                                                                                                                                                                                                                                                                U‰åƒì¡ `B …ÀtÌÙ}þ·MþáÀðÿÿf‰Mþ·UþÊ?  f‰UþÙmþÇ$`3@ èÒò ÉÃU‰åWVSìœ   ‹M ¶]‹} ‹Q‹M ‹G‹}ˆ]ó‹] ‰Uì‹Q‹3‰Eè‹]‹E‰uä‹u‹M‰Uà)ø)Þ‰uØ‹U‹u‰EÜ‹})Î‰uÔ)×‰ó‰}Ð‰uÌ‰uÈ‰}Ä‹M‰}À‹EÄÇE¼   ‹}ì)Ã‰·€ã‹uÄˆ]»‹U‹Eè‹]Ì‰°vÁà‰…tÿÿÿ[‰ÁÁâ÷Ù‰Ó‰xÿÿÿ÷Ûx‰}ˆqz‰u„s‰}€‰µ|ÿÿÿ‰pÿÿÿ‰•lÿÿÿëÆEº ‹uÜ9uÌŽÜ   ÿMÌºÿÿÿÿ‹Eì‹}Ì‰T¸ü‹MØ9MÈ¨   ÿEÈ¸ÿÿÿÿ‹]ìƒ…lÿÿÿ‹uÈƒ­pÿÿÿ‰D³‹]È‹}Ì9ûë>‰È)øƒø~ÆEºöE»‹}ì•À‰Ÿ1Ò9]ÄžÂ…Ât;]À‹Eè9˜Ž¿  ƒë;]Ì|\‹uì‹Lž‹Tžü‰Ï9Ê|z‰þ‰ù)Þ;MœÀ1Ò;uœÂ…Ât”‹Uà‹²‹Uä9Šu†AFëÜÿMÈƒ­lÿÿÿƒ…pÿÿÿébÿÿÿÿEÌé.ÿÿÿ‹MÜ9MÄŽÿ   ÿMÄ¿ÿÿÿ‹uè‹UÄ‰|–ü‹EØ9EÀË   ÿEÀ¾ÿÿÿ‹]èƒ…tÿÿÿ‹MÀƒ­xÿÿÿ‰t‹‹]À‹UÄ9Óë>)Îƒþ~ÆEºöE»‹uè”À‰ž1Ò9]ÌžÂ…Ât;]È‹Eì9˜ô  v ƒë;]Ä|@‹Mè‹|™ü‹T™‰þ9×|rÿ‰÷‰ñ)ß9MœÀ1Ò9}œÂ…Ât”‹Uà‹Dºü‹Uä9DŠüu„IOëÚ€}ó t9ÿE¼ƒ…|ÿÿÿƒE€ƒE„ƒEˆéþÿÿÿMÀƒ­tÿÿÿƒ…xÿÿÿé?ÿÿÿÿEÄéÿÿÿ}¼È   Žî  €}º „ä  ‹} € „×  ÇE´    ‹MÈ‹UÌ9ÑŒí   ‹µpÿÿÿ‹E€‹lÿÿÿ‹½|ÿÿÿÆ‰uŒû‹uÔ‰Ê‹}ì)ò‹4‹}‰ð)È‰E°‰ð)ø< )×…Òˆå  9ûƒ   ;}´~~‹UƒÂ9òžÂ1À;uœÀ…Ðtg‹U‹EƒÂ;U°žÂ9E°œÀ¶À…ÐtKÇE¬   ‹Eà‹U°‹Tü‹Eä9T°üu1‹Eà‹U°Tü‰U‹EäT°üƒ}¬„r  ƒmƒêÿE¬‹E‹ 9tãƒEŒƒéƒë;MÌ:ÿÿÿ‹M´…ÉT  1ÿ‹uÄ‰½hÿÿÿ‹}À9÷Œ¿   ‹tÿÿÿ‹M„‹•xÿÿÿ‹EˆËÂ‰U”ëj9Ë}W;hÿÿÿŸÀ1Ò9uœÂ…ÂtB‹U‹E¨ƒê9òÂ9EœÀ¶À…Ðt'‹Eƒè;E¨|ÇE¤    ‹Eà‹U¨‹‹Eä9°„D  ƒE”ƒïƒë;}Ä|,‹uÐ‰ú‹Eè)ò‹4¸‹E‰ñ)ù)ð‰M¨…ÒB‰rÿÿÿ9M”élÿÿÿ‹hÿÿÿ…Û\  ‹M ‹u¼9q½ýÿÿ‹UÈ¾ÿÿÿÿ;UÌ|n‹Eì‹;M~‹M‰È)Ð9E}‹M‹EÑ9ð~‰M ‰ÆƒêëË‹]‰‰sÆC	ÆCÄœ   [^_]Ã9}Œéþÿÿ‹]‰‰{ÆC	ÆCÄœ   [^_]Ã‹UÀ»ÿÿÿ;UÄ|0‹}è‹—;M}‹M‰È)Ð;E}‹M‹EÑ9Ø}‰Mœ‰ÃƒêëË‹M‹E‹}‹UÈ‰ñ×)Ø)ù9È}a‹E ‹])Æ‰‰sÆCÆC	 éaÿÿÿ‹Eà‹U¨‰U˜‹Eä°ëƒE˜ƒÂÿE¤‹E˜‹ 9…‘þÿÿƒ}¤uã‰hÿÿÿ‹U¨‹M‰1‰Qéuþÿÿ‹uœ‹})ó‰7‰_ÆG ÆG	é ÿÿÿ‹}ÆG ÆG	éðþÿÿ‰}´‹U‹E°‰2‰BéŽýÿÿ‹]ÆCÆC	 éÍþÿÿëU‰åWVSƒìh‹U¶M‹]‹;]‹uˆM×‹}‰EÐ‹MœÀ1Ò‹I9þœÂ…Â‰MÄt6‹UÐ‹±9šu+v ¼'    CF;]œÁ1À9þœÀ…Èt‹MÄ‹±‹UÐ9štß;]œÀ1Ò9þœÂ…Ât.‹MÄ‹E‹UÐ‹L¹ü9L‚üuÿMO;]œÀ1Ò9þœÂ…ÂuØ¶    ;]tC9þuGët& ‹gB ‹=gB ‹4šCÆ7;]|ç1ÒƒÄh‰Ð[^_]Ã¡ gB ‹¨gB ‹°FÆ9þ|éëÛf¶U×MØ‰|$‹E‰L$‰t$‰D$‹E‰T$‰$‰D$èCøÿÿ¶Uà‰t$‹M‰$‹EÜ‰L$‹MØ‰T$‰D$‰L$èªþÿÿ„Àº   …xÿÿÿ¶Uá‰|$‹M‹}Ü‹u‹]Ø‰T$‰L$‰|$‰t$‰$èqþÿÿ„Àº   …?ÿÿÿé8ÿÿÿëU‰åWVSƒì\‹U‹Z\‹‚ì   ØÁà»   ‰$èIƒ  ‰Â1É‹u‹|1\‰T1xÁçú‰T1|úÁ   Kyá‹žŒ   }èÁã‰$è~  ‰Eè‰Ã‹†Œ   ‹V\ƒ‰Mì1Éƒú ~‹U‹rt‹ŽA‹Eÿ“‹P\9Êï‹]1É‹ƒì   ƒø ~&‹›  ‹W¶    ‹‹A‹uÿ‚‹†ì   9Èì‹V\4ƒÇ‰4$è‹}  ‰Eà‹]ÇEÄ    ‰}¬‹K\ÇEÈ    È‰Eä‹]‹UÈ‹EÄ‹u¬‹L\‹|…à‹‹tt»   ‰EØ‰ÈÁè‰}ÜëÛÁèuù1Ò9Êsv ‹–…À…•  B9ÊrðÿEÄEÈ   ƒm¬ƒ}Ä~ ÇEÀ    ‹MƒÁ\‰MÌ‹uÌ1ÿ‹]À‹‹Là9×‰UÔ   v ¶9<„t  „À„|   1Û;}Ô‰ú}v ¶„Àt<”À¶ÀBÃ;UÔ|è9ú~€|ÿuJK9úÆ
+ ïv ‰Ö    )þ9ðŽ-  ¶    ¼'    9ú~J€<
+uõÆ 9úñ¶    ¼'    G;}ÔŒfÿÿÿÿEÀEÌ   ƒ}ÀŽ6ÿÿÿÇE°    1Û‹M‹u°‹|\‹Tµà1ö1É‰}¬9þ‰UÐ}B¶    ¼'    €=´dB  u‹EÐ€< …ª  ‹}‹D;t‹T;x‹ˆ‰²‹T;|‰²AF;M¬|ËÿE°‹M‰´€   Ã   ƒ}°~‰‹uà‰4$èGè ‹]è‰$è<è ƒÄ\[^_]Ãt& ‹}Ø‹‡…Àu‹EÜÆBéUþÿÿ9Ø†Lþÿÿ‹}ÜÆBé@þÿÿt& Æ9 G;}Ôéÿÿÿv ‰ðº   Áøë	t& ÒÁø…À÷1ÀB1Û‰U¼9ð}{ë¶    1Û@9ð}€<uóC;]¼„ð   9]¼}æÆ @9ð|âÇE¸    1Ò9ò}>ëÇE¸    B9ò}-ƒú~€<t"¶<„   „ÀtÙÿE¸ƒ}¸u×‰ö¼'    ÇE´    1Û|>ÿ9óKþÿÿ‰úë´&    ÇE´    CJ9ó/þÿÿƒû~
+€<
+„ þÿÿ¶
+<t„ÀtÔÿE´ƒ}´uÒG;}ÔéþÿÿfÇE´    Æ
+ ëºv ‹U‹¼„   ÆA;M¬é\þÿÿÇE¸    Æ é7ÿÿÿ)ØéôþÿÿfU‰åWVSƒì0‹EÇEð    ÇEØ      ‰EÜ‹EÜ‹]Ø‹}‹‹EØ‹L;t‰UÄ‹´;„   ‹T8\‰Mì1Û1É‰Uè;Mè}€< u‹}Ä‰ÚC€<: uôA;Mè|è;Mè„
+  ‰ÊA€<1 uù‹EÄ€< ë‹}ÄC€< uö‰È)Ð…Ò‰EätM‹Eì‹}ì‹Dˆü9D—üu=´&    JIÆ2Æ1 ët& J€|ÿ uø‹}ÄK€<; uö…Òt‹}ì‹Eì‹|ü9|ütÊ‰Mà‹EÄ€|ÿ u‹}è‰}à´&    ;MètK‹}ì‹Eì‹<9<u=Æ2 BÆ1t& A€< uù‹EÄC€< tÏ‰Mà¶    ¿    ‹}ÄC€<; uö;Mèu¶‰È)Ð;Eä…1ÿÿÿ9MàæþÿÿJIÆ2Æ1 ‹}ÄK€<; uöëáÿEðEØ   mÜ   ƒ}ðŽ‹þÿÿƒÄ0[^_]ÃU‰åWVSì¬   ‹E¶deB ‰$‰T$è¾Y  „À„³  ‹U‹Š¬   9J„‘  ‹
+…Éˆe  ‹Zã ð  û €  „P  ‹E‹   1À9Ñ„Ü   ‹]¿þÿÿ‰|$‹³È   ‰t$‹K8¾   ‰$è\|  ‰D$ºþÿÿ‰T$Ç$   èC|  ‰E°‹]‹U°‰T$‹CH‰$èë|  ‰CHÃ   Nyâë/ü‰ò‹vH‹ºØ   9Û‰Ùó¦u^;]°…\  ‹]1À‰ƒà   ÇCP    1Û¾   ‹E‹…Éx‹M‹E°‹|P‰$)ø‰D$èbG  Ã   NyÒ‹u‹^P;žà   tŽ¸   …À‰Ãt@‹¤dB …Ò„:  ¡¨dB …À„8  ‰D$‰T$Ç$$B èg  €=dfB  „  t& ‰pÿÿÿ‹]‹SH‹ƒØ   9Ât‰$èbã ‹ƒØ   ‰$èTã ‹…pÿÿÿÄ¬   [^_]Ã‹}‹‹—   é‡þÿÿ‹]‹s\‹»ì   ÷ƒÇ‰<$èzv  ‰E¤@‹S\‰ƒ„   ‹E¤ÐƒÀ‰ƒ  ‰$è÷÷ÿÿ‹Kx‹»€   ‹“  ‰MÈ‹³  úZÝ    ‰uÌ‰$è8{  ‹M<˜‹‘  ¶äeB Áât‰uÐD…Û‰EÔ¸   ˆMØëÀÁûuù=   Œ  ‰EÜ»   ‰\$‹]Ç$”fB ‰ßÇ   ‰\$èOâ ‰|$º   1ÿ‰T$Ç$$gB è4â ¶´dB EÈ‰D$‰L$‹³  ‰|$‰t$‹“€   Ç$    ‰T$è^õÿÿ‹ƒ  ‹MÐÁà)Áƒé‰$èõá ‰$è=ûÿÿƒ=4fB „#  ÇE€    ‹U‹}‹E‹]‹²„   ‹W\‹¸ì   ‹‹  ‰µ|ÿÿÿ…ú‰xÿÿÿ‰•tÿÿÿˆ±   ´&    ¼'    ‹•tÿÿÿ‹µ|ÿÿÿ‹xÿÿÿ¶Dÿ¶T;ÿˆÁÑtn‹tÿÿÿ‰û„Àëfÿtÿÿÿ‹µ|ÿÿÿ‹…tÿÿÿ€|ÿ uç„Òëv ‹•xÿÿÿO€|:ÿ uòÇ$   ‹…tÿÿÿ‰Î)û)ÆèŠy  ‰x‹M€‹•tÿÿÿ‰X‰p‰P‰‰E€ÿtÿÿÿO…½tÿÿÿ‰]ÿÿÿ‹u€€=DeB  ‰u´u‹=¤eB …ÿ„D  ‹}´1Û‰pÿÿÿ…ÿë]‰<$èm  MÄ‰û‹8Ç     U¼‰Æ‰L$EÀM¸‰D$‰T$‰L$‰$èxp  …Àt»   ‰pÿÿÿ‰>…ÿ•À1Òƒ½pÿÿÿ ”Â…Âu¢€=dfB  „#  ‹pÿÿÿ…Ût<‹¤dB …Ò„ª  ¡¨dB …À„  ‰D$‰T$Ç$$B èŒc  €=dfB  „°  ‰pÿÿÿ‹E¾   ‹Xx‰$èöß ‹}¤‰<$èëß ‹]‹Ct‰$èÝß ‹{X‹STÃ   º‰$èÆß NyÛ‹E´ë‹0‰$è´ß ‰ð…Àuð‹4fB ƒëƒû‡"üÿÿ‹]1ö€»ˆ    …±  FÃ   ƒþ~çéÿûÿÿ»   éïûÿÿ¸   éßüÿÿ‹]‹“   …Òˆ‰ûÿÿ‹³    æ ð  þ €  …úÿÿ¸   élûÿÿ€=fB  t‹pÿÿÿ…Û„ÿÿÿ‹u‹Ž   …É•Â¶Â‰D$¡¨dB …Àu	‹}‹‡”   ‰D$¡¤dB …Àu‹]‹C‰$è9d  ¡4fB ƒø‡v  ÿ$…`B 1Àé÷úÿÿÇE     ‹»„   ‹K\ÇEŒ    ‹ƒ  ‹³ì   ‰}œ1ÿ9Ï‰E˜œÀ9÷‰M”œÂ	Ð‰u¨„—   ‹Uœ‹uŒ‹M˜¶2¶9ˆÃÓtc‰uˆ„À‰}„ë´&    ÿEŒ‹uœ‹EŒ€< uñ„Òë‹]˜G€<; uöÇ$   ‹]ˆ‹uŒ‹E„)Þ‰û)Ãèˆv  ‰X‹Mˆ‹U„‰p‰H‹M ‰P‰E ‰ÿEŒG‹u”9uŒœÀ;}œÂ	Ð¨…iÿÿÿ‹u éïüÿÿÇ$<B è}Ø ‰D$‹µ¤dB …Àu‹C‰D$ºVB 1ÿ‰T$‰|$Ç$    è,s  ¹   ‰pÿÿÿéþÿÿ1Éƒ}´ •Á‰pÿÿÿéýÿÿ‹}‹Wé»ùÿÿ‹u‹†”   éºùÿÿ»   éFýÿÿèHÝ ‹u´‰4$èW  èpe  é2ýÿÿ‹M´‰$èP7  è[e  éýÿÿ‹E´‰$èË5  èFe  éýÿÿ‹]´‰$è†4  è1e  éóüÿÿ‹}´‰<$è±2  èe  éÞüÿÿ‹M´¾   ‰t$‰$èÓ  èþd  éÀüÿÿ‹E´1Ò‰T$‰$è¸  ëã‹U´‰$èÛT  èÖd  é˜üÿÿ‹}‹‡”   écüÿÿ‹u‹VéKüÿÿU‰åƒìh‰]ô‹E‹]‰uø…À‰}ü‹ut+‰t$»„B ‰\$‰D$¡´gB ‰$è× ‹]ô‹uø‹}ü‰ì]ÃS(‰$èFÜ …À„ƒ   ‰D$1ÿ1Ò‰|$¿+   ‰T$‹´eB ‰|$}¸‰L$‰<$èv …Àu‹S(1É¸‹B ‰L$‰D$‰T$‰<$èŽÖ ‰|$‹{»”B ‰\$‰|$‰t$‹5´gB ‰4$èpÖ ‹]ô‹uø‹}ü‰ì]Ã}¸ëª´&    ¼'    U‰åSƒì‹]€} t@‰\$‹¤dB Ç$žB ‰L$èæþÿÿÇ$¢B ‹¨dB ƒ   ‰D$‰T$èÆþÿÿƒÄ[]Ã‰\$‹¤dB Ç$¦B ‰L$è¦þÿÿÇ$žB ‹¨dB ƒ   ‰D$‰T$è†þÿÿƒÄ[]ÃU‰åSƒì‹]¶E€=DeB  ˆEûu
+‹¤eB …ÒtL‰$è´	  ¡ gB ¹ÿÿÿ‰`B ÷Ø€}û £`B ¸@-@ u¸)@ ‰$ºÀ1@ ‰D$‰T$èg  ƒÄ[]Ãf‰Ø…ÛëÆ@ ‹ …Àuöëª´&    ¼'    U‰åMèWUäVuðSƒì<]ì‰t$‹E‰\$‰L$‰T$‰$è0j  ‰EÐ…À„U  ‹ gB ‹uä‹ÔdB ÷Ú)Î9ÖŒB  ‰uä‹Eì)È9Ð}‰Ð‰Eì‹ôfB ‹Uè‰ß)Ï9×ŽR  
+‰Eè‹„gB ‹Uð‰Ø)È9ÐŽ  
+‹eB 1Û‰Eð…Ò…  èN_  Ç$ªB ‹=´gB ¸   ‰D$¾   ‰t$‰|$èžÙ …Û„x   ‰|$Ç$    èŽÙ 1Ò€;
+tH´&    Bƒú'€<
+uô…Ò~1¶Dÿ‹ÈqB öDt´&    ¼'    J…Ò~¶DÿöDuï‰T$º   ‰|$‰T$‰$èÙ ‰|$º   »   ‰T$uÜ‰\$Ç$ºB èùØ ‰t$‹MèEà‰D$‹]äÇ$”fB ‰L$‰\$èh  ‹Eà‹UÜ9Ð$  ‰D$‹´gB ¾ÀB ‰t$‰$ècÓ ‰|$¹   »   ‰L$‰\$Ç$ÄB è‰Ø öEÐtv‹uä‹];uèk…Ût,¶    ¿    ‹C‹SÐ9ð‹…Ûuî´&    ¼'    …ÛºËB t9s‹KºÍB …ÉŽØ  f‰$‹èfB ±‰D$FèÊd  ;uè~•‰|$¹   ¾   ‰t$‰L$Ç$ÏB èë× Ç$$gB ‹]ðEØ‰D$‹uìUÔ‰T$‰\$‰t$èûf  ‹EØ‹UÔ9Ð6  ‰D$‹´gB ºÀB ‰T$‰$èRÒ ‰|$¾   ¿   ‰t$‰|$Ç$ÔB èx× öEÐ„†   ‹uì‹];uð{t& ¼'    …Ût,¶    ¿    ‹C‹SÐ9ð‹…Ûuî´&    ¼'    …ÛºËB t9s‹KºÍB …ÉŽ®   f‰$¡xgB <°‰|$Fè«c  ;uð~–¶    ƒÄ<[^_]Ã‰Öé·üÿÿ‹eB Cÿ1Û‰Eð…Ò„øüÿÿ‰t$‹èfB ‰$èé  ‰ÃéßüÿÿCÿé©üÿÿ‰D$¡´gB ‰T$ºÛB ‰T$‰$è<Ñ éÔýÿÿ‰D$¡´gB ¹ÛB ‰T$‰L$‰$èÑ éÂþÿÿºãB éJÿÿÿºåB é þÿÿU‰åMìWUèEäVSƒìL]ð‰\$‹}‰L$‰T$‰D$‰<$è f  …À„£  ‹ gB ‹uä‹ÔdB ÷Ú)Î9ÖŒ  ‰uä‹Eì)È9Ð}‰Ð‰Eì‹ôfB ‹Uè‰Ø)È9ÐŽ   
+‰Eè‹„gB ‹Uð‰Ø)È9ÐŽV  
+‹eB 1Û‰Eð…Ò…V  è![  Ç$çB ‹´gB ¹   ‰L$¸   uà‰D$‰UÈ‰T$èkÕ ‰t$‹EèUÜ‰T$‹MäÇ$”fB ‰D$‰L$è~d  ‹Eà‹UÜ9Ð:  ‰D$Œ  ¸ÀB ‰D$‹5´gB ‰4$èÏÏ Ç$ìB ‹MÈº   ‰T$¾   ‰t$‰L$èòÔ Ç$$gB ‹UìEØ‰D$‹uðMÔ‰L$‰T$‰t$èd  ‹EØ‹UÔ9Ð—  ‰D$ƒ  ¸ïB ‰D$¡´gB ‰$èTÏ Ç$õB ‹UÈ¸   ‰D$¹   ‰L$‰T$èwÔ …ÛtiÇ$    ‹uÈ‰t$èhÔ 1Ò€;
+t3Bƒú'€<
+uô…Ò~#¶Dÿ‹ÈqB öDtJ…Ò~¶DÿöDuï‰T$‹EÈ¹   ‰L$‰$‰D$è
+Ô Ç$
+   ‹]È‰\$èÿÓ ‰}Ì‹uä‹Eì;uè‰EÐ«  v ¼'    ‹}Ì…ÿt‹UÌ9rŽ­   ‹èfB ±F€=ägB  t‹€8
+t€=ÄeB ‹UÈÿ‰T$ƒçƒÇ	‰<$è•Ó ‰\$Ç$    è5`  ÿEÐ;uè~‹EÐ;Eð~•ƒÄL[^_]Ã‰Öéiýÿÿ‹eB Cÿ1Û‰Eð…Ò„ªýÿÿ‰t$‹5èfB ‰4$èn  ‰Ãé‘ýÿÿCÿé[ýÿÿ¸ïB éôýÿÿt& ‹MÌ‹YëYÇ$-   ‹èfB ‹EÈ<²F‰D$èûÒ €=ÄeB  t#€=ägB  t‹€9
+tÇ$	   ‹EÈ‰D$èÏÒ ‰|$Ç$    èo_  Kƒûÿu¡‹}Ì‹_ë_Ç$+   ‹MÐ¡xgB ‹UÈ<ˆA‰MÐ‰T$èŽÒ €=ÄeB  t#€=ägB  t‹€:
+tÇ$	   ‹MÈ‰L$èbÒ ‰|$Ç$    è_  Kƒûÿuœ‹}Ì‹‰]Ìé½þÿÿ;EðéÀþÿÿ¸ÀB éxýÿÿ‰T$)Ð‹´gB @¾ÛB ‰D$‰t$‰$è»Ì ébýÿÿ‰T$)Ð‹´gB @‰D$¸ÛB ‰D$‰$è”Ì éÀüÿÿëU‰åWVSƒì¡ÔdB ‹UL =ÿÿÿ?‰Eä‰Mè~ÇEèÿÿÿ‹Z‹J‰Ø‹r‰×‹Z‹ðÙ€ ‰Mðu…ÒtC€z t=¶    ¼'    ‹Mä‰Mì…Òt‹Z‹J‰Þ)Æ‰È+Eð9Æu;uì|®ƒÄ‰ø[^_]Ãt& ‹MèëÎèÑ ¶    U‰åWVSƒì,‹u…ötG}ä¶    ¼'    ‹MðÇ    Uì‰4$Eè‰L$‰T$‰D$‰|$èÇ`  ‰…À”F…Û‰ÞuÉƒÄ,[^_]ÃU‰åWVSƒì‹E‹`B ‹}Xÿ‰Uð9Ó£`B |G¶    ¿    ‹4Ÿ‰ð÷ÐDŸxI‰D$1Ò1É‰T$‰L$‰D$‰t$Ç$ôdB è_Ó  …Ày(K;]ð}Å‹`B 1Àúÿÿÿt‹—ƒÄ[^_]Ã¸ÿÿÿë°‰`B ƒÄ‰ð[^_]ÃU¸   ‰åWVSìŒ   ƒäðèWÌ è"Ð ÇEè    ‹Eº   ÇEä    »÷B ¾ÿÿÿÿ‰B ‹8ÇEà    ÇEÜÿÿÿÿÆEÛ ÇEÔ    ÆEÓ ‰=”dB ‰\$Ç$    èÑ Ç$øB ¹B ‰L$èZÊ Ç$øB èVÊ Ç$    èz‰ ºôdB ¸”eB ‰H`B £h`B Ç$ èY|  èt} £ÄgB ë1Ûº B ¹ B ‰\$‰T$‰L$‹}‰|$‹E‰$è&‡ ƒøÿ‰Ã„  û–   w7ÿ$B Ç$   è€  ƒ=ÔdB ¹   ‰ÔdB ¶    ¿    ‰ÞëŒÇ$    1Û‰\$èú  ¸
+   uì‰D$‰t$‹DhB ‰$èœ† ‹}ì‰Ñ‰Â€? …—  ¡TfB ‰Ç‰ÆÁÿƒù ‰Ð‰Ê†  ¸ÿÿÿ1Ò9×wr9Æs‰Æ‰5TfB ‰ÞéÿÿÿèN  èù  eô1À[^_]Ã¹B ‰L$¡DhB ‰D$Eè‰$è  ‰ÞéÛþÿÿÆx`B Ç$   èÐÏ …À…0ÿÿÿÇ$   ¾   ‰t$‰Þè©Ï é¤þÿÿÇ$   èh  ‰Þé‘þÿÿ€=TeB Àƒàð  ‰D$‹=DhB ‰|$‹5ÄgB ‰4$‰Þè’~ é]þÿÿ¹   ‰Þ‰ôeB éKþÿÿ1Ò¸ B ¿*B ‰T$$¹;B ºGB ‰D$ ¾QB ¸]B ‰|$»kB ¿xB ‰D$‰L$‰T$‰|$‰t$‰\$‹5ŒdB ‹^‰$èL„ è×  eô1À[^_]ÃÆÔgB ‰ÞéÏýÿÿÆ¨`B ‰ÞéÁýÿÿÆ(`B ‰Þé³ýÿÿÆdfB ‰Þé¥ýÿÿÆEÓ¸}B ‰D$Ç$8`B è|  ‰Þé…ýÿÿÇ$   èI  éÜþÿÿ€=„2B  „ 
+  ÆädB 1À‰Þ‰D$Ç$   è\Î éGýÿÿÆ„eB ‰Þé9ýÿÿÇ$   èý  éþÿÿÇ$   èì  éþÿÿÆ´dB ‰Þé	ýÿÿÆTeB ‰ÞéûüÿÿÆDeB ‰ÞéíüÿÿNÐƒù	‡À  }ÜÌÌÌ‹UÜ’|CÐ‰}Ü…ÿ‰3ýÿÿÇEÜÿÿÿ‰ÞéµüÿÿÇ$   ë“   ès      Œ’@B ‰L$teB ‹5DhB ‰$‰t$éýÿÿÇ$   ë   <[è2  ýÀB „fB ‰T$‹DhB ‰$‰L$éWýÿÿ¸ŒB ‰D$‹5DhB Eä‰$‰t$é9ýÿÿ¸
+   uì‰t$‰D$‹=DhB ‰<$èBƒ ‰Æ‰ÑƒÀÿƒÑÿ‰×ƒù ‡ë  ƒøþ‡â  ‹Uì€: …Ö  ¡eB 1Ò‰Ñ1ù1ð	Á„3üÿÿ‹=eB …ÿ…R	  ‰5eB ‰Þé¨ûÿÿÆÔeB ‰ÞéšûÿÿÆägB ‰ÞéŒûÿÿÆDfB ‰Þé~ûÿÿÇ$   ‰Þè@  ÆfB édûÿÿÇ$   è(  é»üÿÿÆTeB  ‰ÞéEûÿÿÇ$   ¿„fB ¾   èÿ  º–B ‰T$‹DhB ‰<$ƒÇ‰L$èA  Nyß‰ÞéûÿÿÆ$eB ‰ÞéùúÿÿÇ$   é8ûÿÿƒ=ôeB ‡Pûÿÿ¹   ‰Þ‰ôeB éÎúÿÿÆ$fB ‰ÞéÀúÿÿ€=TeB ¿
+   ‰|$öƒæðÆ  ‰t$‹DhB ‰L$‹ÄgB Ç$p´A ‰T$èq{ …À„éúÿÿ‹DhB ‰$è›L  ¾
+   Mì‰t$‰L$¡DhB ‰$èŽ ‰ÆƒÀÿ‰×ƒÒÿƒú ‡O  ƒøþ‡F  ‹Uì€: …:  ‹EÔ1Ò‰Ñ1ù1ð	Á„ƒúÿÿ‹}Ô…ÿ…±  ‰uÔ‰Þéþùÿÿ‹DhB 1ÿ¾   …Ò…å  1ÉƒûU”ÁƒÁ‰$è¦  ¡ÔdB ™9úwr9ðs‰5ÔdB ÆEÛ‰ÞéµùÿÿÆÄeB ‰Þé§ùÿÿº¤B ‰T$¡DhB Ç$4eB ‰D$è¹
+  é¢úÿÿÆ˜`B ‰ÞévùÿÿÆˆ`B ‰Þéhùÿÿ‹¤dB …Ò„&  ‹5¨dB …ö…  ‹=DhB ‰Þ‰=¨dB é9ùÿÿ‹=DhB Ç$X`B ‰|$è  é’ûÿÿÆäeB ‰Þéùÿÿ¡DhB éjûÿÿ‹ôeB …É…hùÿÿ¾   ‰5ôeB ‰ÞéæøÿÿÇ$   èª
+  ‹=DhB ‰<$1ÿèêÉ 4Å    )ÆƒÆa‰4$èf`  ‰Æ¡DhB 1É‰|$1Ò¿   ‰D$,‰D$(‰D$$‰D$‰D$‰D$‰D$¸€B ‰L$ ‰T$‰D$‰4$èeÂ ÇE´teB ‰t$º§B ‰T$‹E´‰$è~	  ‰4$èfÉ ƒE´Ot0yÕ‰Þé4øÿÿ‹DhB ‰Þ‰¤dB é!øÿÿsÐ‰uÜ‰Þéøÿÿ=ÿÿÿ†ÝøÿÿéÑøÿÿ‰$¿
+   uì‰|$‰t$è, ‰Æ‹Eì‰×€8 …c  ƒú wþÿÿÿ†âýÿÿ¾ÿÿÿ1ÿéÖýÿÿ¡4fB …Àu&€}Ó „  Ç$   èp	  ‹uÜ…öˆ¿  ¡4fB ƒø„r  ¸ªB £´eB ‹}Ü…ÿˆ   ‹4fB ƒéƒù‡  ‹ÔdB ‹EÜ‰M¸9Á|
+9È}€}Û u‹UÜ‰ÔdB ‰U¸¡eB …Àu¿   ‰=eB ‹MÔ…ÉuÇEÔ‚   1ÿ€=ÔgB  ¾   u‹5eB 1ÿÇEÌ    ‹UÔ‰ñ‰û‰UÈ‹EÈ‹UÌðúƒÀƒÒ É¤ó‰\$‰L$‰$‰T$èõÀ ‰E ‹] ‰U¤÷æ¯ß‰×‰EÀ‹U¤ß‹EÈ¯Ö‹uÀ×ƒÆý‰}Ä‹}Ä‹UÌƒ×ÿ+EÀUÄ9×|Ô  9Æ‡Ì  ‰ø™‰÷‰Ó÷Ó‹UÀ‰ØÁø!Ç‰=tfB …ÿu‹UÈ‰ÄdB ‹U¸9TfB }‰TfB Ç$8`B è8  Ç$X`B è,  ¡4fB ƒø„Û  ¶ÔeB ƒø²„È  ˆfB ¶dfB 1À‹X`B ¶x`B ¶5„eB ¶=DfB !Ñ¶DeB 	ò	ú…Û…  ‹ôeB …Û…  	Â‹5B ¿   ÷Ò…Ñ‹M•deB N1ÛƒÁ9ó‰M¼}‹U¼‹šC‰$èè~ |89ó|é‰<$1Ûè&]  9ó‰Ç}Æ  P‹M¼‹™C‰$‰D$è7 9ó|ãÆ  ‰=ôgB ‹Uè…Ò„™   ‹}ä…ÿ…õ  ¡B ;E|=è5I  è  ‹Uà‰$èÆ Ç$   è¹q „À…zýÿÿ¸¿B éuýÿÿ´&    ‹Uè‹]‹4ƒ‰T$Ç$    ‰t$è#  9Eà}‰Eà¡B @;E£B |Ëë¸   éðþÿÿ‰Æ‰×é+þÿÿ‹Uä…Ò„  ¡B ;Ecÿÿÿë‹Uä‰T$‹U‹‚Ç$    ‰D$è¾  9Eà}‰Eà¡B @;E£B |Ëé'ÿÿÿ‹5ÔdB ‰u¸é	ýÿÿ1À‹4…„fB …öu¹ÎB ‰…„fB @ƒøvã‹xeB …É…Ü   ‹€eB …Ò‰Ðu¸ÒB £xeB ‰Á¡|eB …Àu…Ò‰Ðu¸ÕB £|eB ‹=teB …ÿu»ØB ‰teB …Ò„™   ¡teB 1Û€8 tü¹   ¿ØB ‰Æó¦u¡„fB €8 u³ˆÚéŒýÿÿÇ$   è\  éòûÿÿ‹B ‹E)Ðƒø„Ô   H9  ‹M‹u‹|ŽüÇ$ÛB ‰|$èÒ  ‹ÔdB ‰]¸é
+üÿÿ…É•Âé.ýÿÿ‹€eB é1ÿÿÿ‰D$º÷B ‰T$‰$è:U  £€eB ¡4fB ƒø…éüÿÿé:ÿÿÿ‹DhB Ç$öB ‰\$èl  ‹=DhB Ç$B ‰|$èV  ¸   £ÔdB é2ûÿÿÇ$ B 1Û‰\$è5  ‹DhB Ç$FB ‰\$è  ‹u‹L–‰L$‹<–Ç$    ‰|$èÑ  ‰EàéOýÿÿ‹DhB Ç$bB ‰\$èã  Ç$~B èÇD  Ç$šB è»D  Ç$´B è¯D  Ç$ÐB è£D  ‹E‹\Ç$ùB ‰\$èœ  ¶    ¿    U‰åƒì(‰uø‹M‹u‰}ü‰]ô‰$èÃ ‰Ç‹F‰|$‰D$‹U‰$è«m  …Àt7‰D$¾hB 1Û‹}‰t$‰\$‰|$Ç$    èV  ‹]ô‹uø‹}ü‰ì]Ãt& ‹‹F…Û•Eï¶Mï‰Eð‹Uð¶ÁˆN‹NBø9Á‰Fw2…Éu¹   ¶    ¼'    	9Â‰Ñv÷‰V‰$‰T$è(Y  ‰‰Ã€}ï t‹uðÆ\ÆD|ƒÆ‰uð‹MðW‰T$<‹]‰<$‰\$è@À ‹]ô‹uø‹}ü‰ì]Ãv U‰åƒì(‰uü‹u‰]ø‹…Àu‹]ø‹uü‰ì]Ã‹^Ç$   èX  €~ ‰CtÝ‹F‰D$‹N‰L$‹‰$è€l  …ÀtÁ‰D$»hB ‹‰\$1ö‰t$‰T$Ç$   èWU  ëšt& U‰åƒì‹E…Àt%‰$è[º ‰D$‹U1À‰D$‰T$Ç$    èU  Ç$pB è2º ‰D$‹”dB 1É‰L$Ç$   ‰T$èòT  èU¿ ¶    ¼'    U‰åƒì¡ŒdB ‹@ö@@u‰$èÜÀ …ÀuÉÃÇ$–B èRB  Ç$£B èÆ¹ ‰$èþA  ´&    ¼'    U‰åW¿`-B VSƒìÇ$L.B è–¹ ‰$‹”dB ‰T$è¬¹ ¡`-B …Àt2t& ¼'    €8 u*‹ŒdB ƒÇ‹AÇ$
+   ‰D$è¯¾ ‹…ÀuÙƒÄ[^_]Ã‰$è9¹ ‰Æë!t& ‰t$‰Ú)òÇ$i.B Bs‰T$è<¹ ‰4$»
+   ‰\$èó¿ …À‰ÃuÍ‰t$¶€ú •Á€ú-•À¶ð!ÎƒÇöÆp.B ‰4$èú¸ ‹ë´&    ¼'    U‰åƒì(‰uü‹u‰]ø‹]‹…Àt‰\$‰$è¤¿ …Àu‰‹]ø‹uü‰ì]ÃÇ$x.B è€¸ ‰\$‹]1É‰L$‰D$‰\$Ç$    è?S  Ç$pB èS¸ ‰D$‹”dB 1À‰D$‰T$Ç$   èS  èv½ ´&    ¼'    U‰åƒì‹U¡4fB 9Ðt
+…Àu‰4fB ÉÃÇ$œ.B èö· ‰D$1Ò1À‰T$‰D$Ç$    èºR  Ç$pB èÎ· ‰D$‹”dB 1Ò‰T$Ç$   ‰L$èŽR  èñ¼ ‰ö¼'    U1Ò‰åW1ÿVSìœ  ‹u‰½¨þÿÿ‹]…ö„ß  1À…Û”À	Ât€=ˆ`B  „û  1Ò¾   ¸þÿÿ‰t$‰T$‰$è÷½ ƒ}‹U‹EÿƒÏþƒû‰EØöƒÎþ‰½¸þÿÿ…Ò‰µHÿÿÿ„ï  …Û„ß  ‹}…ÿ„Æ  ‹M‰L$‹E‹x‰<$èáO  ‰…¼þÿÿ‰…¤þÿÿ‰\$‹u‹ž”   ‰$èÀO  ‰… þÿÿ‰…Lÿÿÿ1ö1ÛUè‰µ¬þÿÿ‰ˆþÿÿ‰•„þÿÿ‹•ˆþÿÿƒ¼*¸þÿÿÿtk‹½¬þÿÿ…ÿ„}  ‹¼þÿÿ‰L$‹„*¼þÿÿ‰$è|½ …À…\  ü‹½„þÿÿ¹   ‹¸þÿÿµÀþÿÿ‹•ˆþÿÿï(  ó¥‰œ*¸þÿÿëÿ…¬þÿÿ…„þÿÿ   …ˆþÿÿ   ƒ½¬þÿÿŽ^ÿÿÿ¶˜`B 1ÉµHÿÿÿ€=ˆ`B  ˆþÿÿ]è„´   ‹ƒÐþÿÿƒøþtJƒøû”À1Òƒ} ”Â…Âtƒ>þu¿ÿÿÿÿ‰»Ðþÿÿ¶    AÃ   î   ƒùœ   ‹ƒÐþÿÿƒøþu¶‹“àþÿÿ‰Ð% ð  = €  uËâÿ  uÃ‹»ìþÿÿ…ÿë¦‹U1À…Ò„  ‹M‹\‰T$Ç$½.B ‰\$è>  Äœ  ¸   [^_]Ã…Éu€½þÿÿ …C  ëAÃ   î   ƒù~ÎµXÿÿÿ»   UèƒºÐþÿÿÿ„ƒ  Â   î   Kyäuè¿   ºýÿÿÿ‰Ó+žÐþÿÿx è˜» ‰‹ŽÔþÿÿ»   ‰$è³<  ‰¨þÿÿÆ   OyÈ‹µ¨þÿÿ…ö”À1Òƒ} ”Â…Ât7‹Èþÿÿ‹½Xÿÿÿá ð  ù @  ”Ãç ð  ÿ @  ‰Ù”Àƒá8Ø…U  ‹•¨þÿÿ…Ò…w  ‹½¸þÿÿ‰½þÿÿG„Ó  ƒ½þÿÿÿÆ…—þÿÿ tƒ½Hÿÿÿÿt‹…Tÿÿÿ9…Äþÿÿ„…  ‹Èþÿÿ1Ò‹Xÿÿÿ‰Ïç ð  ‰Þÿ @  ”Âæ ð  1Àþ @  ”À…Â„_  ƒ=4fB „H  ‹M…Ét€=(`B  „Ã  ¸F@ ½¸þÿÿ‰D$‰<$èW  ‰…¨þÿÿ‹¨þÿÿ…É…³  €=¨`B  „¿  ‹µÈþÿÿæ ð  þ @  „§  ¡¨dB …Àu‹…Lÿÿÿ‰D$¡¤dB …Àu‹…¼þÿÿ‰D$Ç$Ð.B èÜ;  ép  ´&    ü‹…ˆþÿÿ¹   ¿ï.B ‹œ(¼þÿÿ‰Þó¦…Ò  1Û€=x`B  ‹•ˆþÿÿ‰œ*¸þÿÿ…r  ‹ˆþÿÿÇ$    ´Àþÿÿ‰t$è¹ …À…-  ‹ˆþÿÿ]èË‹³àþÿÿæ ð  þ €  „W  …°þÿÿ‰$èe ‹•°þÿÿ‹ˆþÿÿ‰”+àþÿÿé4üÿÿt& 	Âu‹U…Ò„é  ÿ €  „Ñ  ƒ½þÿÿÿ„C  ƒ½Hÿÿÿÿ„6  Pÿÿÿ‰$è}a ‰Æ…Àþÿÿ‰$èma ‰t$‹¨dB …Òu‹•Lÿÿÿ‰D$¡¤dB ‰T$…Àu‹…¼þÿÿ‰D$Ç$ô.B èÂ:  ¸   ‰…¨þÿÿ´&    ‹ŒdB ‹C‰$èg¸ …À…(  ‹½¤þÿÿ…ÿt‹•¤þÿÿ‰$èß¶ ‹ þÿÿ…Ét‹µ þÿÿ‰4$èÇ¶ ‹…¨þÿÿÄœ  [^_]Ã¶    ü¹   ºØþÿÿ1Àó«‹‰Šàþÿÿé`üÿÿv ‰Lÿÿÿ‹E1Ò‰•¤þÿÿ1É‰ þÿÿ‰…¼þÿÿéXúÿÿ‹µˆþÿÿ‰$¼5Àþÿÿ‰|$èÓ· …À„ËúÿÿèÖ· ‹¿ýÿÿÿ‹„þÿÿ)×‰¹Ðþÿÿé¬úÿÿ‹ƒÐþÿÿƒøþ„«   ƒøû”À1Òƒ} ”Â…Â„¦ûÿÿƒ>þ…ûÿÿ¸ÿÿÿÿ‰ƒÐþÿÿéûÿÿ€=˜`B  …ùÿÿº   é
+ùÿÿ¶    è[· ‹8»ýÿÿÿ‹•ˆþÿÿ)û‰œ*¸þÿÿé0úÿÿÇ$    èl· …À…zýÿÿÇ$    ¿   ‰|$èG· é`ýÿÿ‹]éùÿÿ‰]é	ùÿÿ‹“àþÿÿ‰×ç ð  ÿ €  …øúÿÿâÿ  …ìúÿÿƒ»ìþÿÿ é=ÿÿÿ¿   Í    )ÏÈÿÁâ‰•œþÿÿÁà¼*¸þÿÿ‹´(¼þÿÿ‹_‰4$èØ_ ‰D$‰$èœH  ‰Gü¹   ‰…¤þÿÿ¿ï.B ó¦„2  ‹œþÿÿŒÀþÿÿ‰L$‹µ¤þÿÿ‰4$èA¶ …À„$ûÿÿ‹…¤þÿÿ‰$èk7  ¸   é„ýÿÿƒ½Hÿÿÿÿ… ûÿÿéÌûÿÿ‰Ú¸   é×ùÿÿÇ$    1Ò¸   ‰T$‰D$èðµ …À‰ÂˆS  ‹àþÿÿ‹A)Ðˆ8  ‰Aéküÿÿá ð  ù @  ”Àã ð  û @  ”Á	È¨„B  €=(`B  „5  €=ˆ`B  …  €=˜`B  „  ƒ½þÿÿÿ„÷   1À‹M‹U‹|‰T$Ç$½.B ‰|$è97  é¢üÿÿþ €  …#üÿÿ€=deB  tá ð  ù €  „   €=x`B Û÷Óã   ƒ½þÿÿþ„=  ƒ½Hÿÿÿþ„…  ‹…¨þÿÿ…À„^  ‹…¸þÿÿ…Àx‰$èÂ´ …À…  ‹…Hÿÿÿ…Àˆkúÿÿ9…¸þÿÿ„_úÿÿ‰$è˜´ …À„Oúÿÿ‹…Lÿÿÿébþÿÿ1À‰Aé1ûÿÿè–´ ‹¾ýÿÿÿ)Î‰³Ðþÿÿéûÿÿ»F@ µ¸þÿÿ‰\$‰4$éÿùÿÿƒ½þÿÿÿ¸   …àþÿÿéÝþÿÿ‹µPÿÿÿf9µÀþÿÿ…hùÿÿ‹Xÿÿÿ9Èþÿÿ…Vùÿÿ‹\ÿÿÿ9Ìþÿÿ…Dùÿÿ‹•`ÿÿÿf9•Ðþÿÿ…1ùÿÿ‹½dÿÿÿ9½Ôþÿÿ…ùÿÿ‹…pÿÿÿ9…àþÿÿ…ùÿÿ‹µxÿÿÿ9µèþÿÿ…ûøÿÿ€=fB  Æ…—þÿÿ…mùÿÿéâøÿÿ‹•Lÿÿÿ‰T$‹¼þÿÿÇ$/B ‰\$è{5  éCùÿÿ¸þÿÿ‰$èèÌÿÿ‰…¨þÿÿé‰þÿÿ€½—þÿÿ „â   ‹¸þÿÿ‰Hÿÿÿé]þÿÿÇ$£B ès¬ ‰$è«4  ‹•¼þÿÿ¿   ‰$èh4  ‰½¨þÿÿéSþÿÿã ð  û €  …îýÿÿ‹½dÿÿÿ9½Ôþÿÿ„Üýÿÿ¡¨dB …Àu‹…Lÿÿÿ‰D$¡¤dB …Àu‹…¼þÿÿ‰D$Ç$>/B è·4  é úÿÿ‰\$1É‰L$‹•¼þÿÿ‰$è¢² ‰…¸þÿÿ…À‰ýÿÿ‹…¼þÿÿ¾   ‰$èÉ3  ‰µ¨þÿÿéýÿÿ‰\$1Ò‰T$‹½Lÿÿÿ‰<$è^² ‰…Hÿÿÿ…À‰fýÿÿ‹µLÿÿÿ‰4$èŠ3  ¹   ‰¨þÿÿéVýÿÿÇ$X/B èÞ3  Ç$„/B èÒ3  U‰åWVSƒì,‹EÇEð    ‹UÇEì    ƒ8ÿÇB    ÇB    „x  ‹@‰$è² ‰Eä1Ò…À„<  ÇEè    ¿   Ç$   è¬H  ‰Eì‹M‰Aè¾± Ç     ‹]ä‰$è5² …À„×   X‰Ù‹1ƒÁ–ÿþþþ÷Ö!ò‰Ð%€€€€tèâ€€  uÁèƒÁ ÀƒÙ)ÙA‰Mà€;.u¶C„ÀtŸ<.„2  ‰\$‹ÄgB ‰$è˜_ „Àu‹uè‹EàÆë)ÿþÿÿ?‡  ?‰Ç‰D$‹Uì‰$è*H  ‰Eì‹M‰A9þwÓ‹Mì‹Eè‹Uà‰\$Á‰T$‰$èR¯ ÿEð‰uèèç° Ç     ‹]ä‰$è^± …À…)ÿÿÿèÉ° ‹8…ÿt%è¾° ‹Mä‹0‰$è1± è¬° ‰01ÒƒÄ,‰Ð[^_]Ã‹Uä‰$è± 1Ò…Àuå}ðýÿÿwk‹uðµ   ‰$1ÛèPG  ‹}ð‰Æ‹E9û‰p‰8ë‹}ì‰<žC‰<$è ° ;]ð‹UìL‰Mìrâ‹Eðº   Ç†    ƒÄ,‰Ð[^_]Ã€{ „[þÿÿé¿þÿÿètk t& U‰åƒì(‰uø‹u‰}ü‹}‰]ô€=¸`B  u9€=TeB  u‰u‹]ô‹uø‰}‹}ü‰ì]éú¯ f‰u‹]ô‹uø‰}‹}ü‰ì]é1° è´¯ €=TeB  Ç     u(‰t$‰<$è	° ‰Ãè’¯ ‹ …Àu(‰Ø‹uø‹]ô‹}ü‰ì]Ã‰t$‰<$èé¯ ‰Ãèj¯ ‹ …ÀtØÇ$À/B èx¨ ‰ÃèQ¯ ‰\$»   ‰t$‰|$‹Ç$    ‰T$è.C  ‰\$Ç$È`B è†¯ ´&    ¼'    U‰åWVSƒìL‹EÇEÄ    ƒ8ÿtx‰$1Ò‰T$èº  „Àuf‹]}È¾   ‰|$‰$èŸüÿÿ„À„·   ƒÇÃ   Nyà‹]Ä…Û„Ñ   ]È¾   ‹C…À…±   ‹C…À…™   ƒÃNyä‹EÄƒÄL[^_]Ã‹Uƒº   ÿt‰$¸   ‰D$è3  „À„uÿÿÿ‹M»è/B ‹Uƒ9ÿ•À¶øO1Éç   ‹t:‰\$‰L$‰t$Ç$    è"B  ƒÄL¸   [^_]Ãt& ‹S‰$è5/  ÇEÄ   é2ÿÿÿ‰$èa¬ éZÿÿÿ‰$èT¬ éBÿÿÿÆ¸`B ‹}Ì‹uØ‰}¸‰u¼Ç$È`B è ® …ÀtÆ¸`B  1ÛuÈº   ¿ÀX@ ‰|$‰T$‹ƒÆ‰L$‹D¸C‰$èà­ ƒû~Ó‹4eB …Ût‹E‹°   …ö„Ë   ´&    ‹U¸‹
+…Ét`´&    ‹E¸¹   ‹0…öt‹}¼¹ÿÿÿÿ‹…ÒuZ1À…Éx‹}¼‹ƒÇ‰}¼‰Ð‰D$1À…É~.‰D$‹E‰$ÿU‹uÄ9Æ}£‰EÄ‹U¸‹
+…Éu§‹]¼‹;…ÿužé9þÿÿ‹]¸‹ƒÃ‰]¸‰ÈëÃ‹E¼‹0‰t$‹]¸‹‰$è´üÿÿ‰ÁëŒ¡4eB ‰D$‹u¸‹‰$èšüÿÿ…Ày=‹M¸ƒÁ‰M¸‹}¸‹…ÒuÔë)f¡4eB ‰D$‹u¼‹‰$èjüÿÿ…À‰ÿÿÿ‹M¼ƒÁ‰M¼‹}¼‹…ÒuÐéûþÿÿt& ¼'    U‰å‹E‹U‹‰M‹‰E]é'üÿÿ´&    U‰åWVS‹M‹E‹‘   …Òt:ÀÁã<‹wë
+‹’   …Òt"9quî·Gf9Auä[¸   ^_]Ã¶    [1À^_]ÃU¹pY@ ‰åƒìºð@ ‹E‰L$‰T$‰$è6  ÉÃt& ¼'    U‰åEøSMðƒì4‰D$]ôUì‰\$‰L$‰T$‹E‰$èÒ9  …À‰ÃuƒÄ4[]Ã¶    è[/  ‹Eðº”fB ‰D$‹Mì‰T$Ç$,   ‰L$è9  ¾‹ 3B ¡´gB ‰$‰D$è¸« Ç$
+   ‹´gB ‰T$è¢« Kt›ÆEë‹]ô;]øŽ”   Ç$0B ¡´gB º   ‰T$»   ‰\$‰D$èH© ƒÄ4[]ÃÇ$0B ¡´gB ¹   ‰L$º   ‰T$‰D$è© ÆEëë‹xgB ‹š€8.u€x
+t0Ç$0B š‰L$è™5  C;]ø€}ë uÍë‘€}ë „åþÿÿéUÿÿÿÇ$0B ¡´gB ¹   ‰L$º   ‰T$‰D$è¨ ÆEë ë¶ëU¹0[@ ‰åƒìºà@ ‹E‰L$‰T$‰$èÝ4  ÉÃt& ¼'    U‰åEøSMðƒì$‰D$]ôUì‰\$‰L$‰T$‹E‰$è8  …À‰ÃuƒÄ$[]Ã¶    è›-  ¾‹ 3B ¡´gB ‰$‰D$èª ‹Uð¹”fB ‰T$‹Eì‰L$Ç$    ‰D$è@7  Ç$
+   ‹´gB ‰T$èâ© Kt›‹]ô;]ø.ëÇ$0B ‹xgB ™‰T$CèF4  ;]ø~áÇ$0B ‹´gB ¸   ‰D$»   ‰\$‰T$èa§ ƒÄ$[]Ãv U¹`\@ ‰åƒìºà@ ‹E‰L$‰T$‰$è­3  ÉÃt& ¼'    U‰åEøSMðƒì4‰D$]ôUì‰\$‰L$‰T$‹E‰$èâ6  …À‰ÃuƒÄ4[]Ã¶    èk,  UèEä‰T$‰D$‹Mð‰L$‹UìÇ$”fB ‰T$èó5  öÃt3‹Uä¹   ‹Eè9Â)ÐH‰L$‹´gB ¸0B ‰T$‰D$‰$è;¡ öÃtŠEàMÜ‰D$‰L$‹Uø‰T$‹]ôÇ$$gB ‰\$èŽ5  ‹UÜ¹   ‹Eà9Â~T‰L$‹´gB º%0B ‹Mè‰T$‰$‰L$èÝ  ‹]ô;]ø%ÿÿÿÇ$0B ‹xgB š‰D$Cè¶2  ;]ø~áƒÄ4[]Ã)ÐHë¥U¸0^@ ‰åƒì¹à@ ‹ gB ‰D$‰L$÷Ú‰¨aB ‰˜aB ‹U‰$è)2  ¡˜aB 9ôfB ‹¨aB 9„gB ~9è+  ‹„gB ¡¨aB ‹ôfB ‰T$‹˜aB ‰D$¡teB ‰L$‰T$‰$èÕ   ÉÃv U‰åMìVUèuôSƒì0]ð‰t$‰\$‰L$‰T$‹E‰$è5  …À‰ÆuƒÄ0[^]Ãt& è›*  ‹˜aB ‹]è9Ú}d¡¨aB ‹Mð‰D$¡teB ‰L$‰\$‰T$‰$èY   ‹]è‹Mð‹UìB‰˜aB ‹Eô‰T$‹µteB @‰\$‰D$‰L$‰$£¨aB è!   ƒÄ0[^]Ã¡¨aB ‹Mð9È}»ë–¶    ¿    U‰åƒì8ÇEØ”fB ‹U‹EÇEä$gB ‹M‰UÜ‹U‰EàEØ‰Uì‹U‰D$¡´gB ‰Mè1É‰L$‰T$‰$è   ÉÃU‰åWVSƒìL‹}¶]¶8Út7„Òt3t& G€ú%‰þt0‹u…öt‹M¾Â‰$‰L$èÿ£ ¶8ØˆÂt„ÀuÒƒÄL‰ø[^_]Ã¶GˆÂ¾Àƒè%ƒøwÿ$…40B ‹M1Ò1À‰T$‰D$‰L$Oþ‹}‰L$‰<$èk  …À‰Çu¦²%‰÷ë‡‹EƒÀ‰D$¡ŒfB ‰D$‹U‰$è!  ë€‹u‹„fB ‹U‰t$‰L$‰$è  é_ÿÿÿ‹E‰D$¡ˆfB ëÀÇEÐ    ¾JÐƒù	‡à   èµ¤ Ç     ¹
+   EÔ‰L$‰<$‰D$è[ ‹}Ð‰TýÜ‰DýØè‡¤ ‹…Ò…Xÿÿÿ‹UÔ‹MÐz¶00B 8…@ÿÿÿA‰MÐI~•ÇEÌ    ‹UØ‹Mà‹Eä‹uÜ1Ñ‹U1Æ	Ît‹M1Ò‰MÌ‰|$‹E¾:   ‰t$‰$‰D$è\þÿÿ‰Ç¶ „À„“þÿÿW‹u¹)   ‰L$‹}Ì‰T$‰t$‰<$è-þÿÿ‰Ç¶ „À„dþÿÿGé[þÿÿ‰T$‹E‰$è+   ‹MÐ™‰DÍØ!Ð@‰TÍÜ„‘þÿÿWé4ÿÿÿ´&    ¼'    U‰åƒì¾E‹MP»ƒú	wÿ$•œ0B ƒÁ¸m   ¶    ¿    ƒèeƒø	wÿ$…Ä0B É¸ÿÿÿÿÃ‹A‹QÉ)ÐÃ‹A‰D$‹‰$èÎ0  ÉHÃ‹A‹‰E‰UÉéº0  ‹AëÙt& ‹A‹‰E‰UÉéŸ0  ƒÁ¸f   ë•ƒÁ¸l   ë‹ƒÁ¸n   ëƒÁ¸e   étÿÿÿt& U‰åWVSƒì,‹]‹M‹‹C…É‹rT‰Uð‰Eè‰uì‹s„Ÿ   €=ÔgB  „š   ;uè‰   ‹MA‰Mä´&    ‹U‹]ä¶„Àtgv <%‰ß…Ö   ¶C¾ÐƒúL„'  à   ƒú%„·   ‰t$Kþ‹Eð‰L$‹]1Ò‰T$‰D$‰$èt  …À‰Ãt~¶Cv ¼'    „ÀuœF;uè|†ƒÄ,[^_]Ã‹E€8%…Zÿÿÿ‰Â¶@<l„Ñ   <L…Dÿÿÿ‹U€z …7ÿÿÿ‹}¹   ‹Uè‰|$‹}ì‹·‹—‰L$)Ã‰\$‹·‰$è*  ëš°%‰û¶    ¿    ‹M¾ø‰<$‰L$è  ¶Céeÿÿÿt& ƒúl… ÿÿÿ1ÿ1Ò1É‰|$‹}ì‰T$‹D·€xÿ
+”Á)È‰D$‹·f‰$èh-  ¶Céÿÿÿ‹Mì1ÿ1Ò‰|$‰T$‹D±‰D$‹±ëÓ€z
+…qþÿÿ€z ”Á1À;uèœÀ…È„Zþÿÿ‹]‹}è‹Mì‰\$‹¹€xÿ
+t‹±)Ð@‰D$‹]ì¸   ‰D$‹³éÿÿÿ‹}ì‹·)ÈëÞt& U‰åWVSƒì‹M‹}‹uA¶    ¼'    ¶A<-ˆÃtö<'”À€û0”Â	Ð¨uå¾Ãƒè0ƒø	wv ¼'    ¶AˆÓ¾Ãƒè0ƒø	vï€û.t¶¾ÃƒèXAƒø ‰Mäw+ÿ$…ì0B ¶A¾Âƒè0ˆÓƒø	wÖ¶A¾Âƒè0ˆÓƒø	vÞëÃ1Àeô[^_]Ã…ÿ„Ð   1À€únué‹M‰<$‰L$è…-  ‰Eì‹E…ÀtY‰eè‹Eä‹u)ðHþƒÀƒàðè’š ‰L$t$‹Uƒæð<‰T$‰4$èž Ælˆ_ÆG ‹}ì‰t$‰|$‹]‰$èÅ˜ ‹eè‹Eäeô[^_]Ã1À€ú'…aÿÿÿuó‰t$‹]ä‰$èÚ   ‰Eä‹Mä1À…É„?ÿÿÿ‹}…ÿtÁ‹U‰T$¾Eó‰$èÀ ‹Eäë¬¾Â‰ñƒèEƒø	v¾Âƒèeƒø	wÿ$…p1B ÿ$…˜1B ¸ÿÿÿÿ‰Eì‹Mì1À…É‰ÿÿÿéàþÿÿ‹A‹Q)Ðëá‹A‰D$‹9‰<$èp,  ëÎ‹A‰D$‹1‰4$è],  Hëº‹Aë×‹Aëå²nNë‹²mNë„²lNézÿÿÿ²fNépÿÿÿ²eNéfÿÿÿt& U‰åS‹]C¶¾Ñƒú't!~ƒú\t$1Û€8'Pu‹]ˆ‰Ó‰Ø[]Ã…Òuæ1Û‰Ø[]Ãv P¶ 1Éë¶    ¾Àƒè0ƒøwÛÀá Á¶B<'uè‰Ð)Øƒè1Ûƒøv°‰Ø[]ÃU‰åƒì‰uü‹u‰]ø‹]…öt	€»‰    t‹]ø‹uü‰ì]Ã´&    ‰t$‹KP‹SHÑ‰L$‹‰$è–3  ƒøÿtCP9ð’ƒ‰   ‹]ø‹uü‰ì]Ã‹s‰4$è   U‰åWVSƒì‹]‹…ÀˆÅ   ‹Sâ ð  ú €  „¸   ‹SP‹{L‰þ)Öt€»‰    „º   …Ò„   ‹CL9Âul=÷ÿÿ?‡š   À‰CL‰D$‹sH‰4$è=4  ‰CH‰Á‹CL‹SP‰Æ)ÖtÌ€»‰    uÃ‰t$<‰|$‹‰$èÎ2  ƒøÿ„ú   ‹SPÂ9ð‰SP’ƒ‰   ëŽfrƒæø‰sL‰t$‹KH‰$èØ3  ‰CHƒÄ[^_]Ã‹s‰ðƒàøƒÀ9ðr=þÿÿv;èX ‰t$‹KHÊ‰T$‹‰$è[2  ƒøÿ„‡   ‹SPÂ9ð‰SP’ƒ‰   éÿÿÿ9CLr&‹SP9ò‡êþÿÿ‰ð)Ð‰ÇGt	€»‰    t 9òvéÏþÿÿ‰CL‰D$‹KH‰$è?3  ‰CHëÃ‰|$‹KHÊ‰T$‹‰$èã1  ƒøÿt‹SPÂ9ø‰SP’ƒ‰   ë±‹C‰$èP  U‰åWVSƒì\‹EÇEØ    ‹M‹U‹Xh‹u‹zT‰]ì‹Yd‹FX‰}à‰ÚÁâ‰]Ü‰$‰EÔè2  ‰EÐ‹=ØaB ‹5èaB ‹øaB ‹U‰}Ì‹}‰uÈ‹]‰MÄ‹wH‹JP‹=ôeB ‹Cpñ‰M¼…ÿ•E»¶„eB ¶]»‰EÀ‹UÀ¶Á	Ã•Eº9Uìƒ‹  ÇEð    ‹uì„É‰u´„/  ƒÿ„&  ‡e  ƒÿ„ž  ‹uì¶F‰uì<
+t,‹ÈqB ¶ÈöD
+tƒÁ ‹Eð‹]ìÁÀÁ‰Mð¶C‰]ì<
+uÚ1Ò‹Eð‹¸aB ÷5ÈaB ‹uì‹]´)ÞN‰uä‘‹U¼9Uì‰Eè„  ‹Mè‹ë‹}Ì‰ÞÁæ‹>…Û„'  ‹UÌ‰ØÁà‹uð9tuÜ‹T‹}Ì‰U¨‹Uä9T8„P  €}» t¿‹U´‹E¨‰T$‰$èk"  „Àu©‹MÜ9MØ„  ‹uØ‹UÐ‹M´‹Eà‰²‹]À‰°F9]ì‰uØƒi  ¶„eB ÇEð    ‹uì‹=ôeB ‰u´„É…Ñþÿÿƒÿ„s  ‡Œ   ƒÿ„Ö  ‹uì¶F‰uìë‹Mð¶À‹]ìÁÁÈ‰Eð¶C‰]ì<
+uäéÞþÿÿƒÿ…›þÿÿ‹Mì¶A‰Mì<
+„Ãþÿÿ‹ÈqB ¶À¾TöÂuöÂ‰ÁtƒÁ ‹UðÁÂÑ‰Mð‹uì¶F‰uì<
+uÐéˆþÿÿƒÿ…tÿÿÿ‹Uì¶B‰Uì<
+„mþÿÿ‹ÈqB ¶ÈöD
+u‹uðÁÆñ‰Mð‹Mì¶A‰Mì<
+uÝé?þÿÿü‹u¨9Ò‹}´‰Ñó¦„¹þÿÿ€}º é˜þÿÿ‹Eì¶@‰Eì€û
+ˆÙ„þÿÿ‹ÈqB ¶ÑöDt*‹Mì¶A‰Mì<
+ˆÁ„êýÿÿ¶ðöD3uâ‹UðÁÂƒÂ ‰Uð¶ÉöDtƒÁ ‹uðÁÆñ‰Mð‹Mì¶A‰Mì<
+ˆÁu¤é§ýÿÿ‹Eì¶@‰Eì€û
+ˆÙ„’ýÿÿ‹ÈqB ¶ÑöDt*‹uì¶F‰uì<
+ˆÁ„nýÿÿ¶ÐöDuâ‹EðÁÀƒÀ ‰Eð‹Uð¶ñ‹MìÁÂÖ‰uð¶A‰Mì<
+ˆÁu®é5ýÿÿ‹]ì1ö¶C‰]ì<
+ˆÃ„ýÿÿ‹eB ‰M¬¹   ¶Ãƒø	t>bƒøtRF¶Óf‹EðÁÀ‰]ðIuñ‹Uì¶
+B‰Uì€ù
+ˆË„Øüÿÿ¶Ã¹   ƒø	uÂ1Ò‰ð‹M¬÷u¬³ )Ñ9ðs1À‰Æë¯1Ò…ö•Â)Öë¤ƒøuž1öë›‹]ì1ö¶C‰]ì€ú
+ˆÓ„…üÿÿ‹eB ¡ÈqB ‰M°‰E¤¹   ¶Ãƒø	t\uƒøty¶Ã‹]¤öDtƒÀ ˆÃF¶Ó´&    ¼'    ‹]ðÁÃ‰EðIuñ‹Mì¶A‰Mì€ú
+ˆÓ„üÿÿ¶Ã¹   ƒø	u¤1Ò‰ð‹M°÷u°³ )Ñ9ðs1À‰Æë£ƒøu‹1öëš1Ò…ö•Â)Öë‹]Ø‹}‹uÔ‰_\Áæ1Û‹MÜ9MØtN‹}ì‹E¼‹MØ‹Uà9Ç‰<Š„    9ÔdB €=fB  …‹   ÿEØ´&    ‹}ì¶G‰}ì<
+uòC‹MÜ9MØu²ù©ªª*¶  ‹UÔ‰ÈÀ)Ð=þÿÿ‡¢  ‹}Ô)ùùþÿÿ‡‘  ‰EÜ‹MÔ‹Uà)ÈòÁà‰$‰D$è-  )ð‹}ì‹MØ‰Eà‹E¼‹Uà9Ç‰<Š…`ÿÿÿ‹M‹]à‹uØ‹}Ü‹EÐ‰YT‹UÌ‰q`‹]Ä‰yd‹uÈ‰At‰øaB ‰5èaB ‰ØaB ƒÄ\[^_]Ã‹u€¾ˆ    „íúÿÿ‹4fB ƒëƒû†Ûúÿÿƒÿwƒé‰MèÿMì‹}ì‰}À‰}¼é¿úÿÿ‹uÈÿEÈ;uÄ‰ó„£   ‹Mè‰ð‹UðÁà‹9‹MÌ‰<‹}´‰T‹Uä‰|‹}è‰T‹MÜ9MØ‰7…âúÿÿù©ªª*Š   ‹UÔ‰ÈÀ)Ð=þÿÿwz‹}Ô)ùùþÿÿwm‰EÜ‹}ÐÁà‰D$‰<$èÿ+  ‰EÐ‹uÔ‹EÜ‹MÔ‹UàÁæ)ÈòÁà‰D$‰$èÚ+  )ð‰Eàéuúÿÿ}Äþÿÿw ÑeÄ‹UÌ‹EÄ‰$Áà‰D$è¯+  ‰EÌé4ÿÿÿèòO fU‰åWVSƒì\‹E‰$èÜöÿÿ‹U‹rP‹ZH…öt€|3ÿ
+tÆ
+‹}FÆ‡ˆ   ë
+‹MÆˆ    …Ût Ç3    1Ò‰T3€=DfB  …T  ‹]‰sP‹U‹²   92„ê  ‰×Ç   ‰<$èhöÿÿ‹wP‹_H…ö…C  Æ‡ˆ    …Û„S  Ç3    1É‰L3€=DfB  …‰  ‰wP‹]‹E‹M‹{P‹]‹PH‹±Ø   ‰}À‹»à   ‰UÄ‰uÐ‰}Ì‹uÐ‹}Ä‰uð9÷„6  ‹uÌ9uÀƒ˜  ‹]Ð‹UÀ‹MÄ¶öÐˆ‹UÄ‹uÐ‹
+‹ZëƒEðƒÇ‹‹_‹uð‹‹V‰Þ1È1Ö	Ætâ‹uð‰ù¶8u	AF¶8t÷‹=4fB ‹UÄ‹EÀ_ü‰]´‹UÐ‹EÌÂƒ}´‰UÈv=‹EÀ‹U‹]ÄÃ¶‚ˆ   ‰Ú)Â‹E9Ê’Â¶€  ‰E´‹EÈ+E´9ð’À1Ð¨…B  ;MÄ‹TfB ‰Ð‰U¬tf€yÿ
+„w  IN;MÄuï‰M¨‹U‹EÈ‰JhOüƒù‰²ø   ‰Þ‰E¼†  ‹}¶  :ˆ   „y  €=fB  ‹}‹E¼‰wp‰‡   „Ñ  ‹eB …É…Ã  ‹=ÔdB ÿþÿÿ±  ;}Àƒ¨  ‹U¨‰ð¹    )Ð1Ò÷ñƒø‚2  =‰ã8v¸‰ã8ƒÀ)ó1Ò‰EÔ‰Ø÷ñƒøs¸   =‰ã8v¸‰ã8ÇEà   P9}àÑeà9}à~ø‹Mà‰ø‹uÔñ9×~‰ÐÁ‰MäéW  €|3ÿ
+„²ýÿÿÆ
+F…ÛÆ‡ˆ   …­ýÿÿ‹]‹E‹U‹{H‹°Ø   ‹JP‰}Ä‹U‹}Ä‰uÐ‹uÐ‰MÀ‹Šà   9÷‰uð‰MÌ…Êýÿÿ‹}Ì‹EÐ‹UÀþ‹=4fB ‰ñ‰uÈémþÿÿHƒøÿ„†þÿÿINézþÿÿ‹M‹]‹qP¶‘ˆ   ‹{H‹AL‰uÀ‰}Ð‰}Ä‰¹Ø   ‰Ü   ‰uÌ‰±à   ˆ‘  éKýÿÿ‹MÄ‹UÌ¶‹MÐöÐécýÿÿ‰t$¸   ‰D$‰$èf‘ …À‰Á„üÿÿ‰Â<3¶1ÛBˆ<t»   Ù9úré)Ê)Öéhüÿÿ€:
+uçëêINé·ýÿÿÇEà    ‹EÀÁèƒøs¸   =‰ã8v¸‰ã8ƒÀ‰EäÇEè    ‹}à‹]äOÁã‰}Ü‰$è$'  €=fB  ‰Eì‹uÄ„¼  ‹M‹yh9÷„)  9}Ä„´  v ¼'    ‹]è‹MÜÿEè!Ë;]ä„Ò  ‹Mì‰4™¶    ¶F€û
+u÷9þuÓ‹}‹‡ø   ‹Mà…É„”  ‹ÔdB ‹]è‰×‰U¸9Ú‡  ÇE´    ‹MÄ‰ó)Ë‹M¼)Áƒ}è	~‹Uè‰ØJ‰U¬1Ò÷u¬‰E´‰È1Ò÷u´ƒø‰Ás¹   ù‰ã8‰Èv¸‰ã8‹MÄ‰òX‹u¼)Ê‹MÈ)ñ¾    ƒ}è	~‹uè‰Ð1ÒN÷ö‰Æ‰È1Ò÷öƒø‰Ás¹   ù‰ã8‰Èv¸‰ã8P‹E¸9Ð~‰Ð9ûœÀûþÿÿ—Â	Ð¨…(      ‰$èÊ%  ;}è‰Át?1Ò9ú}U‹uè¡ÔdB )Æ‰u°‹E°‹uÜÐ!ð‹uì‹†‰‘B9ú|è1Ò9ú}*‹‘‹uì‰–B9ú|ò1Òë‹uì‹–‹uÄ)ð‹uÐð‰‘B9ú|è)}ä½    ‹uì)û0‹uÈ‰ù÷Ù‰VT‹Uä‰žô   ‹]è‰†ä   ‰Žè   ‰NX‰Vd‰žü   ‰^lƒÄ\[^_]Ã‹=ÔdB ‰}¸‹}èéqþÿÿ}äþÿÿ‡L  Ñeä‹Uì‹Eä‰$Áà‰D$è%  ‰Eìéþÿÿ‹EÌ‹}¨9EÀr
+‹MÀ‹UÌ)ÑÏ9ûët& ÿM¼N‹M¼¶8…ò   9þuê9uÄÇE´    tf€~ÿ
+t`ÇE´   ‹E´‹M¬Tÿƒúÿt!f9Þt¶    ¿    ¶F€ù
+u÷Jƒúÿuá‰ò)úU¼éÿúÿÿ‹E‹xh9}Ä…Výÿÿ‹U‹‚ø   é~ýÿÿ‹M¼9MÐtŸ€yÿ
+u’ë—‰t$º   ‰T$‰$èÓ …À‰Á„Xùÿÿó‰Â‰]Ø¶1ÛBˆ<t»   Ù;UØrè)Ê)Öé0ùÿÿ€:
+uæëé‹ø   ;E¼…Èüÿÿéýÿÿ¸   éÄúÿÿÿE¼F‰÷éÿÿÿè,H ¶    ¿    U‰åWVSƒì‹}¶$fB ¶u‹	ò•Eó…Àˆš  »ïÿÿ‰\$‹O8Ç$   ‰L$èÍ"  ‰GL‰$èR#  €}ó ‰Â‰GH„³   ÇGP    1À‹   Æ‡‰    	Æ•Â9„Ô   ¶Eó¶òŸ   ‰uì	ð•Eë…Éˆâ  ºïÿÿ‰T$‹K8Ç$   ‰L$èV"  ‰CL‰$èÛ"  €}ë ‰Â‰CH…Â  ‹sL…öt€»‰    „$  ‹CP1ö‰t$‰$‰D$ècŒ …À•Ã¶Ãéœ  ¶    ‹_L…Ût€¿‰    „¸  ‹GP1Û‰$‰\$‰D$è'Œ …À‹   •Â¶Â	Æ•Â9…,ÿÿÿ‹wH„Ò¸   ‹_L‹OP‰·Ø   ‰ŸÜ   ‰à   …=  t& ‰<$è¨öÿÿ‹‡ô   ‹WdÐ@=þÿÿ£øaB ‡œ  Áà¾VUUU‰$èì!  £ØaB ‹øaB ¹   ‰èaB ¹	   ‰Ø÷î‰ØÁø)Âú   v»   A‰ÞÓæ9Ör÷¶™À1B º   Óâ)Úúþÿÿ‰ÈaB ‡.  •   ‰û¾   ‰$èh  ƒÀ£¸aB ‰$Ã   è’îÿÿNyï‹èaB ‹ØaB ‰  ‰Œ   ‰$èÏˆ ‹=¸aB ƒï‰<$è¾ˆ ƒÄ1À[^_]Ãt& ÇCL   Ç$   è!  ‰CHÇCP    1ÀÆƒ‰    Eì¸   •Â„Ò„ÇþÿÿƒÄ[^_]ÃÇGL   Ç$   èÌ   ‰GHéýÿÿ‰\$‹OPÊ‰T$‹‰$è  ƒøÿtMGP9Ø‹WH’‡‰   éþÿÿ‰t$‹KPÊ‰T$‹‡   ‰$èi  ƒøÿt$CP9ð‹SH’ƒ‰   é¨ýÿÿèÛD ‹G‰$èÐ
+  ‹CëóU¹à{@ ‰åƒìºà@ ‹E‰L$‰T$‰$è-  ÉÃt& ¼'    U‰åMìVUèuôSƒì0]ð‰t$‰\$‰L$‰T$‹E‰$èa  …À‰ÆuƒÄ0[^]Ãt& èë  ‹Eì¹”fB ‰D$‹]è‰L$Ç$,   ‰\$è¨  ¾† 3B ‹´gB ‰$‰T$èG‰ ‹]ôº$gB ‰\$‹Mð‰T$Ç$,   ‰L$èl  Ç$
+   ¡´gB ‰D$è‰ ÷Æ   uEƒþtkƒæ„fÿÿÿ‹]ð;]ôZÿÿÿt& Ç$ 2B ‹xgB 4™‰t$Cèf  ;]ô~áƒÄ0[^]Ã‹]è;]ì³fÇ$2B ‹èfB ™‰T$Cè6  ;]ì~áëÇ$2B ‹´gB »   ‰\$¸   ‰D$‰T$èO† éhÿÿÿU‰åƒìèÅ  ‹ gB ºPƒ@ ¸à@ ‰T$‰D$÷Ù‰bB ‰bB ‹M‰$è„  ‹„gB ¡ôfB ‰T$‰$è]  ÉÃt& ¼'    U‰åW1ÿVSƒì,1Û‹M‹´gB ‹A‰Uð‹1‰Eì9Æs=t& ¼'    ¶F¶Áƒèƒøwÿ$…2B ¡ÈqB ¶ÑöD—tK‰úG;Ur#;uìrÎƒÄ,‰Ø[^_]Ã…ÿtíO;}sç9û†2  f‹Eð‰û‰D$¶Ñ‰$è\… ;uìëÇ´&    ;}s¸‹Uð‰T$ëÛ1Ò‰ø÷5eB ¡eB )Ð‰Eè9ß„š   ‹MèÏ;uìëŒ‹}ð¶Ù‰$‰|$è
+… 1À€=ÔgB  ‹eB ‹=´gB ‰UÜu-‰Ó;]w&‰ö¼'    ‰|$Ç$	   èÐ„ ‹UÜ‰Ø;]vã;EXs#t& ¼'    ‰|$Ç$    è „ ‰ØC;Erè1Û1ÿ;uìéüþÿÿØ€=ÔgB  ‰Eàtj9Es‹M‰Mà;]àƒDÿÿÿ‹Uà)Ú‰ÓÇ$    ‹Eð‰D$èP„ Kuê‹Mè‹]àÏéÿÿÿƒ§þÿÿ‰ø)Ø‰ÃÇ$    ‹Mð‰L$è!„ Kuê;uì‰ûé„þÿÿ‹U9Uàƒâþÿÿ‹Uð¶Á‹]à‰$‰T$èóƒ ‹MèÏéÈþÿÿ‰ö¼'    U‰åWVSƒì,‹U¶EÇEÜ    ‹uÆEÛ ‹´gB …Ò‹tfB ˆEó¡ÄdB ‰uì‰]è‰Mä‰Eàt%‹z€ÿ
+„º  ‹]ä1É‰L$‰$‰\$èŒýÿÿ‰EÜ€}ó „ª   ‹}à‹Eä‹´gB ‹MÜt8ÿÑî€=ÔgB  ‰UÔ‹=eB u41Ò‰È‰Ë÷÷û)Ó9ów$´&    ‹MÔÇ$	   ‰L$èƒ ‰Ù;9óvä9ñYs'¶    ¼'    ‹UÔ‰ßCÇ$    ‰T$èê‚ 9÷ræF€}ó|‰uÜ„
+  ‹Uè‰T$¾}ó‰<$èÅ‚ ‹]ì…Û„»   ¶UÛÆEÛ‹Eì‹p€~ÿ
+t…Ò•EÛ‹}ì‹€9
+„“   €=ÔgB  ‹MÜ‹=´gB ‹5eB u41Ò‰È1÷ö)Ó;]àw$v ¼'    ‰|$Ç$	   èP‚ ‰Ù3;]àvæ;MàYs&´&    ¼'    ‰|$‰ÞCÇ$    è‚ ;uàrè‹}ä‰|$‹Mà‰L$‹]ì‰$èüÿÿ€}Û u	ƒÄ,[^_]ÃÇE
+   ‹Uè‰UƒÄ,[^_]é× ÆEÛé=þÿÿ‹Eì‹p€~ÿ
+”Ã:]Û„àþÿÿ€}ÛÉ€á-€Á/ˆMóéÌþÿÿt& U‰åWVSƒì‹}€=ÔeB  ‹bB ‹5bB …ë   1É9û•Á‰Mð1Ò‹Eð;u•Â‰UìEì„Ê   €=fB  …Ô   €=$eB  …    ‹Uì…Uðtk´&    ‹xgB ¸    ‰D$±‹èfB ‰T$F™‰$Cè'ýÿÿ9û•Á1À;u•À…ÈuÆ;utQÇ$    ‹xgB ¸)   ‰D$±F‰T$èíüÿÿ;uuØ9ût4t& ¡èfB 1Éº(   ‰L$‰T$4˜C‰4$èÀüÿÿ9ûuÜ¶    ¿    ‰=bB ‹]‰bB ƒÄ[^_]Ã‹E‰ùºp2B ‰T$)Ù‰L$)ð‰D$¡´gB ‰$è{ é ÿÿÿ¶    ¼'    U‰åMèWUäVuðSƒì<]ì‰t$‹E‰\$‰L$‰T$‰$èð  …À‰Ç„Ö   €=ÔeB  ‹Uä‹Eì‹bB ‹5bB ‰Uà‰EÜ„¹   €=fB  ‹uà‹]Ü‰5bB ‰bB …g  ƒÿ„™  ÷Ç   t?‹]ì;]ð1‰ö¼'    Ç$    ‹xgB ¾>   ‰t$šC‰L$èûÿÿ;]ð~Ø‰bB ƒçt=‹]ä;]è*t& ¡èfB 1É¾<   ‰L$‰t$<˜C‰<$è`ûÿÿ;]è~Û‰bB t& ƒÄ<[^_]Ã1Ò;]à•Â1À;uÜ‰UØ‹MØ•À‰EÔMÔ„%ÿÿÿ€=fB  …v  €=$eB  uq‹EÔ…EØ„W  t& ‹xgB º    ‰T$±‹èfB ‰D$F™‰$Cè×úÿÿ;]à•Á1Ò;uÜ•Â…ÊuÅé  ‹èfB 1É¸(   ‰L$‰D$4šC‰4$èŸúÿÿ;]àuÚ€=fB  ‹uà‹]Ü‰5bB ‰bB „™þÿÿ‹Uä¸z2B ‹uè‰D$‹]ð‹Mì)Ö‹´gB F‰t$)ËC‰\$‰$èÚx ƒÿ…hþÿÿ‹]ä‹Eè‹uì9Ã6‹Uð9Ö2‹=xgB ¹|   ¡èfB ‰L$·<˜‰T$CF‰<$èúÿÿ‹Eè9Ã~Ê‹Uð9ÃžÀ9Ö¶øƒÇ‰]ä‰bB ‰uì‰5bB éûýÿÿt& Ç$    ‹xgB º)   ‰T$±F‰D$è­ùÿÿ;uÜuØéÿÿÿ‹Mà¸p2B ‹UÜ‰D$)Ù)ò‰L$‹´gB ‰T$‰$è
+x é\þÿÿU‰åƒìèÅ~ ‹MºŒ2B ‰T$‰L$‹ Ç$    ‰D$è£  ÉÃU‰åSƒìè”~ ‹èÍ  Ç$   ‹E¹Œ2B ‰L$‰\$‰D$èm  èÐ| ´&    U‰åƒìè•  ‹M‰$èjw ‰D$ºŒ2B 1À‰T$‰D$Ç$   è+  èŽ| ¶    U1Ò‰å1Àƒì‹M‰T$‹U‰D$‹E‰L$‰T$‰$è   ÉÃv U‰åWVSƒìl‹]€=ädB  ‹}„¤   ‰]È‹E…ÿ‹U¾   ‰EÌ‰ø‰UÐ„å   ‰EÔ‹E…À„Í   ‰EØ1Ûv ‹LÈ‰$èä} @Æ‰D¨Cƒû~ç‰4$1öè]  ‰ÇX´&    ‹LµÈ‹Dµ¨‰$‰L$‰D$è¸{ ‹Tµ¨FÓƒþ~Ü‹ B ‰= B ‰;Ç    ƒÄl[^_]Ã€=fB  u1‰$è?v ‹]‰|$‰\$‹M‰L$‹}‰$‰|$èFv ƒÄl[^_]Ã‹ŒdB ‹rÇ$    ‰t$è]{ ë´¸2B é)ÿÿÿ¸2B éÿÿÿ´&    U‰åWVSƒì\‹=(bB …ÿtu¶    ¼'    ‹G1ö‰EÈ‰UÄv ‹\µÈ‰$èÔ| \‰\µÌFƒþ~æ‹EÈ‰$è‹u ‰$‹UÔ‹MÌ‹]Ø‹uÐ‰T$‰L$‰\$‰t$èu ‰<$è¯z ‹}Ä…ÿu˜ƒÄ\[^_]ÃU‰å‹E‹M‹U]£8bB 1À‰HbB ˆXbB £´gB Ãv ¼'    U‰åƒì8‰]ø¡´gB ‰uü…Àt‹]ø‹uü‰ì]Ã¡8bB ‰$è#| ‹5HbB ‰Ã‰4$è| ‹ôgB Ã‰$è| T‰$è‡  ‰Eì‹58bB ¹2B ‰L$¡HbB ‹ôgB ‰t$‹Uì‰D$‰\$‰$è›t €=ädB  ui€=XbB  ‹ŒdB ‹Q‰´gB u<‹]ì‰$è·y ¡4fB ƒø„N  ƒø…Eÿÿÿº   ‰T$Ç$”fB èûÿÿé+ÿÿÿÇ$2B ‹uì‰t$èKt ë¯‹ŒdB ‹S‰$èÈz …À…6  Eð‰$è­{ …À…  è˜{ £hbB …ÀŒã   uw‹Mô‰$è–z ‹Eð…Àt!‰$1Û‰\$èA6 …Àˆ  ‹Eð‰$ènz Ç$„2B ‹Eì1Ò‰T$»¡2B ¾„2B ‰\$‰D$‰t$è#{ è^z ƒ8”Á¶ÑƒÂ~‰$è{ ‹]ð¾¤2B ‰$èz ‰t$‹Mô‰$èÛz £´gB …À…Ìþÿÿèz ‹èRýÿÿ¸¦2B ‰D$‰\$¸Œ2B ‰D$Ç$   èð  èSx 1À‰D$é¹þÿÿèÛy ‹¾­2B èýÿÿ‰t$ëÀèÄy ‹èýüÿÿº²2B ‰T$ë©Ç$·2B èÆr ‰ÃèŸy ‹0èØüÿÿ‰\$¹Œ2B ‰L$‰t$ë‰è€y ‹è¹üÿÿ¸Ä2B ébÿÿÿëU‰åƒì(‰]ø‹´gB ‰uü…Ò„¶   ¡ŒdB 9P„¨   öB@…°   ‰$è>y …À…Õ   ¡hbB 1ÉUô‰L$‰T$‰$è¬y …Àˆà   ‹Uô»ÿÿÿ„Òu0¶Þ…ÛtYƒû~¸Ì2B t$ƒû¸ü2B tûÿÿÿ¸ 3B u´&    ¸P3B ‰$èÓq ‰\$1Ò»„2B ‰\$‰D$‰T$Ç$   è  1ö‹]ø‰5´gB ‹uü‰ì]Ãè¹ûÿÿÇ$·2B èq ‰D$¹Œ2B 1Ò‰L$‰T$Ç$   èN  è±v Ç$·2B è]q ‰Ãè6x ‹0èoûÿÿ‰\$»Œ2B ‰\$‰t$ëÂèx ‹¾Œ2B èKûÿÿ‰t$¸o3B ‰D$‰\$ëž´&    U‰åWVSƒì‹eB ÇEð    ‹ôeB ‹}‰UÜ‹u‰Mä‰Uà¡ÈqB ‰EØ¶    ¼'    ¶G¶FˆÙˆEî8ÃˆEïtTƒ}ä„â   w`ƒ}ä„ž  ¶    €=„eB  t&‹]Ø¶ÁöDtƒÀ ˆÁ¶Eï‹UØöDtƒÀ ˆEï:Mï…Ç  €ù
+„«  €ù	toÿEðë…t& ƒ}äuª¶Ã‹ÈqB ë	¶GˆÁ¶À¾T1ÀÁê€ù
+•À…Âuã¶Eî¾TÁê€}î
+ë¶F¶ÂˆUï¾TÁê€}ï
+•À¶À…ÂuàéKÿÿÿ‹eB 1Ò‹Eð÷ñ)ÑMðéÿÿÿt& ¶Ã‹ÈqB öDtë¶G¶ÐöDˆÁ„H  €ù
+uç¶UîöDt%€}î
+ët& ¶F¶ÂˆUïöD„  €}ï
+uå:Mï„Ìþÿÿ€}ï ”À1Ò€ù
+•Â…Ât‹E@9øs¶WþöDtOépþÿÿ€ù ”À1Ò€}ï
+•Â…Â„‰þÿÿ‹E@9ðƒ}þÿÿ¶VþöD„nþÿÿNé8þÿÿ€û ”À1Ò€}î	”Â…Âu€û	”Ã1À€}î ”À…Ø„>þÿÿ‹]ðë€ù	u_‹Eð1Ò‹Mà÷uà)ÑMð¶GˆÑ€ù uàÿEðëðƒÄ1À[^_]Ã9]ð„þÿÿƒÄ¸   [^_]Ãt& €}ï	uà‰Ø1Ò÷uÜ‹EÜ)ÐÃ¶FˆUï€}ï ußCëðÆEï NéíþÿÿO± éµþÿÿv ¼'    U‰å‹E]Ã´&    U‰å‹E]Ã´&    U‰åWVSƒì‹}ëf‰<$‰þÿU‹8‰ÃÇ     ‰4$ÿU‰;…ÿuâƒÄ[^_]Ãv ¼'    U‰åƒì(‰]ô‹M‹]‰uø¡´gB 1ö‰}ü…Û‹‰Eð‹y‰Uìt¶„Òu^‰t$‹uì‰\$‰|$‰4$è§   …Ût€; t.€ÿ
+t(Ç$w3B èŒm ‰D$‹]ð¿‘3B ‰|$‰$è„m t& ‹]ô‹uø‹}ü‰ì]Ãv €=ÄeB  ¾˜3B u¾œ3B €=ägB  ‰ñ‰]èt‹Eì€8
+t‰L$‹Uè‹Mð‰T$‰$è1m é^ÿÿÿ1À€ú ”À¹Œ2B ‰UèëÐ´&    U‰åWVSƒì,‹]€=ÔgB  ‹M‹E‰]ð‹U‰Mì‰Eè„ý   ÇEä    ¡eB ‰Ö‹=´gB ‰Eà´&    ¼'    ;uðsE¶F¶Âƒø	„   ;ƒø„Ý   ‹ÈqB ¶Ò¾D¨—•Á¶ÁEä‰|$‰$èËq ;uðr»ƒÄ,[^_]ÃƒøuÉ‰|$Ç$   è©q ‹Uì…Ò•Á1Û;uð’Ã…Ët€>
+t‹Mè‰L$‹Eì‰<$‰D$è*l ÇEä    é^ÿÿÿ‹Eä1Ò‹]à÷uà)Ó]ä´&    ¼'    ‰|$Ç$    è@q Kuíé(ÿÿÿ)Uð‹5´gB ÇE   ‹Uð‰u‰UƒÄ,[^_]éq ‹]ä…Û„øþÿÿÿMä‰|$Ç$   èõp é%ÿÿÿU‰å‹E‹M]‹@lÈ@ÃëU‰å‹E‹U‹Hl‹EJT‰‹UD
+‹U‰]Ã¶    ¿    U‰åSƒì‹E¶]‹M‹Pl‹EIL
+@9È~,‰D$¾Ã‹´gB ‰D$º¤3B ‰L$‰$‰T$èk ƒÄ[]Ã‰D$‹´gB »­3B ‰\$‰$èåj ƒÄ[]ÃëU1À‰åWVSƒì\‹M¶DeB „Òu
+‹5¤eB …öt°ˆEß¶ÂH‰EØ„ÒÆE× tƒ=ôeB ‡”  ÇEà    ‹q‹}ÇEä    ‹èfB ¡xgB ‰7‹Q‰]Ð‹]‰EÌ‰Mð‰v ¼'    ‹uð‹N‹VUä‹~Dÿ‰Eì‹^}à;Mìt;ÿ‰Ï‰uè²   €}ß „¨   ´&    ‹]Ð‹UÐ‹»‹\º‰E´K‰Ù)Á€}× ‰MÈ‰Át@¶ ‹5ÈqB ¶ÐˆE³‰U¸‰uÀöDt$<
+ëA‹uÀ¶¶Â‰E¸öDt€ú
+uç´&    )Ë;]Øt‹¤eB …É…  ÆEß G;}ìL  €}ß …sÿÿÿ‹}ð‹_¶    ¼'    ‰ß;}è¥   t& €}ß „–   ‹]Ì‹uÌ‹»‹\¾‰ÑK‰U´‰Ø)Ð€}× ‰EÄtF¶¡ÈqB ¶òˆU³‰u¸‰E¼öD0t+t& ¼'    €ú
+tA‹E¼¶¶ò‰u¸öD0uç´&    )Ë;]Øt‹¤eB …Ò…«   ÆEß G;}èŽmÿÿÿ¶    ¼'    ‹Uð‹:…ÿ‰}ð…`þÿÿ‹Eè‹u‹]ì‹M‰‰1À€}ß u1Àƒ}ä ‹}à•À…ÿtƒÈƒÄ\[^_]ÃÇ$”eB ‹EÈ1Ò‰T$‹]´1ö‰t$‰D$‰D$‰\$è“p  …Àˆ°þÿÿG;}ìŽ´þÿÿ‹Mð‹YéÆþÿÿ¶    Ç$”eB ‹EÄ1Û‰\$‹M´1ö‰t$‰D$‰D$‰L$èFp  …Àˆ#ÿÿÿGé"ÿÿÿÆE×écýÿÿëU‰åƒì(‰}ü‹M‹}‰uø‹u‰$‰]ôèàn ‰<$‰ÃèÖn ‰4$ÃèÌn T‰$èP  ‰|$‰Ã‹E‰t$¿±3B ‰|$‰$‰D$èvg ‰Ø‹uø‹]ô‹}ü‰ì]ÃëU‰åƒì‰]ø‹]‰uü‰$èù  ‰\$‰Æ1À‰4$‰D$èÕm ‰ð‹]ø‹uü‰ì]Ã‰ö¼'    U‰åƒì(‰}ü‹}‰uø‰]ô‰<$è ‰$‰Æèì 1Ò…Àt€|ÿ/uë²‰<$¶ÚÃ¸3B èím ‰$‰Æèãm Æ‹E‰$èÖm L‰$èZ  ‰\$‹U‰Æ‰|$¸±3B ‰4$‰T$‰D$è€f ‰ð‹]ô‹uø‹}ü‰ì]Ã‰ö¼'    U‰åVSƒì ‹ŒdB ‹u‹B‰$èül ë:f‹^‹F‹N‹V‰\$‹ŒdB ‰D$¸¼3B ‰T$‰L$‰D$‹K‰$èf ‹6…öuÄ‹ŒdB ‹s‰uƒÄ [^]é¥l U‰åVSƒì‹E‹M‹ŒdB ‹]‰D$‹u‰L$‹B‰$èãe ÿhB …Ûu9‹ŒdB ‹QÇ$
+   ‰T$èðj ‹ŒdB ‹C‰$è7l …öuEƒÄ[^]Ãt& ‰$è( …Àt ‰D$‹ŒdB ¹à3B ‰L$‹Z‰$èVe ë›Ç$å3B è8e ëÒ‰4$è.l ´&    ¼'    U¹   ‰åƒì‰L$Ç$   è½l …Àx‹ŒdB ‹B‰$è¨k ¡hB …Àt'ÿÐE‰D$‹M‰L$‹U‰T$‹E‰$èåþÿÿÉÃv ‹”dB ºú3B ‰T$‰L$¡ŒdB ‹H‰$è­d E‰D$‹M‰L$‹U‰T$‹E‰$èþÿÿÉÃt& ¼'    U‰åVSƒì¡$hB ‹]‹u…Àt95ˆbB „‘   ‰xbB ‰5ˆbB Ç$   º   ‰T$èäk …Àx¡ŒdB ‹H‰$èÐj ¡hB …ÀtqÿÐ‰t$…Û¸ÿ3B ‰\$„“   ‰D$‹ŒdB ‹S‰$èóc ‹ME‹u‰D$‹]‰L$‰t$‰$èãýÿÿƒÄ[^]Ã¡xbB 9Ãtð‰\$‰$è¯j …ÀtàéQÿÿÿ‹”dB ¸4B ‹ŒdB ‰D$‰T$‹Q‰$èŠc ‰t$…Û¸ÿ3B ‰\$…mÿÿÿ¸4B écÿÿÿU‰åWVSƒì‹]‹M‰ßÏ¶    ¼'    ‰þ)Þy¾ÿÿÿ‰t$‰\$‹E‰$èÒj …À~Ã9ûrØ‹UƒÄ‰Ø[)Ð^_]ÃtïèÒi ƒ8u…öxÝƒÄ¸ÿÿÿÿ[^_]Ã¶    ¿    U‰åƒì‰$‰t$‰|$‹M‹u…Éu…ö‰ðu¸    ‹$‹t$‹|$‰ì]Ã…ö‰Ètë1Ò‰÷÷ö…Ò‰Ót‰ø‰×1Ò÷ó‰Ó…Òuò1Ò‰È÷÷‰Ã‰Ç¯Þ;]w1Ò‰Ø÷ö‰Ú9øt‰Ê‹$‰Ð‹t$‹|$‰ì]ÃU‰åSƒì‹]‰$èj …À‰Á”Â1À…Û•À…ÐuZ‰È[]ÃèQ$ U‰åSƒì‹]‹M‰\$‰$èÇi …À‰Á”Â1À…Û•À…ÐuƒÄ‰È[]Ãè$ ´&    U‰åSƒì‹]‹M…Û‹túªªªªs!BÑèÂ‰‰U‰]ƒÄ[]ë…Òuíº@   ëæèÏ# ëU‰åSƒì‹]‰$èFi …À‰Á”À1Ò…Û•Â…Âu‰\$1Û‰\$‰$èúg ƒÄ[]Ãè# ëU1Ò‰åS¸ÿÿÿÿƒì‹M‹]÷ñ9Ør‰L$‰$èÒh …ÀtƒÄ[]Ã…Ûtöè7# ´&    U‰åSƒì‹]‰$è¶h …À‰Á”À1Ò…Û•Â…Âu‰\$‹]‰$‰\$èùe ƒÄ[]Ãèî" ´&    ¼'    U‰åVSƒì‹u‰4$è½g X‰$èZh …À‰Á”Â1À…Û•À…Ðu‰\$‰t$‰$è e ƒÄ[^]Ãè”" U‰åWVSƒì‰Ã‰Uð‹@9Ð†  ÇC    ‹S‰ÏÇC    ƒç‹C$ÇC    ƒÿö‰S ¶S;ƒæƒÆ‰C(„ÒÆC< ‰s,ˆUïte‹}ð…ÿt3‹s9þ†Ã   Wÿ‰Øè¨  €}ï ‰C,…  ){)þ‰s€}ï u{){(‹C ‹uð)ø€}ï ‰s‰C u‰CÇC    ƒÄ1À[^_]Ã‹3‰së”€{8 „è   ‹S‰Ç9Âw‰×‹K9ùƒ  ‹‹SÐ¶4‹C0…À…
+  ¡ÈqB öD0t‹SFàˆ
+AëÊ‹C‰òˆAë¿‰×)Ç¶C;ˆEïé.ÿÿÿÇC    ‹K‹‹C0ùÑ¶qÿ…ÀÇC    t¶40‹S4‰ð‰ñÁèƒá‹‚º   Óè¨uƒþ
+t
+1Ò‰S,éÿÿÿ€{= º   uí1Òëé‹S‹s:‰D$)þ‰t$‰$èf ¶K;‹sˆMïéËþÿÿ‹s0…ö„ëþÿÿ‹S‰Ç9Âw‰×‹K9ùrë$´&    ‹s0‹S‹Ð¶‹S¶ˆ
+A9ùrã‰K‰Ké¨þÿÿ¶40éíþÿÿëUƒúý‰åV‰ÆSwE9P tE‹H¶‹P4‰ØÁè‰Ù‹‚ƒáº   Óè¨u	ƒû
+t
+1À‰Â[‰Ð^]Ã€~= ¸   uí1Àëé‹P,ëæƒáƒùÀƒàPëÖv ¼'    U‰åWVSƒì,‰Uì‹R‰Eð‰Mè…Òt‹q…öu
+1ÀƒÄ,[^_]Ã‹Eð2‹x‹Eð;‰MØ‹9MØ‡"  ‹Mð‹Y‹Eìñ‰MàJÿWÿ‹xN‹Eè‰}Ô‹x‰}Üf‹}Ô‹‹}Ü;·„¦   ƒØ   Nƒþývâ‹Mð‹uì‹Q‹~‰ÐJÿø‹}è‹wðxÿ‹uð‰}ä‰Ç‹Eà)Çú…ÿ‰V•Â1Àƒùý–À…ÐëÿMäO‰4ƒt‹Uä‹4“‹‹9Öwç49Iƒùý‰³vç‰Ú‹]à½    ƒù4švöÂt‹>ƒéƒÆ‰:ƒÂü‰×Áéó¥éøþÿÿƒúýwv 9“†|   JƒúývñÿMà‹}Ô‹‹}à‰»Iƒùý†0ÿÿÿé1ÿÿÿv Iƒùýé#ÿÿÿ4‹Uð<µ    ‰|$‹Z‰$èd ‰Â…Ò¸   „Žþÿÿ‰Ó‹Uð‹Eè‹Mð‰2‹uì‹y‰Z‹V‹pé˜þÿÿƒúýw…‹}Ô‹9“…vÿÿÿé€ÿÿÿfU‰åƒì8‰]ô…Ò‰Ó‰uø‰}ü‰Eð‰Mì„  ‹J…É•À1Òƒ}ì •Â…Âu<…Û„ô   …É„ì   ‹Uð‰J‹C…À…  ü‹}ð¹   ó«1À‹]ô‹uø‹}ü‰ì]Ã‹uì‹F…Àtº‹Mð‰Áà‰$è;c ‹}ð‰Æ…ö‰G¸   tÄÇEä    ‹C1ÒÇEè    ƒø ‰EØ†¦  ‹}ì‹O…É„?  ‹K‹G‰MÜ‰Eàë*´&    B‹}ä‹Mè‰¾G9MØ‰}ä†l  ‹Eì9P†  ‹}à‹Mè‹—‹}Ü9wÌ”À‹MÜ¶ø‹EèúÿEè‹ë·¶    ‹]ì…Û„µ   ‹}ì‹G…À„§   ‹Mð‰A‹W…Òugü‹}ð¹   ‰Ðó«éøþÿÿ‹}ð4    ‰‰4$èLb ‹Mð…À‰Â‰A„#  ‹C‹s…    ƒùvöÂt‹ƒéƒÆ‰ƒÂü‰×Áéó¥é£þÿÿ‹Uð‰Áà‰$èûa ‰Ç‹Eð…ÿ‰x„é   ‹uì‰ú‹}ì‹F‹wë¥v ü‹}ð1À¹   ó«‹]ô‹uø‹}ü‰ì]Ã‹Mè9MØvQ)MØ‹}ä¾‰Î‹KÁæÎ‹MØÁáƒùvöÂt‹ƒéƒÆ‰ƒÂü‰×Áéó¥‹C‹Uè)ÐEä‹uä‹Uð‰réýýÿÿ‹Mì‹A9Ðvè‹}ä)Ð¾‹y4•    …    þƒùvöÃt‹ƒéƒÆ‰ƒÃü‰ßÁéó¥‹]ì‹Cë¡ÇA    ¸   Ç    éœýÿÿÇ@    Ç     ¸   é…ýÿÿv U‰åWVSƒì…Ò‰Eð‰Uì„I  ‹R…Ò„>  ‹Mð‹Y‰Î‹	<S9ù‚|  …Û„®  SK‰MèJÿƒùý–À1Òƒûý–Â…Âtf‹uð‹Eì‹~‹pë7´&    ÿMè‰Ê‹–I‹Uèƒùý‰—–À1Òƒûý–Â…Ât0ë‹Ž9Ÿ„Ä   rÂKƒùý–À1Òƒûý–Â…ÂußƒùýwD‹Eè    ‹}ì)È‹MðH‰Eè‰ÂÁâ‹qKòƒù‹wvöÂt‹>‰ÙƒÆ‰:ƒÂü‰×Áéó¥‹]ð‹uì‹Uè‹K‹~1öYÿDyÿ‰Eä)Ð‰ÂBt6‹Mð‹y‰A´&    ‹Mä‹4‹Ÿ9Îv*ÿMäJ‰4‡uç´&    1öƒÄ‰ð[^_]Ãt& IKé8ÿÿÿ4Kƒûý‰·v½‰û‹}è•    ƒù4»vöÃt‹ƒéƒÆ‰ƒÃü‰ßÁéó¥ë­
+ Áà‰D$‹V¾   ‰$è_ …ÀtŽ‹}ð‹uð‰‹]ì‰G‹S‹^éJþÿÿ‹]ð‹uð‹Mì‰S‹Uì‹B‹V‹q…    ƒùvöÂt‹>ƒéƒÆ‰:ƒÂü‰×Áéó¥é0ÿÿÿU‰åƒì8‰uø‰Æ‰]ô‰}ü‹x‰Uè‹P‰Mì9úsmü‹>‹Mè‹]ì‰×‰\×‹F‹>dÇÿ üÿ‹V‹N‹FÇ‘ÿÿÿÿ‹^<[Áç»   Ç‰Ù1Àó«‹N‹V<IÁç‰Ù×ó«‹NQ‰È‰V‹]ô‹uø‹}ü‰ì]Ã?ÿªªª
+‰Eä¸ÿÿÿÿwà‹‰ùÁá‰L$‰$èü] ‰Â…Ò¸ÿÿÿÿtÂ‰‹Ný    ‰\$‰$èÙ] ‰Eà‹F‰\$‰$èÇ] ‰EÜ‹Uäº‹~Áã‰\$‰<$è¬] ‰\$‹N‰Ç‰$è›] ‰Á‹Eà‹UÜ…À”Ã…Ò”À	Ø¨u0…ÿ”À…É”Â	Ð¨u ‰~‹Eà‹]Ü‰N‹}ä‹V‰F‰^‰~éÄþÿÿ¸ÿÿÿÿéÿÿÿ‰ö¼'    U‰åWVSƒì‹U‹M‹B‰Ó‰
+ƒÃÇC    ‰BÁà‰$è] ‰C…Àº   „|   ‹}1ö‹Wƒú vBt& ‹}‹M‹G‹<°‹öDøu#‹M‹S9QtT‹C‰<¸   ÿC„Àtp‹}‹WF9òwÃ‹}‹]‹OD!M‹s ‹E@–‹9CvM‹S‹u‰4‚@1Ò‰ƒÄ‰Ð[^_]Ã‹MD‰AÁà‰D$‹S‰$è`\ ‰Â1À…Òt–‰S‰Ð‹Sëº   ëÁt µ    ‰D$‹S‰$è-\ …Àº   tž‰C‰Â‹‰së‡´&    U‰åWVSƒì‰Mì¹   ‰Ó‰Eð‰L$Ç$8   èâ[ ‰Eè‹Uè1À…Ò„«   ‹EèƒÀ‰Eä‹uä‹C‰F‹S…Ò…É   ü‹}ä¹   ‰Ðó«1À…À…|  ‹uä‹Uè‹K‰r(1öƒù v@v ‹C‹}ð‹°‹Ð¶BƒøtYƒøttƒøt_ƒøtf÷Bÿt
+‹}è€O4€‹KF9ñwÃ‹Eì‹uè‹]ð‰D$‰t$‰$èúýÿÿ…À…   ‹EèƒÄ[^_]Ã´&    f÷Bÿu¤F9ñë¾v ‹Uè€J4@‹Kë¬t& ‹Mè€I4‹Këœ‹}è‰GÁà‰$èëZ ‰Â‹Eä…Ò‰P„»   ‹{‹s½    ƒùvöÂt‹ƒéƒÆ‰ƒÂü‰×Áéó¥éòþÿÿ‹Uè‹z‰<$èX ‹}è‹O$‰$èX ‹G(;Eät‹p‰4$èóW ‹_(‰$èèW ‹Uè‹Z‰$èÚW ‹}è‹O0‰$èÌW ‹G,‰$èÁW ‰<$è¹W ÇEè    ‹Eèéûþÿÿ‹]è‰$èŸW 1ÀééþÿÿÇ@    ¸   ÇG    éRþÿÿU‰åWVSƒì,‰Eð¸   ‰Uì‰MèÇEà    ‰D$Ç$8   èÊY ‰EÜ‹}Ü1À…ÿ„W  ‹]Ü‹UìƒÃ‰]Ø‹B‹MØ‰A‹r…ö…•  ü‹}Ø¹   ‹Eàó«1À…À…  ¶Uè‹uÜ€â¶F4$ðÐˆF4‹MØÇEä    ‹]ì‰N(‹sƒþ ëÿEä;uä†ñ   ‹Eì‹]ä‹Mð‹x‹‹ŸÂ‹{¶KÁï‰ûƒù”Âãÿ  ”À¶ø…×u¾ƒù„â   ƒù„å   …Ûtu‹MÜ‹}Ø9y(„@  öÃtöEètöÃtöEèuöÃtVöEèuPt& ‹MØ‹Uä‹]à‹A)Ú9ÐvH9Ð‰Av‹Iv ‹t‘‹}Ø‰4‘B9WwðÿEà‹]ì‹sé5ÿÿÿf‹Uì‹ré(ÿÿÿöÃ@thöEèuÝë¨‹UÜ‰$èíU 1ÀƒÄ,[^_]Â ‹u‰t$‹}Ü‰|$‹Eð‰$èûÿÿ…À…Ó   ‹EÜƒÄ,[^_]Â f‹uÜ€N4éÿÿÿ‹UÜ€J4@éÿÿÿ‹Mì‹qé°þÿÿ‹}Ü‰GÁà‰$èX ‹MØ…À‰A„T  ‹uì‰Â‹Mì‹^‹q    ƒùv¨t‹>ƒÂƒÆƒé‰8ü‰×Áéó¥é"þÿÿÇ$   è²W ‹UÜ…À‰Æ‰B(„  ‹}ì‹G…À‰F…¡   ü¹   ‰÷ó«ÇEà    ‹uÜ€N4€évþÿÿ‹}Ü‹G‰$èÞT ‹MÜ‹Y$‰$èÐT ‹UÜ‹B(;EØt‹X‰$èºT ‹UÜ‹r(‰4$è¬T ‹MÜ‹Y‰$èžT ‹UÜ‹r0‰4$èT ‹}Ü‹G,‰$è‚T ‹MÜ‰$èwT ÇEÜ    ‹EÜé¬þÿÿ‰Áà‰$èãV ‰F…À‰Â„Á   ‹Mì‹A‹q…    ƒùvöÂt‹>ƒéƒÆ‰:ƒÂü‰×Áéó¥éÿÿÿÇA    ‹EÜÇ@    ¸   éíüÿÿ‹z‰<$èôS ‹uÜ‹F$‰$èæS ‹]Ü‹C(;EØt‹X‰$èÐS ‹MÜ‹Q(‰$èÂS ‹EÜ‹X‰$è´S ‹MÜ‹Q0‰$è¦S ‹}Ü‹w,‰4$è˜S ‹EÜ‰$é›ýÿÿÇF    Ç    é|þÿÿt& ¼'    U‰åƒì¡4hB ‹MÁèˆÂÀâ€â¶A$ïÐ€ˆA¡4hB ‰D$‹U‰T$‹E‰$‰D$è  …Àt‹… 5B Á 4B ‰MÉéÁM É1ÀÃ¶    ¿    U¡4hB ‰å‹U]‰4hB Ã¶    ¼'    U1Ò‰åƒì‰uø‹u‰]ô¹   ‰}ü‹~‹‰L$‰T$‰<$èT ‰|$‹C$‰4$‰D$èo   ‹C$;C(t‰|$‹C(‰4$‰D$èT   ‹C$;C,t‰|$‹S,‰4$‰T$è9   ‹C$;C0t‰|$‹{0‰4$‰|$è   €N1À‹]ô‹uø‹}ü‰ì]Ãt& ¼'    U‰åWVSƒì,‹UÆEë ‹}‹ƒx\‰Eð„  ÇEì    ‹]‹Kƒù ëO‹u‹Uì‹^‹uð‹“‰Eä‹Uä‹¶\Ðƒû„œ   ÇEà    1ÒƒûtNƒû”Àƒû”Â	Ð¨…½   ÿEì;Mìw¯ƒÄ,[^_]Ãv Æ;¶    ¿    ABƒù~)ÿEàƒ}ài‹]ð‹‹uä‹Mà‹ð‹4ˆ1É¶    ¼'    ‰ðÓè¨tÈÆ€}ë t¾¡ÈqB ‰ÓöDt Z ë›¶ÐÆ€}ë t‹ÈqB ‰ÂöDtƒÂ Æ:‹]‹KéYÿÿÿ‹MöA@„ñþÿÿÆEëéèþÿÿ‰<$¹   ¾   ‰t$‰L$è<R ƒû…(ÿÿÿ‹}€Oéÿÿÿ´&    U‰åWVSƒì‹]‹}‰ÚƒâÇ    ƒúÀÇG    %ÊOý °ü² ÇG    Ç$   èS ‰G…Àº   „û   öÃ…  öÃ„	  ¶Wƒæ¿Î   €Ê€ÇG    Áë€âïˆØÀà$ÂˆW‹]‰$èR ‰D$‹M‰t$‰<$‰L$èï  ‰Eðƒø„Ã   ‹uð…ö…¿   ‹w1É¸   ‹‰L$‰D$‰4$è<Q ‰t$‹S$‰<$‰T$è™ýÿÿ‹C$;C(t‰t$‹S(‰<$‰T$è~ýÿÿ‹C$;C,t‰t$‹K,‰<$‰L$ècýÿÿ‹C$;C0t‰t$‹s0‰<$‰t$èHýÿÿ€O‹UðƒÄ‰Ð[^_]Ã´&    Î  @ öÃ…÷þÿÿ¶W€âéûþÿÿt& ÇEð   ‹_‰$è.O ÇG    ë±t& U‰åƒì‰}ü‹E‹}‰]ôƒø‰uøwM‹… 5B  4B ‰$è¢I ‰$‰ÆèÈP …ÿXt9û‰Øw'‰D$‹M‰t$‰$è¸N ‰Ø‹uø‹]ô‹}ü‰ì]Ãè¬N ‹UGÿÆ ëÍ´&    U‰åWVSƒì‹E‰Eð‰Â‹ …Àt‹z1Û…ÿ…'  ‹Mð‹Y‰$1ÛèlN ‹}ð‹G…À„   ÇEì    1ÿ1öë(‹Mð‹A…Àu=‹Mð‹A…ÀuIƒEìC‹MðƒÆƒÇ9YvX‹Uð‹B…ÀtÏ‹D‰$èN ‹Mð‹A…ÀtÃ‹T‰$èýM ‹Mð‹A…Àt·‹UìCƒÆƒÇ‹D‰$èÝM ƒEì‹Mð9Yw¨‹]ð‹{‰<$èÃM ‹Mð‹q‰4$èµM ‹Uð‹B‰$è§M ‹]ð‹;‰<$èšM ÇEè    ‹uð‹V …Ò…Ò   ‰$è}M ‹Mð‹„   ‰$èlM ‹Uð‰UƒÄ[^_]éZM ‹Mð‹4ØC‰4$èéM  ‹Uð9ZwçéÀþÿÿ‹N‹¹‹S‰$è+M ‹C$‰$è M ‹S(K9Êt‹J‰$èM ‹C(‰$è M ‹KG‰$èôL ‹C0‰$èéL ‹S,‰$èÞL ‰$èÖL 9>w–‹~‰<$èÇL ÿEè‹Uð‹]è9ZDr4‹Eð‹P ‹uè<v4º‹1ÿ…Ò…bÿÿÿ‹~‰<$è“L ÿEè‹Uð‹]è9ZDsÌ‹R éøþÿÿ¶    ¼'    U‰åSƒì‹]‹…Àt‰$è¸ýÿÿÇ    ‹SÇC    ‰$è@L ÇC    ‹C‰$è.L ÇC    X[]Ãv U‰åWVSƒì|‹uÇE”    ‹U‹>¶F‰VÇF    $~‡   ˆF†¡  ÇFˆ   ‹]‰<$‰\$èR  ‰E”…À…c  ‹MºD   ]˜‹F‰T$Áé€á‰E1ÀˆM‰D$‰$èûL ¶M‰|$‹U‹E‰$‹U‰L$‰Ùè|  ‹Eƒì…À…¾   €{; ‹E…“   €} ‰C…–   ‹U…Ò„¾   ‰Øèò  1À‰E”…À…¸   ÇF    ‹EU”‰T$‰t$‰D$‰$è%  ‰G4…À„Œ   ‰4$èa
+  ‰E”…À…y   ‰<$èŽ  ‰E”‰4$è3  €}Ó uE‹E”…Àureô[^_]Ã€} ‹C‰C„jÿÿÿ‰Øè÷   épÿÿÿf‹U‰ØBè•   …À„/ÿÿÿéXÿÿÿ‹Mœ‰$èJ ë®‹K‰K‰Ké;ÿÿÿ‰4$èÅ  €}Ó t‹]œ‰$èdJ ‰<$è¼ûÿÿÇ    ‹E”ÇF    éqÿÿÿÇF    ¹ˆ   ‰<$‰L$è¯L ‰Ç…ÿ¸   „JÿÿÿÇFˆ   ‰>é*þÿÿfU‰åƒì‰]ø‰Ã‰uü‰Ö€x; u‰s1À‹]ø‹uü‰ì]Ã‰T$‹@‰$è\L ‰Â…Ò¸   tÜ‰SëÒ¶    ¿    U‰åWVS‹P‰Ã‹@ 9Â‰Çw‰×‹K9ùs/v ‹S‹3‹C0Ö…À¶u.¡ÈqB öDt‹sBàˆA9ùrÔ‰K‰K[^_]Ã‹sˆAëè¶ëÌv ¼'    U‰åWV‰ÆS‹P‹@ 9Â‰Çw‰×‹^ët& ‹N‹È¶‹F0‹N¶ˆC9ûrã‰^‰^[^_]Ã´&    U‰åƒì‰]ô‰Ë‹M‰uø‰Ö‹U‰1À…É‰}ü‹}ˆUó‰s ‰s‰K0ˆS8t=°ˆC;‹O\‰K@¶WXÀêƒâˆS9¶GX‹}ü‰s(‰s$Àè‹uøƒàˆC:‹]ô‰ì]Â v „ÒtÁë½v ¼'    U1À‰åWºˆ   VSƒì‹]‰T$‹}‰D$‰$èºI ÇC@   ÿ©ªª
+¸   wtO¾   ‰KÁá‰$è¸J ‰ëö9þvú‰t$~ÿÇ$   è‹J ‰C ‰{D‹ÄqB ¿ä5B ‹‰C\è¸ ü‰Æ¹   ó¦u"¶CX‹3$÷ˆCX…öt‹[ 1À…ÛtƒÄ[^_]Ã¶CXëÞ¸   ëë¶    ¼'    U‰åVSƒì‹E‹0‹F8ë‹‰$è”G ‰Ø…ÀuðÇF8    ‹VÇF@   ÇF4    ‰$ènG ÇF    ƒÄ[^]ÃU‰åWVSì¬   ‹]‹S4‹z‹S‹wv‰sH‚‹C‰EÜ‹S…Ò…^  ü¹   }Ø‰Ðó«1À‰EÔ…À…¶   ‹U‹rL…ö…³   ‹]Ü…Û…X  ÇEÔ    1À‹]…À‰C$„	  ö@4€„Ç  ‹uÜ…ö‰u„…‘  ÇEÔ    1À‹u„‹M…ö‰A(…×  ÇEÔ    1À‹u„‹M…ö‰A,…  ÇEÔ    1À‹M‹Y(‰A0…Û„£  ‹q,…ö„˜  …À„  ‹Uà‰$è]F 1Àeô[^_]Ãv ÇEÐ    ‹]Üƒû ëÿEÐ;]Ð†4ÿÿÿ‹Mà‹uÐ‹E‰M˜‹<±‹€|ùuÜ1öƒû vt& ‹U˜‹²Á€z	tQF9ówì9ót¸‹U‹rSÿƒúü‹|Ž‹‡í   1ÿ‰Ñ9×ƒÒ   ‹uàëz9ÏƒÅ   Ñê9–rë‰Ñëêv ‹ù9t­F9óë¦t& 1Àƒû v‹Mà‹UÜv ‹4@ó9Âwö‹u‹ND‹V 1ö!ÙI‚‹ƒù ‰MÀ†  ‹@‰E¸ë
+F9uÀ†ó  ‹U¸‹²9uìöA4uæ‹y(UØ…ÿ”À…Ò”Â	Ð¨u‹G;EÜ„‡  1À„Àt¾‰Èé%þÿÿt& ‹M‰A0‰A,‰A(é—þÿÿ‹uà9¾uG…°þÿÿ‹}@‹G˜EØè|æÿÿÇEÐ    ‹]Üéþÿÿ‰EØÁà‰$èGG ‰Eà…À‰Â„â  ‹C‹s…    ƒùvöÂt‹ƒéƒÆ‰ƒÂü‰×Áéó¥écýÿÿ‹]„1ÀƒÃƒ}„ v‹Mà‹UÜ¶    ¼'    ‹<@û9Âwö‹M‹yD‹q !ß†‹1öƒú ‰U„†3  ‹P‰U´ë
+F9u„†!  ‹E´‹°9uì¶y4ƒçƒÿuà‹A(}Ø…À‰EÄ”À…ÿ”Â	Ð¨u‹UÄ‹B;EÜ„J  1À„Àt²‰ÈéLýÿÿ‹]„1ÀƒÃƒ}„ v‹Mà‹UÜt& ‹<@û9Âwö‹}‹WD‹w !ÚR†‹1öƒú ‰U †I  ‹@‰Eœë
+F9u †7  ‹}œ‹·9uì¶Q4ƒâƒúuà‹A(}Ø…À‰EÈ”À…ÿ”Â	Ð¨u‹UÈ‹B;EÜ„  1À„Àt²‰Èé’üÿÿ‹]„1ÀCƒ}„ v‹Mà‹UÜ¶    ‹<@û9Âwö‹u‹~D‹V 1ö!ß‚‹ƒù ‰M¬†Î  ‹H‰M¨ë
+F9u¬†¼  ‹E¨‹°9uì¶Q4ƒâJuâ‹A(}Ø…À‰EÌ”À…ÿ”Â	Ð¨u‹UÌ‹B;EÜ„½   1À„Àt´‰ÈéÚûÿÿPÿƒúýw$‹Eà‹‰E”‰}„‹}”‹—‹}„9—…SýÿÿJƒúývè¸   éEýÿÿt& ‰$‹E1ÉUØèÐêÿÿƒì…À…VûÿÿÇEÔ   éJûÿÿHƒøý‰…dÿÿÿw9‹EÈ‹Uà‹x‰UŒ‰}¼‹}Œ‹•dÿÿÿ‹E¼‹—‹½dÿÿÿ9¸…»þÿÿOƒÿý‰½dÿÿÿvÖ¸   é§þÿÿHƒøý‰…dÿÿÿw9‹EÌ‹Uà‹x‰U‰}¤‹E‹½dÿÿÿ‹U¤‹<¸‹…dÿÿÿ9<‚…
+ÿÿÿHƒøý‰…dÿÿÿvÖ¸   éöþÿÿHƒøý‰…dÿÿÿw9‹EÄ‹Uà‹x‰Uˆ‰}°‹Eˆ‹½dÿÿÿ‹U°‹<¸‹…dÿÿÿ9<‚…}ýÿÿHƒøý‰…dÿÿÿvÖ¸   éiýÿÿ‰$‹E¹   UØè¹éÿÿƒì…Àtz‹]Ü‰]„éúÿÿ‰$‹E¹   UØè”éÿÿƒì…Àta‹]Ü‰]„éBúÿÿ‰$‹E¹   UØèoéÿÿƒì…À…XúÿÿÇEÔ   éLúÿÿ‹EÔéuúÿÿÇEÜ    ¸   ÇEØ    éœùÿÿÇEÔ   ézÿÿÿÇEÔ   ë–v U‰åVSƒì‹u‹‹SÁâ‰$èC ‰C‹KÁá‰$èüB ‰C‹C@Áâ‰$èèB ‰C‹KIÁà‰$èÔB ‰C‹S…Ò„  ‹K…É„…  ‹S…Ò„z  …À„r  ‹FÁà‰$èšB ‰ƒ„   …Àtj‹N1Ò…Étë‰B9Vw÷‰\$¸°Å@ ‰D$‹S4‰$è  ‹V1Àƒú v‹‹„   ë9u@9Âwö9Â„Õ   ‰t$¹@Æ@ ‰L$‹C4‰$èæ   …À‰Â…ª   ‰\$¸ È@ ‰D$‹S4‰$èÄ   …À‰Â…ˆ   ‰\$¹È@ ‰L$‹C4‰$è  ‰\$ºðÈ@ ‰T$‹K4‰$èê   …À‰ÂuR‰$èü  …À‰ÂuDöFu‹V…Òt	öCXu
+v ‹sL…öt%‹KIÁà‰$èpA ‰C…Àº   t
+‰$è¤  ‰ÂƒÄ‰Ð[^]Ã‹“„   ‰$è»> 1É‰‹„   éÿÿÿº   ëÕ´&    U‰åWVSƒì‹}‹u‹]‹C…Àt	‰Ã‹C…Àu÷‹K…Ét‹[ëäf‰\$‰4$ÿ×…Àu‹…Òt‰Ø‰Ó‹R9Âtâ…ÒtÞ‰Óë¼1ÀƒÄ[^_]ÃU‰åWVSƒì‹}‹u‹]´&    ¼'    ‰\$‰4$ÿ×…Àu,‹C…Àu‹Cë´&    ‰Ú‹…Ût‹C9Ðtñ…Àtí‰ÃëÉ1ÀƒÄ[^_]ÃëU‰åS‹U‹]¶B<tN<t
+[1À]Ãt& ‹B…Àtï€xué‹H‹@…À‰Bt‰‹ƒ„   ƒù‹R‹‰ˆwÆ¸þÿÿÿÓÀ!CP1À[]Ã‹‹„   …Ét¬‹B‹¸   ‰JÓà	CP1À[]Ã´&    ¼'    U‰åƒì‰]ø‹]‰uü‹u‹CÇEô    …Àt€xt8‹C…Àt€xt‹Eô‹]ø‹uü‰ì]Ã‰D$Uô‰t$‰$è-   ‰C…ÀtÙ‰ëÕ‰D$Eô‰t$‰$è   ‰C…Àt®‰ëªt& U‰åWVSƒì‹E‹]‹‹{ö@‰Uðt#…ÿt‹Kƒùv
+‰øƒÄ[^_]Ã‹BPÓè¨tít& 1É1Ò»   ‰\$¾	   1Û‰L$‰T$‹Eð‰$èù;  ‰Eì1É‰t$‰\$‰L$‹Uð‰$èÝ;  …ÿ‰Æ‰Ãt‰t$¸   ‰D$‰|$‹}ð‰<$è¹;  ‰Ã‰\$¸   ‰D$‹}ì‰|$‹Mð‰$è˜;  …À‰Á”À…Û”Â	Ð¨uM‹Uì…Ò”À…ö”Ã	Ø¨u:‹}‹G‰F‹Uì‰B¶W¶^€â€ã÷Óˆ^‹}ì¶G$÷ÐˆGƒÄ‰È[^_]Ã‹u1ÀÇ   éôþÿÿ‰ö¼'    U‰åƒì‰]ô‹]‰}ü‹}‰uø€{t5‰[‹S‰ø‹Kè%ßÿÿ‰C‰Æƒþÿ¸   t€{t!1À‹]ô‹uø‹}ü‰ì]Ã‹K‹Q‹A‰S‰Cëß‹‹{‹\ñçÿ  Áçãÿ üÿ	û‰\ñë¿ëU‰åS‹]¶Cƒøt(ƒøt.‹S…Òu‹S…Òt‹C‰B[1À]Ãf‹K‰Jëä‹C‰X1À[]Ã‹S‹K‹B‰AëÒëU‰åƒì(‰]ô‹]‰}ü‹}‰uø‹sÇEð    ¶Cƒøwÿ$…€6B öCu‹S‹G‹Z‰°‹Eð‹]ô‹uø‹}ü‰ì]ÃÇ$ì5B ¹6B ¸¨  ‰L$‰D$è°< ëÄ‹K…ÉtÉÇ$ì5B º<6B ¸…  ‰T$‰D$è‰< ë©‹K‹W‹A‰Eä‰²€{u”v‹w–Ç   ÇC   Ç$   èH< ‰C…À„j  ‹}ä‰8é]ÿÿÿ€OX‹C…À…Á   ‹C‹H‹C‰Mì…À„µ   ‹@ƒ}ìý‹X‰]è‡Ú   ƒ}èý‡­   v‹w†Ç   Ç$   èØ; ‰C…Àº   t"‹}è9}ì„À   ÇC   sd‹Mì‹Uè‰‰P1Ò‰UðéÌþÿÿ‹Wv‹C4Š‹XÇ   ÇF   Ç$   èz; ‰F…À„‚   ‰1À‰Eðéþÿÿ‹@é:ÿÿÿ‹CéFÿÿÿ‹]è‹Uì‰‰PëšÇ$ì5B »O6B ¹–  ‰\$‰L$è0; é0ÿÿÿÇ$ì5B ºg6B ¸•  ‰T$‰D$è; éÿÿÿÇC   ‹Uì‰1ÒéCÿÿÿÇF    ¸   Ç    ‰EðéýýÿÿÇC    Ç    éëýÿÿ‰ö¼'    U‰åW‰×VSƒì,‰Eð‹E‰Mì‰Eè‹Uð‹
+€|ù„  ‰ö¼'    ‹]ðÁà‹K‹T…Ò„Ã  J„Ò  ‹]ì‹D4[‹µ    1À‰D‹Mè‰Uà‰L$‹Uà‰T$‹uð‰4$è|  ƒøÿ‰Æ„Ž  ‹Mð‹AÃ‹…À„G  ‹S…Ò…|  ‹S‰2ÿC¸   „À„O  ‹uð‹]è‹F‹L‹q‰uä‰t$‰\$‹}ð‰<$è†  ƒøÿ‰Æ„  ‹]ð‹Mì‹{I‡‹…À„Ê   ‹S…Ò…¹  ‹{‰7ÿC¸   „À„â   ‰uì‹}ä‹Uð‹
+€|ù…ìþÿÿ‹r‹]ì‹R‹¾‹Eè4[µ    ‰Mä1É‰L‰D$‹uä‰t$‹Uð‰$èô  ƒøÿ‰Æ„‰   ‹Mð‹Q‹Mì‹º‰Š‹Uð‹zû‹…Àt4‹S…Ò„jÿÿÿ9Ð„\  ‹K91†  …Òë‹|‘ü‰<‘Juö‰4‘éFÿÿÿÇ   ÇC   Ç$   èÇ8 ‰C…À„h  ‰01À…À”Â¶Â„À…ÿÿÿº   eô‰Ð[^_]Â ‹D‹]ì‹4[1Àµ    ‰Uä‹Uè‰D‰T$‹Mä‰L$‹uð‰4$èª  ;}”Â1À9}ì•À…Ð…  ‹Uð‹
+‹tùÁîæÿ  	uè‹Eè‰D$‹Mä‰$‰L$èÙ  ƒøÿ‰Æ„nÿÿÿ‹Uð‹zû‹…À„$ÿÿÿ‹S…Ò„Zþÿÿ9Ð„  ‹K91†ê  …Òë‹D‘ü‰‘Juö‰4‘é6þÿÿÇ   ÇC   Ç$   è·7 ‰C…À„  ‰01À…À”Ã¶Ãéœýÿÿ‹Uè‰T$‹uà‰t$‹Mð‰$è:  ƒøÿ‰Æ„Ïþÿÿ‹Mð‹AÃ‹…ÀtQ‹S…Ò…   ‹S‰2ÿC¸   „À„¡þÿÿ‹Uè‰ñ‰T$‹]‰$‹Uà‹Eðèwüÿÿƒì…À„-ýÿÿ‰Âézþÿÿt& Ç   ÇC   Ç$   èÿ6 ‰C…À„  ‰01À…À”Ã¶Ãë•9Ð„L  ‹K91v…Òë‹D‘ü‰‘Juö‰4‘é'ýÿÿ‰‘J‹D‘ü9ðwô‰4‘éýÿÿ‹Mð‹Uì‹q‹¾‰–1Òeô‰Ð[^_]Â 9Ð„d  ‹K91v…Òë‹D‘ü‰‘Juö‰4‘édüÿÿv ‰‘J‹D‘ü9ðwô‰4‘éMüÿÿÇC    ¸   Ç    é…ýÿÿ‹Mð‹yû‹…ÀtQ‹S…Ò…þ  ‹S‹Eä‰ÿC¸   „Àº   „dýÿÿ1Òédÿÿÿ‰‘J‹D‘ü9ðwôéýÿÿ‰‘J‹D‘ü9ðwôéöüÿÿÇ   ÇC   Ç$   èÅ5 ‰C…À„}  ‹uä‰01À…À”Ã¶Ãë•ÇC    ¸   Ç    éêýÿÿ<Õ    ‰;‰L$‹C‰$èo5 ‰Â1À…Ò„Ùûÿÿ‰S‰Ñ‹Séƒþÿÿ9Ð„å   ‹K91v…Òë‹D‘ü‰‘Juö‰4‘éàýÿÿ‰‘J‹D‘ü9ðwô‰4‘éËýÿÿÕ    ‰‰L$‹C‰$è5 ‰Â1À…Ò„þúÿÿ‰S‰Ñ‹SékþÿÿÇC    ¸   Ç    ééýÿÿ<Õ    ‰;‰L$‹C‰$è¶4 ‰Â1À…Ò„ ûÿÿ‰S‰Ñ‹Sé·üÿÿÕ    ‰‰D$‹{‰<$è‚4 ‰Â1À…Ò„ìúÿÿ‰S‰Ñ‹SésûÿÿÕ    ‰‰L$‹C‰$èN4 ‰Â1À…Ò„ùüÿÿ‰S‰Ñ‹SéêþÿÿÇC    ¸   Ç    ésþÿÿ9Ðt‹K‹Eä9vJ…Òt;‹|‘ü‰<‘Jëô4Õ    ‰3‰L$‹{‰<$èç3 ‰Â1À…Ò„Ïýÿÿ‰S‰Ñ‹Sëº‹uä‰4‘é²ýÿÿ‹D‘ü;Eävì‰‘Jëñ´&    U‰åWVS‹u‹}‹N‹IöDË•À1Ò…É•Â…Ât<‹vë¶    IöDË•À1Ò…É•Â…Ât9<Žuç‹DËÁè%ÿ  ;EuÖ[‰È^_]Ã[¸ÿÿÿÿ^_]Ãt& U‰åƒì‰}ü‹}‰]ô‹]‰uø‹‹u‹Ø‹LØ‰øèhÔÿÿƒøÿ‰ÃtG‹æÿ  Áæ‹DÁ%ÿ üÿ	ð‰DÙ‹u‹‹DÙ‹Tñ	Ââ ÿ %ÿ üÿ	Ð‰DÙ‹€LÙ‹W‰4š‰Ø‹uø‹]ô‹}ü‰ì]Ãt& ¼'    U‰åWVSƒì1Û‹u‹Vƒú v'üÇEä    f‹}ä1À¹   ‹VC×ó«ƒEä‹V9ÚwãÇEð    ƒú †¨   ÇEè    ‹F‰ö¼'    ‹}è‹Mè‹\‹|‰]ì1Û…ÿu+ël´&    ‹G‹Mð‰¸   ÿG„Àtj‹FC‹}è9\v@‹}ì‹V‹ŸI<‚‹W9uÈD‰Áà‰D$‹W‰$èà1 ‰Â1À…Òt¹‰W‰Ð‹Wë¡‹VÿEðƒEè;Uð‡kÿÿÿƒÄ1À[^_]ÃƒÄ¸   [^_]Ãt& U‰åWV1öSƒì<‹}ÆE× ‹O9ñt!´&    ‹Wv…    ‹D…Àt+F9ñuæ€}× teÆE× 1ö‹Wv…    ‹D…ÀuÚt& ‰t$º   MØ‰T$‰|$‰$è4   …Àu'‹O‹D…Àt‹OFë¥ÆE×‹]à‰$è€. ‹Oëé1ÀƒÄ<[^_]ÃU‰åWVSƒìL‹]¶EÆE¿ ‹u‹SˆEÇv    ‹DÇEÜ    @‰EØÁà‰$è·0 ‰EàƒøÀƒà…  ‹U¿ÿÿÿÿ‹M‹B‹‰|‹|ÊÁï‰ùáÿ  …E  ‹MöDÊ„·   ÇEÀ    ‹UI‹r‹L†…É„›   ‰ÇëY´&    …À„x  ‹4
+‰uÈ‹D
+‰EÌ‹t
+‰uÐuÈ‰òEØè7Ïÿÿ‹E[‹P‹\Š…Û„r  ‹U‹rÿEÀ‰ø‹MÀ9L¾v>‹L†‹UÀ‹‘‹U[‹J…    ‹D
+ƒøÿu‹ÿEÀ‰øÆE¿‹MÀ9L¾wË‰ö¼'    ‹EØ]Ø…À„2  ‹UÜ…Ò…\  ‹]à‹u‰3ÿEÜ¸   „Àº   tD€}¿ „Œ   €}Ç …‚   ‹u1É‹E‹^@‰L“´&    ‹EØ‹}‰‹MÜ‰O‹Uà‰W1Òeô‰Ð[^_]Ã‹u‹F‹|…ÿ„©þÿÿ‹D‹öDÚ…˜þÿÿ‰L$‹}‰ð‰<$‰ú‰ùèHôÿÿƒì…À‰Âuµ‹ésþÿÿ‹]‹u‹EØ‹{vÁã‰;‹MÜ‰L;‹Uà‰T;épÿÿÿ‰\$‹u1À‰D$‰t$uÈ‰4$è´ýÿÿ…À„{þÿÿ‰Âé[ÿÿÿt& ÆE¿‹uÐ‰4$è, ‹]‹sézþÿÿ¶    ÇEØ   ÇEÜ   Ç$   è^. ‰Eà…ÀtU‹}‰81À…À”À¶Àé´þÿÿ9ÐtR‹K‹E9v‹S…Òë‹t‘ü‰4‘Juö‹}‰<‘ÿCé‚þÿÿ‹Së‰‘J‹D‘ü;EwóëÞÇEÜ    ¸   ÇEØ    ëÕ    <‹Uà‰}Ø‰L$‰$èÉ- ‰Â1À…Ò„6þÿÿ‰Uàë´&    U‰åƒì ‰]ô‰Ó‰uø‰Æ‰}ü‹R9S(‰MäwÆ@1À‹]ô‹uø‹}ü‰ì]Ã‹{¶ˆ¶@$ï€ù\ˆEãˆFtwÆF¶Ñ1ÿ¡ÈqB öDt(¿   ‰ø$ÀàEã¶Áƒè
+¶UãƒøsˆVw/ÿ$…Ä6B €ù_tÓ‰ø$ÀàEã¶Áƒè
+¶UãƒøsˆVvØ´&    ¸   ‹]ô‹uø‹}ü‰ì]Ã‹CP;S ‚ª  ÆF$¸   ëÙ÷Eä   tË÷Eä   tÂÆF¸   ë¼÷Eä   u®‹Mäá €  f…Ét ÆF
+¸   ëš÷Eä   tŒ÷Eä   tƒÆF¸   ézÿÿÿ÷Eä € u'‹K…Ét Ámä‹{ƒuä€|ÿ
+•Ã	]äöEä…EÿÿÿÆF¸   Ç   é6ÿÿÿÆF¸   é(ÿÿÿ÷Eä   …ÿÿÿöEä…ÿÿÿÆF¸   éÿÿÿÆF¸   éõþÿÿ÷Eä   …ãþÿÿöEä…ÙþÿÿÆF¸   éÐþÿÿÆF¸   éÂþÿÿ÷Eä    „°þÿÿÆF	¸   é§þÿÿ÷Eä    „•þÿÿÆF¸   éŒþÿÿöEäu,‹C@;C t#‰C‹Mä‰ÚEèè¸ýÿÿÿK¶Uì€ê	€ú‡UþÿÿÆF¸   Ç    éFþÿÿ÷Eä   é“þÿÿ€{; …‚  ‹SÐ¶@ˆ¶øˆÃÆF‹ÈqB öD9•Â<_”À	Ð¨•ÁGÙÀáMãƒøV¶UãˆVwÿ$…”8B ÷Eä   t÷Eä   uÆF¸   é5ýÿÿ÷Eä   tí÷Eä   uäÆF¸   éýÿÿ÷Eä   uÌ‹]äã €  f…Ûu¾ÆF
+¸   éïüÿÿ÷Eä   u§ÆF ¸   éØüÿÿ÷Eä   uÆF"¸   éÁüÿÿ÷Eä   …uÿÿÿÆF¸   Ç   é üÿÿ÷Eä   …TÿÿÿÆF¸   Ç@   éüÿÿ÷Eä   …3ÿÿÿÆF!¸   édüÿÿ÷Eä   …ÿÿÿÆF#¸   éIüÿÿ÷Eä   …ýþÿÿÆF¸   Ç   é(üÿÿ÷Eä   …ÜþÿÿöEä„ÒþÿÿÆF¸   éüÿÿ÷Eä   …·þÿÿÆF¸   Ç	   éâûÿÿ÷Eä   …–þÿÿÆF¸   Ç   éÁûÿÿ÷Eä @  …uþÿÿÆF¶û¸   ƒï1‰>éžûÿÿ÷Eä   …RþÿÿöEä„HþÿÿÆF¸   éyûÿÿt& ÷Eä    …(þÿÿÆF	¸   éYûÿÿ÷Eä    …þÿÿÆF¸   é>ûÿÿ÷Eä   …òýÿÿÆF¸   Ç€   éûÿÿ‹C‹Á¶éwýÿÿ‰ö¼'    U‰åWVSƒì,‹}‹]‹u‹}è‰ò‰ø‰™€   ‰Mä‰ÙÉ  € è¯úÿÿF1Ò‹E‰|$‹}‰T$‰\$‰4$‰D$‰|$èˆ   ‹]‰Æ‹…É•Â1À…ö”À1É…ÐuV‹]ä¹   1À‰L$1Ò‰D$‰$‰T$è%  …ö‰Ã‰Át‰t$‹uä¿   ‰|$‰D$‰4$èû$  ‰Á…Û”À…É”Ã	Ø¨u
+ƒÄ,‰È[^_]Ã‹U1ÉÇ   ëéfU‰åWVSƒì‹U‹M‹}‹‰L$‹U‹u‰]ð‹E‹]‰T$‰D$‰\$‰t$‰<$èñ   ‰Ã‹E‹…É•À1Ò…Û”Â1É…Âu€~
+„‰   ‰ÙƒÄ‰È[^_]Ãf‹U…Òt	€ù	„š   ‰t$‹M‹U‰<$‹E‰L$‹M‰T$‰D$‰L$èˆ   ‹U‰Á‹…À•À1Ò…É”Â…Âuh‰\$‹]ð¸
+   ‰D$‰$‰L$èõ#  …À‰Ãt=€~
+…wÿÿÿ‹M‰ú‰ðÉ  € èùÿÿG¶N€ù
+•Â1À€ù•À…Ð…Vÿÿÿ1Éë¡‹uÇ   1Éé6ÿÿÿfU‰åWVSƒì‹E‹u‹}‹‰]ð‰t$‹M‰L$‹U‰|$‰T$‹E‰D$‹]‰$è  ‹‰Ã…É•À1Ò…Û”Â1É…Â…™   ´&    ¶O€ù
+•À1Ò€ù•Â…Âtz‹E…Àt€ù	tn‰t$‹M‰L$‹E‰|$‰D$‹U‰T$‹M‰$è–   ‰Á‹…À•À1Ò…É”Â…Âun…Û•À1Ò…É•Â…Âu2…ÛuŽ‰Ë¶O€ù
+•À1Ò€ù•Â…ÂuŒ¶    ‰ÙƒÄ‰È[^_]Ãt& ‰L$¸   ‰D$‰\$‹]ð‰$è„"  …À‰Ã…:ÿÿÿÇ   ƒÄ1É‰È[^_]Ã´&    U‰åWVSƒì<‹E‹U‹M‹]‰Eð‹u‹}‰Uì‰Mè‹‰Mä¶Fƒø$wÿ$… :B €~	uM÷Eì   uDÇ   1ÉƒÄ<‰È[^_]Ã÷Eì   …Y  öEì …O  öEìtÂ‹Mì‰ð‹Uðè÷ÿÿ‹MðAë˜ÆF1À1Ò‰t$‰D$‰T$‹]ä‰$èå!  …À‰Ã„j  ‹Mì‰ð‹UðèÎöÿÿ‹MðA¶N€ù”Â€ù”À	Ð¨u€ùt€ùt‰ÙƒÄ<‰È[^_]Ã÷Eì   udv ‰|$‹Mì‰t$‰L$‹Uä‰T$‹Eð‰$‰D$è;  ‹‰Ã…É•À1Ò…Û”Â…Â…ÿÿÿ¶N€ù”À€ù”Â	Ð¨u­€ùt¨€ùt£‰Ùë‰‰|$‹Uì‰t$‰T$‹Eä‰D$‹Mð‰$‰L$èÚ  ‹‰Ã…Ò•Á1À…Û”À…È…°þÿÿ¶V1É€ú”Á1À€ú”À	È…  1À€ú”À	Áu›€út–€út‘‰Ùéÿÿÿ‰|$1Û¹ð9B €~!ºò9B ‰L$‰T$”Ã‰\$‹Uð‹B0‰D$‹]ä‰$èa  ‹‰Ã…É•Â1À…Û”À1É…Ð„Œþÿÿé"þÿÿf‰|$1Éºø9B €~#¸ù9B ‰T$‰D$”Á‰L$ë¥‰t$1À1Ò‰D$‰T$‹]ä‰$é6þÿÿ‹¸   Óà‹Mä…AT„¥  ‹]ä1Ò	CP1À‰$‰t$‰D$‰T$èí  …À‰Ã„r  ‹Eäÿ@L€HXéùýÿÿ‰t$1À1Û‰\$‰D$‹Mä‰$è¹  …À‰Ã„>  ‹Eäƒx\ŽÇýÿÿ€HXé¾ýÿÿ‰|$‹Eè@‰D$‹Uì‰t$‰\$‰T$‹Mð‰$è#  éíþÿÿ‹÷Á  …  ù   ”Àù   ”Ã	Ø¨„  ù   „˜  Ç   1É1Ò‰t$‰L$‰T$‹]ä‰$è  ‰EÜÇ
+   ‰t$1Ò1À‰T$‰D$‹]ä‰$èó  ‰D$¹
+   ‰Ã‰L$‹UÜ‰T$‹Eä‰$è¢  ‰EØ‹MÜ…É”Â…Û”À	Ð¨…G  ‹MØ…É„<  ‹Mì‰ð‹Uðè óÿÿ‹uð‹MØFéRüÿÿ‰|$‹Eì‰t$‰D$‹Uä‰T$‹]ð‰$èá  ‹‰Ã…É•À1Ò…Û”ÂéëýÿÿÇ   éüÿÿ‹Uä¶BX¨…âþÿÿ1ÛˆBXÇEà    ÇEÐ    ¶    ¼'    ‹ÈqB öD•Áƒû_”À	È¨t¶MÐ¸   ‹UàÓà‹Mä	D‘`ÿEÐCƒ}Ð~ÇÿEàƒ}à~ª‹éwþÿÿ´&    Ç   éƒûÿÿ‰t$1Ò1À‰T$‰D$‹]ä‰$èª  ‰EØ…ÀéíþÿÿÇ   1À1É‰t$‰D$‰L$‹Uä‰$è  ‰EÜÇ	   écþÿÿÇ   é$ûÿÿÇ   éûÿÿt& ¼'    U‰åWVSƒì,‹u‹M‹}‹V‹‹M‰Ó‰EðC‹E‰Y‹M‰Uì‰úÉ  € èòÿÿG1Ò‹E€x	„5  ‹u‹M‹‰]è‰L$‹U‰T$‹E‰D$‹u‰t$‹]‰<$‰\$èùÿÿ‹M‰Æ‹…Û•À1Ò…ö”Â1É…Âu‹E€x
+„¥   ‰ñ…Û‰Ê„!  1ÀƒÄ,[^_]Ã¶    ‹U…Òt	€ù	„¬   ‹M‰L$‹E‰D$‹U‰T$‹]‰\$‹M‰<$‰L$è…øÿÿ‰Á‹E‹…Û•À1Ò…É”Â…Â…õ   ‰L$»
+   ‰\$‰t$‹uè‰4$èî  …À‰Æ„¬   ‹U€z
+…~   ‹M‰ú‹EÉ  € èôðÿÿG‹E¶H€ù
+•Â1Û€ù•Ã…Ó…Dÿÿÿ1Éë–ƒ}ìw¶Mì»   ‹uðÓã	^T‰T$¸   1ÿ‰D$‰|$‹Uð‰$èk  …ÀtD‹]ì‰XƒÄ,[^_]Ã‹}‹éÓþÿÿ‹E€x	t¦‹MÇ   éÈþÿÿ‹}1É»   Ç   é©þÿÿ‹uÇ   é§þÿÿ1Éé”þÿÿ´&    ¼'    U‰åWVSƒì,‹u‹]‹}‹N‰Mà‹S‹‰UÜ‰EØ¶S€ú„•  1É€ú”Á‰Mè1À€ú”ÀL ÿ‰Mä‹M‰ò‰ØèÚïÿÿF1À…ÿ„  ‹]è]ä„”  ÇEì    ‹uè…ö…
+  €„è   ‰|$1Éƒ}äÿ‹]”Á‰$ƒÁ
+1ö‰L$‰t$èP  …À‰Ã„¡  ƒ}äÿ„}   ‹uèƒÆ;uäwr‰<$‹E‰D$èq  ‰\$‹]¹   ‰L$‰Ç‰D$‰$è  ‰Á…ÿ”À…É”Â	Ð¨…H  ‰L$‹U1Û‰\$¸
+   ‰D$‰$èÏ  …À‰Ã„   F;uäv‹}ì…ÿt!‰\$‹Mìº   ‰T$‹u‰L$‰4$è™  ‰Ã‰ØƒÄ,[^_]Ã‹w‰û‹C…Àt	‰Ã‹C…Àu÷‹S…Òt‹[ëä‰\$‰4$è@  …À…ãþÿÿ‹…Ò„Ùþÿÿ‰Ø‰Ó‹R9Ât×…ÒtÓ‰Óë³ÇEä    ‹U‰\$‰4$‰T$èA  ‰Eè@tbƒ}èþt¶C‹Mè<‰MätþÈtnÇEäþÿÿÿƒ}èþ”Àƒ}äþ”Â	Ð¨…<  ƒ}äÿ‹Eä•Á9Eè—Â¶Â…È„þÿÿ‹}Ç
+   1Àé$ÿÿÿ€{uêÇEè    €;,uÞë‹]1ÀÇ   é ÿÿÿ€;,u‰\$‹E‰4$‰D$è  ‰Eäéyÿÿÿ¾   ‰û;uèwE‰<$‹E‰D$èª  ‰\$‹]º   ‰T$‰Ç‰D$‰$è<  ‰Ã…ÿ”À…Û”Á	È¨u…F;uèv»‹uä‰Ø9uè„þÿÿ‰<$‹M‰L$èW  ‰]ì‰Çé~ýÿÿ¾@A ‰û‹C…Àt	‰Ã‹C…Àu÷‹S…Òt‹[ëä‰\$Ç$    ÿÖ…À…ÿÿÿ‹…Ò„ûþÿÿ‰ß‰Ó‹R9útÖ…ÒtÒ‰Óë²÷E    t‹Uà‹EØ‰V‹uÜ‰‰ø‰sÆCéîýÿÿ1É€{‹]•ÁƒÁ	1À‰éÖýÿÿt& ¼'    U¸   ‰åWVSì¼   ÆEƒ Æ…{ÿÿÿ‰D$Ç$    è ‰E„…À„q  ‹M‹Q9Q(‡  ‹]1ÀÆC‰…|ÿÿÿ‹u¶F<„6  <„À  <…   é§  ´&    ÆG1Û‰|ÿÿÿ‹M ƒù•À1Òƒù•Â…Ât‹}¶G<„Ô  <„'  ö…zÿÿÿ…Ý  ƒù„O  ‡ñ   …É„C  Ç$ì5B º”:B ¸•  ‰T$‰D$èV ‹]¶C<„c  <„(  ¶…{ÿÿÿ]ÈÆ…zÿÿÿ 1ö‰]¤‰D$‹ME ‰L$‹U‰T$‹½|ÿÿÿ‰|$‹}‰|$‹]‰$‰\$è”
+  …À…  Æ…{ÿÿÿ ‹M‹Q9Q(†ÿÿÿ‹]‹{¶‹}<\ˆ„  <[„  ¶Àƒø]„ï  ’   ƒø-„è  ‹E»   Æ@éÁþÿÿƒù„(  ƒù…ÿÿÿ‹M‰L$‹u¤‰t$‹]„‰\$‹U‹z0‰<$èÆ  ‹}‰…À„óþÿÿ‹}„‰<$è® 1ÀÄ¼   [^_]Ã¶M¤¾   ‹}„‰ËƒáÁëÓæ	4Ÿé½þÿÿƒø^…nÿÿÿ‹]ÆC»   é/þÿÿ‹u‹~¶‹}<\ˆ„Ç  <[„©  ¶Àƒø]„-  
+  ƒø-„9  ‹}ÆG¸   é­ýÿÿM¨¿   ‰M”M‰|$‹]‰\$‹E‰t$u˜‰D$‰t$‹U‰$‰T$è	  …À…¬  ‹u‹V9V(‡9  ‹UÆB‰…|ÿÿÿ‹M ƒù”Àƒù”Ã	Ø¨…º  ‹]ƒû„®  ƒû„¥  ƒù„Ì  ƒû„&  ‹E …À…Ž  ¶}¤‹E…À…i  ¶u”9÷¸   ‡þÿÿ1Ûv 9ß–Á1Ò9ó–Â…Êt‰Ùº   ƒáÓâ‰Ø‰Ñ‹U„Áè	‚Cûÿ   vÎ‹}1À‰éQþÿÿöE„áýÿÿ‹SB;S ƒÔýÿÿ‰S‹K»   ¶ÆGˆé§üÿÿ‹E‰Ú‹pò9P(‰P‡‚  ÆEœ1À‰Æ¶Eœ<„¯  <„Þ  Æ…zÿÿÿé›üÿÿ‹}¤‰|$‹E„‰$èA
+  ‹U‰éÆýÿÿ‹u‹|ÿÿÿN€}ƒ t1À‹}„÷‡@ƒø~ôÆEŒ‹M„1Ò1Ûuˆ‰Mˆ‰t$‰\$‰T$‹E‰$è  …À„=  Ä¼   [^_]Ã‹}»   ÆGéáûÿÿ‹]1É‹S‹]z;{ s‹C¶L¶Áº   ƒø:„Ü  ¬  ƒø.„Ì  ‹UÆBÆ[º   ‰Óéûÿÿ‹]¤‰$èŸ ƒøº   u¶1Ò‹]„‰ÎƒáÁîÓà	³‹E…Ò‰éÕüÿÿ‹M‹]‹A¶<\ˆ„˜  <[„u  ¶Àƒø]„·    ƒø-…  ‹M¸   ÆAéƒýÿÿ‹E‹x‰½dÿÿÿ¶<\ˆE˜„z  <[„º  ¶Àƒø]„   Ï  ƒø-„  ÆEœ¸   é8þÿÿ1öƒø…ýÿÿ‹E”¶0é…ýÿÿ1ÿƒø…kýÿÿ‹u¤¶>é`ýÿÿ)Ú‹}‹]‰WÆCéµúÿÿ‹U¤‰$è’ ƒø† ýÿÿé^  t& ‹MÆAéåúÿÿ÷E   ÆEƒ…Š   ‹M‹•|ÿÿÿ‹yú9Q(‰Q‡“   ‹EÆ@1À‰…|ÿÿÿ‹]¶C<…÷ùÿÿ‹UÇ   é„ûÿÿƒø=…Tþÿÿ‹]ˆÆC‰Óéêùÿÿ‹M»   ÆAéÙùÿÿöE„)þÿÿ‹E‰ÓˆÆ@é¿ùÿÿ‹M‹U„‹y
+   ‹•|ÿÿÿú9Q(‰Q†mÿÿÿ‹M‹]‹q¶<\ˆ„Þ  <[„ê  ¶Àƒø]„Í  ª  ƒø-„K  ‹}¸   ÆGé+ÿÿÿöE„7ûÿÿ‹VB;V ƒ*ûÿÿ‰V‹N¶ÆGˆé7ûÿÿƒø^„¦  ‹}¸   ÆGéûÿÿƒø^…1þÿÿÆEœ¸   éiüÿÿƒø^…öúÿÿ‹EÆ@¸   é£øÿÿ‹}‰ÓˆÆGéÊøÿÿÆEœ¸   é1üÿÿ‹M¸   ÆAétøÿÿöE„fýÿÿ‹QB;Q ƒYýÿÿ‰Q‹y¸   ¶ÆCˆéîúÿÿöE„„ýÿÿ‹uz‰½tÿÿÿ;~ ƒoýÿÿ‰~‹µdÿÿÿ‰ú¶>ÆEœˆE˜ésýÿÿÆEœ¸   é§ûÿÿÆ…yÿÿÿ ‹}B;G s‹µdÿÿÿ¶Dˆ…yÿÿÿ¶…yÿÿÿ¾   ƒø:„ô     ƒø.„Ÿ  ÆEœ¾   ‰ðÆE˜[éLûÿÿ‹}¸   ÆGé÷ÿÿ‹u1É‹VZ;^ s‹F¶L¶Áº   ƒø:„¶  2  ƒø.„W  ‹UÆBÆ[º   ‰Ðéìùÿÿ‹EÆ@¸   éÛùÿÿ‹]1É‹S‹]r;s s‹{¶L¶Áº   ƒø:„n  cƒø.„	  ‹UÆBÆ[º   ‰Ðéãöÿÿ‹uÇ   éøÿÿ‹}‰éƒøÿÿ‹EÇ    éuøÿÿƒø=… ÿÿÿ¶…yÿÿÿÆEœˆE˜‰ðéKúÿÿƒø=u¡‹u‰ÐˆÆFéŠöÿÿƒø^…Výÿÿ‹u¸   ÆFéüÿÿöE„ ýÿÿ‹QB;Q ƒýÿÿ‰Q‹y¸   ¶ÆCˆéPüÿÿ‹u¸   ÆFéÙøÿÿƒø=…Îþÿÿ‹}‰ÐˆÆGéÀøÿÿ¶…yÿÿÿÆEœˆE˜‰ðé¬ùÿÿ‹u‰ÐˆÆFé›øÿÿ‹EˆÆ@‰Ðéàõÿÿ‹M¸   ÆAéàûÿÿöE„þÿÿ¶…yÿÿÿÆEœˆE˜‰ðé\ùÿÿöE„Oþÿÿ‹]‰ÐˆÆCéAøÿÿöE„“þÿÿ‹]‰ÐˆÆCé|õÿÿ‹}¸   ‰é÷ÿÿ‹EÆ@¸   émûÿÿ‹u1É‹VZ;^ s‹F¶L¶Áº   ƒø:t8ƒø.„±   ‹UÆBÆ[º   ‰Ðé'ûÿÿƒø=uå‹}‰ÐˆÆGéûÿÿföEtÍ‹]‰ÐˆÆCéúúÿÿ‹M”‰$è/ ƒø†Æ÷ÿÿ‹}¸   ‰évöÿÿ´&    ‹]‰émöÿÿ‹]Ç   é_öÿÿ‹U1ÀÇ   é\öÿÿ‹UÇ   éAöÿÿ‹MÇ   é3öÿÿ‹u‰ÐˆÆFé|úÿÿ¶    ¿    U‰åƒì8‰]ô¶] ‹M‰uø‹u‰}ü‹}ˆ]ç‹^Ë‰^¶O€ù”À€ù”Â	Ð¨u+€ùt&€ùtA‹M1ÀÇ    ¶‹}ˆW‹]ô‹uø‹}ü‰ì]Ã‰|$‰t$‹u‰4$èõ   ‹]ô‹uø‹}ü‰ì]Ã€}ç u¹9^(wÆEì€}ì¸   t¥ë·‹N¶€ú\ˆUèt €ú[t9¶Âƒø]tjZƒø-tÆEìëÊÆEìëÄöEtßC;F s×‰F¶ÆEìˆEèë¦C1Ò;F s¶T¶Âƒø:t<)ƒø.tGÆEìÆEè[é{ÿÿÿƒø^u¦ÆEìémÿÿÿÆEìédÿÿÿƒø=u×ˆUèÆEìéSÿÿÿöEtÅˆUèÆEìéAÿÿÿˆUèÆEìé5ÿÿÿ´&    ¼'    U‰åWV1öSƒì‹]‹M‹C¶9C(ˆUóº   w&ëT‹C‹SH9K(‰K¶v::UótB‹M‹Aˆ0Fƒþ&‹}€uÎ€{; uy‹C‹SH¶<‰K‰ú9K(wÆº   ‰ÐZ[^_]Ã‹{€<]uµ‹UA‰C‹zÆ7 ‹]¶CƒøtMwƒøt1Ò‰ÐZ[^_]Ãƒøuñ‹]1ÒÇ   ëæ‹u1ÒÇ   ëÙ‹S‹;‹K‰Ðø¶<J‰K‰úé|ÿÿÿ‹M1ÒÇ   ë¯ëU‰åƒì‰]ø‹]‰uü‹u‰$è ƒøº   u¶‰ÊƒáÁêÓà	–1Ò‹]ø‰Ð‹uü‰ì]Ã´&    ¼'    U‰åWVSƒìD‹EöE@‹]‰Eðt*ü¿–:B ‰Æ¹   ó¦„  ‹uð¿œ:B ¹   ó¦„î   ü‹uð¿ò9B ¹   ó¦uO‹E1Ò¾   …À…“   v ¼'    ‹=ÈqB öDt‰Ñ‰Ðƒá‰÷ÁèÓç	<ƒBúÿ   ~Ù1ÉƒÄD‰È[^_]Ãü‹uð¿¢:B ¹   ó¦…ƒ   ‹E1Ò¾   …À…á   t& ‹=ÈqB öD t‰Ñ‰Ðƒá‰÷ÁèÓç	<ƒBúÿ   ~Ùëž‹=ÈqB öDt‹E‰÷¶‰ÈƒáÁèÓç	<ƒBúÿ   ~Ôémÿÿÿ¶    ÇEð¨:B éÿÿÿü‹uð¿œ:B ¹   ó¦„Ž   ü‹uð¿ù9B ¹   ó¦…Ä   ‹E1Ò¾   …À…7  ¶    ‹=ÈqB öDt‰Ñ‰Ðƒá‰÷ÁèÓç	<ƒBúÿ   ~Ùéëþÿÿ‹=ÈqB öD t‹E‰÷¶‰ÈƒáÁèÓç	<ƒBúÿ   ~Ôéºþÿÿv ‹E1Ò¾   …À…Ž   ´&    ¼'    ‹=ÈqB öDt‰Ñ‰Ðƒá‰÷ÁèÓç	<ƒBúÿ   ~Ùékþÿÿü‹uð¿¨:B ¹   ó¦…Ñ   ‹E1Ò¾   …À…Ž   ‹=ÈqB öDt‰Ñ‰Ðƒá‰÷ÁèÓç	<ƒBúÿ   ~Ùéþÿÿ‹=ÈqB öDt‹E‰÷¶‰ÈƒáÁèÓç	<ƒBúÿ   ~Ôéæýÿÿ‹=ÈqB öDt‹E‰÷¶‰ÈƒáÁèÓç	<ƒBúÿ   ~Ôéµýÿÿ‹=ÈqB öDt‹E‰÷¶‰ÈƒáÁèÓç	<ƒBúÿ   ~Ôé„ýÿÿü‹uð¿®:B ¹   ó¦uk‹E1Ò¾   …Àu,‹=ÈqB öDt‰Ñ‰Ðƒá‰÷ÁèÓç	<ƒBúÿ   ~Ùé8ýÿÿ‹=ÈqB öDt‹E‰÷¶‰ÈƒáÁèÓç	<ƒBúÿ   ~Ôéýÿÿü‹uð¿´:B ¹   ó¦un‹E1Ò¾   …Àu,‹=ÈqB öD—t‰Ñ‰Ðƒá‰÷ÁèÓç	<ƒBúÿ   ~Ùé»üÿÿ‹=ÈqB öD—t‹E‰÷¶‰ÈƒáÁèÓç	<ƒBúÿ   ~ÔéŠüÿÿv ü‹uð¿–:B ¹   ó¦uo‹E1Ò¾   …Àu0‹=ÈqB öDt‰Ñ‰Ðƒá‰÷ÁèÓç	<ƒBúÿ   ~Ùé;üÿÿt& ‹=ÈqB öDt‹E‰÷¶‰ÈƒáÁèÓç	<ƒBúÿ   ~Ôéüÿÿü‹uð¿º:B ¹   ó¦uu‹U1ö¿   …Òu1ƒþ ”Àƒþ	”Â	Ð¨t‰ñ‰ðƒá‰úÁèÓâ	ƒFþÿ   ~Ôéµûÿÿƒþ ”Àƒþ	”Á	È¨t‹E‰ú¶0‰ÈƒáÁèÓâ	ƒFþÿ   ~Ïéûÿÿü‹uð¿À:B ¹   ó¦uo‹E1Ò¾   …Àu.‹=ÈqB ¾D¨t‰Ñ‰Ðƒá‰÷ÁèÓç	<ƒBúÿ   ~×é1ûÿÿ‹=ÈqB ¾D¨t‹E‰÷¶‰ÈƒáÁèÓç	<ƒBúÿ   ~Òéþúÿÿü‹uð¹   ¿Æ:B ó¦uk‹E1Ò¾   …Àu,‹=ÈqB öDt‰Ñ‰Ðƒá‰÷ÁèÓç	<ƒBúÿ   ~Ùé²úÿÿ‹=ÈqB öDt‹E‰÷¶‰ÈƒáÁèÓç	<ƒBúÿ   ~Ôéúÿÿü‹uð¹   ¿Ì:B ó¦—Â’À8Â¹   …`úÿÿ‹E1Ò¾   …Àu.‹=ÈqB ¾D¨Dt‰Ñ‰Ðƒá‰÷ÁèÓç	<ƒBúÿ   ~×é"úÿÿ‹=ÈqB ¾D¨Dt‹E‰÷¶‰ÈƒáÁèÓç	<ƒBúÿ   ~Òéïùÿÿ´&    U¹   ‰åWVSƒì,‹u¶E‰L$Ç$    ˆEçè  …À‰Ã„Î   ‰\$‹M1À‰D$‹U‰L$‰$èùÿÿ…À‰Ç…—   ¶„Àt+º   ¶    ¿    ¶È‰×‰ÈƒáÁèÓç	<ƒF¶„Àuæ€}ç t1À´&    ¼'    ÷ƒ@ƒø~÷ÆEì‹u1À‰]è1Ò}è‰|$‰D$‰T$‰4$èR  …ÀtƒÄ,[^_]Ã‰$èn ‹]1ÀÇ   ëã‰$èY ‹]1À‰;ëÒ‹}1ÀÇ   ëÅv U‰åWVSƒì‹}ÇEðÿÿÿÿ‹u‹M‰ú‰ðèîÕÿÿG¶N¶€ù„…   t& ¼'    €ù”À€û,”Â	Ð¨…~   þÉ”Á1À€û/—À…Èt^€û9–Á1Òƒ}ðþ•Â…ÊtKƒ}ðÿtL‹Uð¶Ã’DHÐv =ÿ  v¸þÿÿÿ‰Eð‹M‰ú‰ðèeÕÿÿG¶N¶€ùu†[¸þÿÿÿ[^_]Ã¸þÿÿÿëÄ¶Ãƒè0ë¼‹Eð[[^_]Ãv U‰åƒì‹UEø‹M‰D$‹EˆUü‹U‰L$‰$‰T$è   ÉÃfU‰åƒì‰]ô‹]‰uø‹u‰}ü‹S@‹}ƒúta‹K8‰ÐÁàB‰S@HÇ@    ‹E‰q‰y‹P‹ÇA    ‰Q€aó…ö‰YÇA    ÇAÿÿÿÿt‰…ÿt‰‰È‹]ô‹uø‹}ü‰ì]ÃÇ$ä  è+ ‰Â1À…ÒtßÇC@    ‹C8‰Ñ‰‰S81Òévÿÿÿv U‰å‹U€zt]1ÀÃ‹E9Buô€J1À]ÃU‰å‹U‹B%ÿ  ƒøt]Ã‹
+‰M]é@ÿ  U‰åƒì‹U‹B%ÿ  ƒøt
+É1ÀÃ¶    ‹J‰$èÿ  É1ÀÃU‰åW}ðVSƒì‹E‹0‰Ã‹MS‰Uì‹Q@ƒú„   ‹E‹H8‰ÐÁàBÁ‹E‰MäƒÁ‰P@‹EäÇA    ‹UìÇA    Ç@    ‹‹RÇA    ‰A‰È‰Q€aóÇA    ÇAÿÿÿÿ‰…À„’   ‰0‹7€N‹C‹7…ÀtR‹M‰Ã~S‰Uì‹Q@ƒú…pÿÿÿÇ$ä  èÔ  ‰Â1À…Òt·‹M‹A8‰Ñ‰‹E‰P81ÒÇ@@    éDÿÿÿ¶    ‹S…Òu‹Eð¶    ‰Ù‹‹6…Ût‹S9Êtï…Òtë‰Ó~éôþÿÿƒÄ[^_]Ã‰ö¼'    U¸   ‰åƒì(‰]ô‹]‰}ü‹}÷Ãøÿÿÿ‰uøuJöÃuY‹U1ö‰$èŒÿ  öG‰ÁtR‰\$1Û1À‰\$‰D$‹U‰ø‰L$‰L$‰4$èß  ƒì…À•Á¶Á‹]ô‹uø‹}ü‰ì]Ã´&    öG‹E‹0‹Hu®‰\$‹E‰D$‹EëªfU‰åSƒì»   ‰\$‹]‹M‹E‹U‰\$1Û‰\$‹]‰L$‰$èË  ƒì‹]üÉÃv U‰åSƒì1Û‰\$‹]‹M‹E‹U‰\$‹]‰L$‰\$‹]‰$è  ƒì‹]üÉÃt& U‰åSƒì$»   ‰\$‹]$‹E‹U‹M‰\$‹] ‰\$1Û‰\$‹]‰\$‹]‰\$‹]‰$èZ   ƒì‹]üÉÃfU‰åSƒì$1Û‰\$‹](‹E‹U‹M‰\$‹]$‰\$‹] ‰\$‹]‰\$‹]‰\$‹]‰$è   ƒì‹]üÉÃt& U‰åƒì8‰}ü‹}‰Eð¶E ‰uø499Î‰]ô‰ËˆEë¸þÿÿÿ‰UìÇEä    rC…ÿuN¶Më‹E‹}‹]‰L$‹M‰D$‹Eð‰$‰ñ‰|$‰\$è{   ‹}äƒì‰Æ‰<$è«û  ‰ð‹]ô‹uø‹}ü‰ì]Â …É‹Ut«‰4$èþ  ‰Eä‹Uä¸þÿÿÿ…ÒtÓ‰\$‹Uì‹Eä‰T$‰$èVû  ‰|$‹MäÙ‰$‹]‰\$è>û  ‹Uäé^ÿÿÿ¶    U‰åWVSƒì<‹]‰Mè‹M‰Uì‹UèË‰Eð9U¶EˆEç¸ÿÿÿÿ‡x  9Ú‚b  ‰Î÷ÖÁî;]’Â…Ö…M  Áé9]–À…Á”Á¶ù÷ß!ß‹]ð1À¶SöÂ •À‰EÜöÂ@…5  9}s‹Eð‹X…ÛtöÂ„5  ‰ö¼'    öÂ…Ý  ‹M…É„Ü  Ðê‰Öƒæƒþ„¤  ‹Uð‹B@‰Eà‹Mà»þÿÿÿÁá‰$èçü  …À‰Æ„½   ‰D$‹UÜ‹Eà‰|$‹]‹}‰T$‹Mè‹Uì‰D$‹Eð‰\$»ÿÿÿÿ‰<$è  ƒì…Àux‹M…Ét<‹Eð‰ò‹Mà¶X‹EÐëƒã‰$»þÿÿÿè`  ‹}ð$ƒì À¶W€âùÂˆWöÂt5€}ç tO‹M9tÇ$Ô:B ¿ÿ:B ºñ  ‰|$‰T$è:ü  ‹^‹E)Ãf‰4$è˜ù  ‰Øeô[^_]Â ƒÈ‰EÜéÀþÿÿ‹‰4$èvù  ëÜ‹0º   1À‰T$‰D$‰$è»ú  ‰\$‹Uð‹N$‰$‰L$è§ÿÿ‹F$;F(t‰\$‹Mð‹F(‰$‰D$è÷¦ÿÿ‹F$;F,t‰\$‹Uð‹N,‰$‰L$èÙ¦ÿÿ‹F$;F0t‰\$‹^0‹uð‰\$‰4$è»¦ÿÿ‹Uð¶BˆBˆÂé8þÿÿ‹E‹]ð‹‹C9Á‡Oþÿÿ‰Mà…É…HþÿÿÇE    v ÇEà   é2þÿÿ‹}èéÀýÿÿ¶    ¿    U‰åWV‰ÎFSƒì,‰Eà‹E‰Uð‰Mì…ÀÇEè   „  ƒø„¢   ƒøtÇ$Ô:B ¸;B ¾-  ‰D$‰t$èÍú  ‹}à‹;]ì‚   ÇEè   1Ò;Uìs'‹Eà‹p‹H´&    ‹}ð‹×‰–‹D×‰‘B;Uìrê9Óv)‹}à‹O‹G¶    ¼'    ÇÿÿÿÿÇ‘ÿÿÿÿB9Ówí‹UèƒÄ,‰Ð[^_]Â ‹Uà‹9ós<µ    ‰|$‹Z‰}ä‰$èú  1Ò…À‰ÃtÊ‰|$‹Uà‹z‰<$èú  …À„…   ‹Mà‰Y‰ó‰A‰1é@ÿÿÿµ    ‰$èáù  ‹Uà‰B1Ò…Àtƒ‰$èÍù  ‹}à…À‰Gt4‹Mà‰ó‰1éÿÿÿÇ$Ô:B ¹5;B »/  ‰\$‰L$è¡ù  ‹Uà‹éØþÿÿ‹G‰$èüö  1Òé+ÿÿÿ‰$ëïU‰åS‹]‹U‹M…Ût¶B$ùˆB‹U‰‹E‰Q‰A[]Ãv €bùÇ    ÇA    ÇA    []Ãt& U‰åWVSìü   ‰Xÿÿÿ‹‰…`ÿÿÿ1Û‰•\ÿÿÿ¸x   •hÿÿÿ‰Tÿÿÿ‹}‹u‰D$‰\$‰$è·÷  ‹Tÿÿÿ‹`ÿÿÿ‰M¬‹K…Ét!¶[‹UöÃ•À9U•Â¶Ò…Â…C  v 1Û‰Hÿÿÿ‹`ÿÿÿ1É‹•`ÿÿÿ‰Lÿÿÿ‹C‰…@ÿÿÿ‹B9ðs‰ò)Â‰ÑI‰Lÿÿÿ‹Lÿÿÿ‹…`ÿÿÿ)Þ‰µ<ÿÿÿ‹p…ö„ß  ‹Tÿÿÿ‹C$…À„Î  ‹S(…Ò„Ã  ‹K,…É„¸  ‹s0…ö„­  ‹@…À„d  Æ…Gÿÿÿ ‹•<ÿÿÿ…Òu‹…Tÿÿÿ‹HL…ÉtÆ…Gÿÿÿ‹µTÿÿÿ‹`ÿÿÿ‹V‹A‹N\BÁè$9Ñv‰Ê‹XÿÿÿC9Óv‰Ó‹•@ÿÿÿ¶Àhÿÿÿ‰D$‹µTÿÿÿ‹…\ÿÿÿ‰$‹•Xÿÿÿ‰t$è¬ÿÿƒì‰Ú…hÿÿÿèçªÿÿ…Àu_‹•Tÿÿÿ‹Tÿÿÿ‹…\ÿÿÿƒÂ`‰Uœ¶KXÀéƒá€}£ ˆM¦t‹…lÿÿÿ€}£ ‰…lÿÿÿu‹µTÿÿÿ‹…Xÿÿÿƒ~\~1À‰…tÿÿÿ‰…xÿÿÿ1À…À‰Æ…%  ‰}‹Tÿÿÿ‹U‰}Œ‹½`ÿÿÿ¶GÀèˆE¥‹KL…hÿÿÿÉèûk  …À‰Æ…ì  ƒ½<ÿÿÿw
+öCX„	  ‹…|ÿÿÿ¾   =þÿÿ?‡Ã  …   ‰$è¡ö  ‰E¼…À„©  ‹E‹]ƒà‰dÿÿÿƒøö‰Pÿÿÿƒæ‹EƒÆ9]‰u”ÒƒÊ‰•4ÿÿÿ9Ãv‰…Pÿÿÿ9]‰ßr‹}‹µTÿÿÿº   ‹Hÿÿÿ‰•8ÿÿÿƒ~\”À…ÉtK„Àu!‹`ÿÿÿ1Ò‹AÁèƒðƒ½@ÿÿÿ ”Â1É…Ðt¹   ‹u‰Ê9uwƒÊ1Àƒ½@ÿÿÿ •À	Ð‰…8ÿÿÿ;Pÿÿÿ¾   ’À9ß’Â	Ð¨…×   ‹…8ÿÿÿƒèƒøwbÿ$…p;B ‹Z…Û…‘ýÿÿ‹Q…Ò…Ô  ‹u¹   …ö•À1Ûƒ} •Ã…Ã…²   ÇE    ÇE    éUýÿÿ‰HÿÿÿöÃ„¹üÿÿé¬üÿÿ‹pÿÿÿ¶    ‰Ú)Ê9•xÿÿÿ†˜  1À;Xÿÿÿs
+‹µlÿÿÿ¶‹•Hÿÿÿ€< …  ‹µ4ÿÿÿó;Pÿÿÿ‰dÿÿÿ’À9û—Â	Ð¨tª¾   ‹U¼‰$èZò  ‹Tÿÿÿ‹YL…Û…!  €}£ u‰ñeô‰È[^_]Â ÇE¼    éþÿÿ‹½lÿÿÿ‰<$èò  ëÖ9ûsK‹\ÿÿÿ‹•Hÿÿÿ¶€< u5S¶    ¿    ‰•dÿÿÿ‰Ó9ûRs‹\ÿÿÿ¶D
+ÿ‹Hÿÿÿ€< tÚ9ûuF1À;Xÿÿÿs
+‹•\ÿÿÿ¶‹@ÿÿÿ…Ét
+‹•@ÿÿÿ¶‹HÿÿÿÈ€8 „(ÿÿÿ¶    ¼'    ‹M‰Ú…hÿÿÿèÐ‹ÿÿ…À‰Æ…ÿÿÿÇEÐ    ‹]dÿÿÿ9]ÇEÄ    ÇEÀ    v1É¶•Gÿÿÿ…hÿÿÿèÿ  ƒøÿ‰Ã„ª   ƒøþ„8  ‰E´‹…`ÿÿÿ¶HöÁ”À1Òƒ½<ÿÿÿ—Â…Âu‹•Tÿÿÿ‹BL…Àt ‹M¼…hÿÿÿ‹™‰Ùèh
+  ‰E¸‹`ÿÿÿ¶KöÁ”À1Òƒ½<ÿÿÿ—Â…Ât‹TÿÿÿöCXu‹…Tÿÿÿ‹HL…É„¹  …hÿÿÿè=  …À‰Æ„¤  ƒø…þÿÿ…hÿÿÿèh  ‹µdÿÿÿ‹4ÿÿÿó‰dÿÿÿéýüÿÿ9ûƒ„þÿÿ‹\ÿÿÿ‹•@ÿÿÿ¶‹Hÿÿÿ¶€< …`þÿÿS´&    ‰•dÿÿÿ‰Ó9ûRƒCþÿÿ‹\ÿÿÿ¶D
+ÿ‹@ÿÿÿ¶‹Hÿÿÿ€< tÌéþÿÿ;Pÿÿÿ‰Ø‚týÿÿ‹•@ÿÿÿ…ÒufëK‰Ø;Pÿÿÿ‰dÿÿÿ‚Sýÿÿ1Ò;…Xÿÿÿs
+‹\ÿÿÿ¶‹…Hÿÿÿ€< tË;Pÿÿÿƒþÿÿé"ýÿÿ´&    Cÿ‰Ã;…Pÿÿÿ‰…dÿÿÿ‚ýÿÿ1Ò;…Xÿÿÿs
+‹\ÿÿÿ¶‹@ÿÿÿ¶‹Hÿÿÿ€< t¿ë¥‹`ÿÿÿöA€…¢ùÿÿéüÿÿ…hÿÿÿè=h  éÏüÿÿ‹M‰Ú…hÿÿÿèh‰ÿÿ…À‰Æ…™üÿÿ‹dÿÿÿ‹pÿÿÿ‰Ú)Êé9üÿÿ¹   éžüÿÿ‹½<ÿÿÿ…ÿ„lüÿÿ¸   ë‹U»ÿÿÿÿ‰\ÂÇÂÿÿÿÿ@;…<ÿÿÿrä‹U‹]´‹½`ÿÿÿÇ    ‰ZöG”Á1Àƒ½<ÿÿÿ—À…ÈtH‹•Tÿÿÿ1ÀöBXt	‹rL…öt°‹M¶À•hÿÿÿ‰D$‹…`ÿÿÿ‰$‹<ÿÿÿè  ƒì…À‰Æ…Õûÿÿ‹½<ÿÿÿ…ÿtW‹]‹½<ÿÿÿë‹•dÿÿÿSÐ‰ƒÃOt9‹ƒøÿtó€}¤ tàÇ$Ô:B ¹P;B º°  ‰L$‰T$èwð  ‹ë¾¾   étûÿÿ1Òë‹…<ÿÿÿ¿ÿÿÿÿ‹]ÐBÇÃÿÿÿÿ‰|Ã;•LÿÿÿrÜ‹•Tÿÿÿ‹Š„   …É‰ÿÿÿ„2ûÿÿ1Ûƒ½<ÿÿÿ†#ûÿÿ¹   ‹…ÿÿÿ‹˜9Út‹E‹|Ð‹E‰|Ø‹|Ð‰|Ø‰ËA;<ÿÿÿrÒéëúÿÿU‰åWVSƒìl‰ÃÇE´    ‹pL‹PD‹@Pþþÿÿ?‰UÄ‰EÀ¸   ‡º   <µ   ‰<$è—ï  ‰E¸…ÀÇE¼   „€   ‹EÄ‹HL…É…“   ‰t$‹EÀ}È‹U¸1É‰$‰øèöi  ƒì‰ú‰ØèZ  ‰E¼‹Uà‰$è¼ì  ‹M¼…Éu8ÇE¼   ‹U¸‹
+…Ét(‹KT‰$èšì  ‰sL‹E¸‹}ÀÇE¸    ‰CT‰{PÇE¼    ‹u¸‰4$èrì  ‹]´‰$ègì  ‹E¼eô[^_]Ã‰<$èÜî  ‰E´…ÀÇE¼   tÉµ    ‹E´Jƒù‰E¤v¨…   ü‹}¤1ÀÁéó«‰t$‹EÀ‹M´‹U¸‰$EÈè&i  ƒìUÈ‰Øè‰  ‰E¼‹Mà‰$èëë  ‹U¼…Ò…cÿÿÿ‹M¸‹…Òu`‹E´‹8…ÿuW´&    ¼'    Nƒþýw7‹KT‹±…ÒtðöB4tê‰ñ‰Øè1  ‰EÀéSÿÿÿÇ     ‰Ñ‹}´ƒÇ‰}¤éZÿÿÿÇE¼   éúþÿÿF‹U¸‹M´‰$‹EÄèC  ‰E¼‹}´ƒì‰<$èRë  ÇE´    ‹U¼…Ò„›þÿÿé¾þÿÿt& ¼'    U‰åW‰ÇVSƒìl‹@DˆUï…É‹W•E×‹p$‰Mè‰EäöF4€ÇEà    ÇEÜÿÿÿÿ‰UØ‰UÐÇEð    ‰uÌtYJ‹GHƒúý‡ó  9W „#  ‹O¶‹W4‰ØÁè‰Ù‹‚ƒáÓè¨¹   uƒû
+„Ü  1ÉöÁ„®  ‹uä‹^(‰]Ìt& ‹]Ì…Û„´  ‹GT…À…¥   ¶C4¨…^  ´&    ¼'    ‹G9G(†4  ‰]¼p9w†Ò  ‹G9ð†¾  ‰Ù‰úEðèÎ*  ‹WT‰Ã…Ò…¡   …Û„¹   €}× …Û  ¶C4¨t§¨€…÷   €}ï 

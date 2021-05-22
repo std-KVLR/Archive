@@ -1,0 +1,34 @@
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+
+#include "Commandlets/GatherTextCommandletBase.h"
+#include "Misc/Paths.h"
+#include "Misc/ConfigCacheIni.h"
+#include "Misc/PackageName.h"
+#include "ISourceControlOperation.h"
+#include "SourceControlOperations.h"
+#include "ISourceControlModule.h"
+#include "EngineGlobals.h"
+#include "AssetData.h"
+#include "Editor.h"
+#include "IAssetRegistry.h"
+#include "ARFilter.h"
+#include "PackageHelperFunctions.h"
+#include "ObjectTools.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogGatherTextCommandletBase, Log, All);
+
+//////////////////////////////////////////////////////////////////////////
+//UGatherTextCommandletBase
+
+UGatherTextCommandletBase::UGatherTextCommandletBase(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+}
+
+void UGatherTextCommandletBase::Initialize( const TSharedPtr< FLocTextHelper >& InGatherManifestHelper, const TSharedPtr< FGatherTextSCC >& InSourceControlInfo )
+{
+	GatherManifestHelper = InGatherManifestHelper;
+	SourceControlInfo = InSourceControlInfo;
+}
+
+void UGatherTextCommandletBase::C

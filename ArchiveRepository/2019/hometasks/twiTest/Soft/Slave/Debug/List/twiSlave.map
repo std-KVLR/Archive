@@ -1,0 +1,70 @@
+ride(),VET_UByte4);
+		VertexFactoryData->ExtraBoneWeights = FVertexStreamComponent(
+			VertexBuffers.SkinWeightVertexBuffer,STRUCT_OFFSET(WeightInfoType,InfluenceWeights) + 4,VertexBuffers.SkinWeightVertexBuffer->GetStride(),VET_UByte4N);
+	}
+
+	// Add a texture coordinate for each texture coordinate set we have
+	if( !VertexBuffers.VertexBufferGPUSkin->GetUseFullPrecisionUVs() )
+	{
+		typedef TGPUSkinVertexFloat16Uvs<MAX_TEXCOORDS> VertexType;
+		VertexFactoryData->PositionComponent = FVertexStreamComponent(
+			VertexBuffers.VertexBufferGPUSkin,STRUCT_OFFSET(VertexType,Position),VertexBuffers.VertexBufferGPUSkin->GetStride(),VET_Float3);
+
+		for( uint32 UVIndex = 0; UVIndex < VertexBuffers.VertexBufferGPUSkin->GetNumTexCoords(); ++UVIndex )
+		{
+			VertexFactoryData->TextureCoordinates.Add(FVertexStreamComponent(
+				VertexBuffers.VertexBufferGPUSkin,STRUCT_OFFSET(VertexType,UVs) + sizeof(FVector2DHalf) * UVIndex, VertexBuffers.VertexBufferGPUSkin->GetStride(),VET_Half2));
+		}
+	}
+	else
+	{
+		typedef TGPUSkinVertexFloat32Uvs<MAX_TEXCOORDS> VertexType;
+		VertexFactoryData->PositionComponent = FVertexStreamComponent(
+			VertexBuffers.VertexBufferGPUSkin,STRUCT_OFFSET(VertexType,Position),VertexBuffers.VertexBufferGPUSkin->GetStride(),VET_Float3);
+
+		for( uint32 UVIndex = 0; UVIndex < VertexBuffers.VertexBufferGPUSkin->GetNumTexCoords(); ++UVIndex )
+		{
+			VertexFactoryData->TextureCoordinates.Add(FVertexStreamComponent(
+				VertexBuffers.VertexBufferGPUSkin,STRUCT_OFFSET(VertexType,UVs) + sizeof(FVector2D) * UVIndex, VertexBuffers.VertexBufferGPUSkin->GetStride(),VET_Float2));
+		}
+	}
+
+	// Color data may be NULL
+	if( VertexBuffers.ColorVertexBuffer != NULL && 
+		VertexBuffers.ColorVertexBuffer->IsInitialized() )
+	{
+		// Color
+		VertexFactoryData->ColorComponent = FVertexStreamComponent(
+			VertexBuffers.ColorVertexBuffer,0,VertexBuffers.ColorVertexBuffer->GetStride(),VET_Color);
+	}
+}
+
+/** 
+ * Initialize the stream components common to all GPU skin vertex factory types 
+ *
+ * @param VertexFactoryData - context for setting the vertex factory stream components. commited later
+ * @param VertexBuffers - vertex buffers which contains the data and also stride info
+ * @param bUseInstancedVertexWeights - use instanced influence weights instead of default weights
+ */
+template<class VertexFactoryType>
+void InitMorphVertexFactoryComponents(typename VertexFactoryType::FDataType* VertexFactoryData, 
+										const FSkeletalMeshObjectGPUSkin::FVertexFactoryBuffers& VertexBuffers)
+{
+	// delta positions
+	VertexFactoryData->DeltaPositionComponent = FVertexStreamComponent(
+		VertexBuffers.MorphVertexBuffer,STRUCT_OFFSET(FMorphGPUSkinVertex,DeltaPosition),sizeof(FMorphGPUSkinVertex),VET_Float3);
+	// delta normals
+	VertexFactoryData->DeltaTangentZComponent = FVertexStreamComponent(
+		VertexBuffers.MorphVertexBuffer, STRUCT_OFFSET(FMorphGPUSkinVertex, DeltaTangentZ), sizeof(FMorphGPUSkinVertex), VET_Float3);
+}
+
+/** 
+ * Initialize the stream components common to all GPU skin vertex factory types 
+ *
+ * @param VertexFactoryData - context for setting the vertex factory stream components. commited later
+ * @param VertexBuffers - vertex buffers which contains the data and also stride info
+ * @param bUseInstancedVertexWeights - use instanced influence weights instead of default weights
+ */
+template<class VertexFactoryType>
+void InitAPEXClothVertexFactoryComponents(typename VertexFactoryType::FDataType* VertexFactoryData, 
+										const F

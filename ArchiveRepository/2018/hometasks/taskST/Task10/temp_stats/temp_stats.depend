@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1544666273 source:d:\programming\cfiles\c++\tasksstroustrup\task10\temp_stats\main.cpp
+	<iostream>
+	<fstream>
+	<vector>
+	<string>
+	"D:\Programming\CFILES\C++\TasksStroustrup\Task10\Reading.cpp"
+	<algorithm>
+
+1544666257 d:\programming\cfiles\c++\tasksstroustrup\task10\reading.cpp
+	<ctime>
+	<cstdlib>
+

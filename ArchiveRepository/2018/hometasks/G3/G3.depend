@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1530411945 source:d:\programming\cfiles\c++\g3\main.cpp
+	<iostream>
+	<vector>
+	<limits>
+	<string.h>
+

@@ -1,0 +1,16 @@
+# depslib dependency file v1.0
+1545174035 source:d:\programming\cfiles\c++\tasksstroustrup\multi_input\multi_input.cpp
+	<iostream>
+	<sstream>
+	<string>
+	<vector>
+	"Reading_task11.h"
+
+1545174035 source:d:\programming\cfiles\c++\tasksstroustrup\multi_input\src\reading_task11.cpp
+	"Reading_task11.h"
+
+1545172631 d:\programming\cfiles\c++\tasksstroustrup\multi_input\include\reading_task11.h
+	<iostream>
+	<string>
+	<sstream>
+

@@ -1,0 +1,23 @@
+# depslib dependency file v1.0
+1533646030 source:d:\programming\cfiles\c++\helloworld\bullsandcowschar\bandc_workfuntions.cpp
+	"bandc_workfuntions.h"
+
+1533645781 d:\programming\cfiles\c++\helloworld\bullsandcowschar\bandc_workfuntions.h
+	<ctime>
+	<cstdlib>
+	<string>
+	<iostream>
+	<cctype>
+	<stdexcept>
+
+1533645744 source:d:\programming\cfiles\c++\helloworld\bullsandcowschar\main.cpp
+	<iostream>
+	"bandc_workfuntions.h"
+	"work_f.h"
+
+1533645744 d:\programming\cfiles\c++\helloworld\bullsandcowschar\work_f.h
+	"bandc_workfuntions.h"
+
+1533645744 source:d:\programming\cfiles\c++\helloworld\bullsandcowschar\work_f.cpp
+	"work_f.h"
+
